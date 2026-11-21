@@ -1,0 +1,25 @@
+# Human decisions about ambiguous data (see docs/DATA_AUDIT.md).
+# Code reads this file. Nothing here is a prompt instruction.
+# Change a decision here, rerun `pytest` and the evals, and record why in DATA_AUDIT.md.
+
+tours:
+  T14:
+    # "Popular Stays - Winter 2023/24 - Early Bird Deal": content is still published, and the
+    # workbook still has (valid) H09 rates, but the offer was for winter 2023/24 and its
+    # "book by 31 August 2023" deal has passed. Quoting it would sell an expired promotion.
+    quotable: false
+    reason: stale_promotion
+    staff_note: "T14 is a 2023/24 promotion that is still published. Retire the page or create a 2026/27 version."
+
+  T06:
+    # Front matter says "1 night / 2 days", but the category ("Day tour"), the title, the body
+    # ("full day ... drive back to Kandy for a late dinner") and the rates (Day tour, 1 day,
+    # 0 nights, no hotel) all describe a one-day tour. Four sources against one.
+    quotable: true
+    display_duration: "1 day"
+    staff_note: "T06 page says '1 night / 2 days' but the rates and itinerary are a 1-day tour. Please fix the page."
+
+# Hotel rate conflicts (e.g. H03's second Peak row, 1 Jan to 31 Mar 2027) are detected by code
+# and return NoQuote(conflicting_rate). If Sales confirms which row is right, record it here, e.g.:
+# hotel_rate_resolutions:
+#   H03: {use_row: 56, confirmed_by: "Senura", date: "2026-11-22"}
