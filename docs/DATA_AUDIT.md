@@ -63,6 +63,9 @@ Every issue the loader finds at run time is also returned as a `DataIssue` recor
 | B18 | **Cancellation policy effective date** | P02 "applies to all bookings made from 1 November 2026". Today is after that, so it applies to all new quotes. | Supersession uses `last_updated` plus the policy's "replaces" statement (code-detected, policies only). |
 | B19 | **Supersession instructions are content too** | "Replaces …" statements are content-derived. | Only `type: policy` docs with `status: published` can supersede, and only pages with an *older* `last_updated`. Testimonials and other pages cannot. |
 | B20 | **Brand pack: one accent per card; no photos** | `cards.style`, `do_not`. | Phase 5: each component takes exactly one `accent` prop from the 5 accent tokens. |
+| B21 | **A real money amount in policy content** | P02: "full refund minus a USD 50 admin fee". It is the only money amount in published content (test `test_no_money_amounts_in_tour_passages`). | Phase 4 guard decision needed: either allow amounts quoted verbatim from a *cited* policy passage, or replace them with "a small admin fee" plus a link to the policy. Plan: allow-list amounts from cited policy passages, logged in the trace. |
+| B22 | **"per person" is not always a price** | "Two 500 ml bottles of water per person per day" (T07, T08, T09, T12, T13 inclusions). | The guard reacts to "per person" only next to a money amount. Phase 4 red-team case. |
+| B23 | **Discount claims inside content** | T14 "Early bird: save 15% …"; testimonial "knocked 20% off because it was our anniversary". | Removed from the retrieval index (logged as `discount_line_removed`). Mira never offers or repeats discounts. |
 
 ## C. Golden quotes checked by hand (Phase 1 sanity check, real tests in Phase 2)
 

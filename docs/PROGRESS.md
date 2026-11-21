@@ -18,5 +18,17 @@
 - H03 overlapping Peak row: waiting for Senura. Currently `conflicting_rate` for 1 Jan to 31 Mar 2027.
 - T06 decision (price as a 1-day tour + staff flag): Shinthurie to confirm.
 - LLM provider and model for Mira and for the judge: to be chosen before Phase 4.
+- P02's "USD 50 admin fee" vs the price guard (DATA_AUDIT B21): proposed handling noted, decide in Phase 4.
 
-## Next: Phase 2, the pricing engine
+## Phase 2: pricing engine (done, Sat 21 Nov)
+- `mira/pricing/schemas.py`: `PricingRequest`, `QuoteInternal` (cost, GP, breakdown), `QuoteForTraveller` (no cost/margin fields; extras forbidden), `NoQuote(reason)` with 12 reasons.
+- `mira/pricing/engine.py`: `quote()` follows the READ ME rules with `Decimal`; no LLM, no I/O.
+- `python -m mira.pricing T09 2027-04-12 --adults 2 --children 7 10` prints the staff breakdown (`--json` for everything).
+- Golden values reproduced exactly: S02 315/315, S03 2965/742, S13 2125/532 → 3640/910, S15 275/275, Q-1041, Q-1042, Q-1044 2505/2505. A test documents that Q-1043 (2,680) leaves out 64,000 LKR of children's extra beds.
+
+## Phase 3: retrieval + grounded answers (done, Sat 21 Nov)
+- `mira/retrieval/index.py`: 95 passages from the 31 published docs; hand-written BM25; supersession pointers + automatic policy pull-in; injection and discount lines removed; testimonials only when asked.
+- `mira/retrieval/grounding.py`: untrusted-content wrapping (escaped), the grounded system prompt, code-attached citations, a `NOT_IN_CONTENT` path that offers an enquiry. The LLM is passed in as a function; **no real model is wired up yet** (Phase 4).
+- Tests: **164 passed** in total.
+
+## Next: Phase 2.5 (thin A2UI slice), then Phase 4 (agent)
