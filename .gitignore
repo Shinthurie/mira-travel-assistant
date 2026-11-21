@@ -23,3 +23,13 @@ evals/.cache/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Original assignment archive (its contents are extracted into docs/brief and data/)
+*.zip
+
+# Local pricing override used for the live demo (the example file is committed)
+config/pricing_overrides.json
+
+# Generated content and logs
+generated_content/
+*.log
