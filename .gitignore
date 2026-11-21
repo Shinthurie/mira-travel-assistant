@@ -1,0 +1,25 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+
+# Secrets (commit .env.example only)
+.env
+.env.*
+!.env.example
+
+# Local databases and run caches
+*.sqlite
+*.db
+evals/.cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
