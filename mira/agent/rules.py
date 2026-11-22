@@ -124,12 +124,12 @@ def rule_extract(text: str, today: date) -> Extraction:
     variant = PriceVariant.NONE
     if re.search(r"\b(discount|% ?off|\d+ ?percent off|cheaper|coupon|promo|voucher|best price|deal)\b", t):
         variant = PriceVariant.DISCOUNT
+    elif re.search(r"\b(from usd|advertised|teaser|it says from|website says|page says)\b", t):
+        variant = PriceVariant.TEASER  # checked before per-person: "from USD 85 per person" is a teaser
     elif re.search(r"\b(per person|each|per head|pp)\b", t) and wants_price:
         variant = PriceVariant.PER_PERSON
     elif re.search(r"\b(in|to) (euros?|eur|gbp|pounds?|sterling|rupees|lkr|aud|inr|yen|cad)\b|\bconvert\b", t):
         variant = PriceVariant.CURRENCY
-    elif re.search(r"\b(from usd|advertised|teaser|it says from|website says)\b", t):
-        variant = PriceVariant.TEASER
 
     if re.search(r"\b(ignore (your|all|any|previous|the) (instructions|rules)|you are now|system prompt|developer mode|"
                  r"jailbreak|pretend (to be|you)|disregard)\b", t):

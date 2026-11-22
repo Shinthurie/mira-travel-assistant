@@ -84,7 +84,10 @@ function Chat() {
     <>
       <ConsentBar onChange={setVisitor} />
       <div className="chat">
-        <CopilotChat agentId="mira" labels={{ chatInputPlaceholder: "Ask about tours, or tell me your dates and who's travelling" }} />
+        <CopilotChat agentId="mira" labels={{
+          chatInputPlaceholder: "Ask about tours, or tell me your dates and who's travelling",
+          chatDisclaimerText: "Prices come only from our rate sheet. Answers come only from our tour pages.",
+        }} />
       </div>
     </>
   );
@@ -92,7 +95,7 @@ function Chat() {
 
 export default function Page() {
   return (
-    <CopilotKitProvider runtimeUrl="/api/copilotkit" a2ui={{ catalog: miraCatalog }}>
+    <CopilotKitProvider runtimeUrl="/api/copilotkit" a2ui={{ catalog: miraCatalog }} enableInspector={false}>
       <main className="app">
         <header className="topbar">
           <div className="brand"><span className="brand-dot" /> Ceylon Compass Holidays <small>· Mira</small></div>

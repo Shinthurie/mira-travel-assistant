@@ -14,7 +14,7 @@ EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<![\w/-])\+?\(?\d[\d\s().-]{6,}\d(?![\w/-])")
 # "my name is X", "I'm X Y", "this is X", "name: X"
 NAME_PHRASE = re.compile(
-    r"\b(my name is|my name's|i am|i'm|this is|name\s*:|call me|signed,?)\s+([A-Z][a-z'\-]+(?:\s+[A-Z][a-z'\-]+){0,2})")
+    r"\b((?i:my name is|my name's|i am|i'm|this is|name\s*:|call me|signed,?))\s+([A-Z][a-z'\-]+(?:\s+[A-Z][a-z'\-]+){0,2})")
 # Keys whose values are always personal data, wherever they appear in a payload.
 PII_KEYS = {"name", "full_name", "email", "phone", "contact", "contact_name", "contact_email", "contact_phone"}
 

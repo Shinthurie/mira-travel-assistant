@@ -31,6 +31,13 @@ SYNONYMS = {
 }
 
 
+REGIONS = {
+    r"south(ern)? coast|south-west coast|beach": ["galle", "mirissa", "hikkaduwa"],
+    r"hill country|tea country|tea hills": ["kandy", "nuwara-eliya", "ella"],
+    r"cultural triangle|ancient (cities|kingdoms)": ["sigiriya", "anuradhapura", "polonnaruwa"],
+    r"wildlife|safari|leopards?|elephants?": ["yala", "minneriya", "udawalawe"],
+}
+
 SERVICES = re.compile(r"\b(airport transfers?|transfers? (from|to)|pick-?up from the airport|car hire|"
                       r"hotel only|flights?|visa)\b", re.IGNORECASE)
 
@@ -110,6 +117,23 @@ class TourResolver:
             return None
         found = self.candidates(text, duration_days)
         return found[0].tour_id if found else None
+
+    def places_in(self, text: str) -> set[str]:
+        """Destination slugs mentioned in the text, including regions ("south coast" -> galle, mirissa)."""
+        t = text.lower()
+        found = {slug for d in self.tours for slug in d.destinations if slug.replace("-", " ") in t}
+        for region, slugs in REGIONS.items():
+            if re.search(region, t):
+                found |= set(slugs)
+        return found
+
+    def rank_by_places(self, text: str) -> list[str]:
+        """Published tours ordered by how many of the mentioned places they visit (planners)."""
+        places = self.places_in(text)
+        if not places:
+            return []
+        scored = [(len(places & set(d.destinations)), d.id) for d in self.tours]
+        return [tid for score, tid in sorted(scored, key=lambda x: (-x[0], x[1])) if score > 0]
 
     def is_published_tour(self, tour_id: str | None) -> bool:
         return bool(tour_id) and any(d.id == tour_id for d in self.tours)

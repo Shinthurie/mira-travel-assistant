@@ -25,7 +25,8 @@ _CUR_AFTER = r"(USD|US dollars?|dollars?|bucks|LKR|rupees?|EUR|euros?|pounds?|GB
 
 MONEY_BEFORE = re.compile(_CUR_BEFORE + r"\s?" + _NUMBER, re.IGNORECASE)
 MONEY_AFTER = re.compile(r"(?<![\w.])" + _NUMBER + r"\s?" + _CUR_AFTER, re.IGNORECASE)
-PER_PERSON = re.compile(r"(?<![\w.])" + _NUMBER + r"\s?(per person|per head|pp\b|a head|each\b)", re.IGNORECASE)
+PER_PERSON = re.compile(r"(?<![\w.])" + _NUMBER + r"\s?(?:" + _CUR_AFTER + r"\s?)?(per person|per head|pp\b|a head|each\b)",
+                        re.IGNORECASE)
 DISCOUNT = re.compile(r"\d+(\.\d+)?\s?%\s?(off|discount|cheaper|reduction|saving)|"
                       r"(discount|off|save|saving|reduction) of \d+(\.\d+)?\s?%", re.IGNORECASE)
 
@@ -116,7 +117,8 @@ def is_allowed(m: MoneyMention, allowed: set[Decimal]) -> bool:
     return m.kind == "amount" and m.currency == "USD" and m.value is not None and m.value in allowed
 
 
-_SENTENCE = re.compile(r"[^.!?\n]*(?:[.!?](?!\d)|\n|$)")
+# A sentence ends at . ! or ? followed by whitespace or the end ("1,482.50" is not a sentence end).
+_SENTENCE = re.compile(r"[^\n]*?[.!?](?=\s|$)|[^\n]+")
 
 
 def guard_text(text: str, allowed: set[Decimal]) -> GuardResult:
@@ -125,16 +127,17 @@ def guard_text(text: str, allowed: set[Decimal]) -> GuardResult:
     bad = [m for m in mentions if not is_allowed(m, allowed)]
     if not bad:
         return GuardResult(text=text, passed=True, checked=mentions)
-    kept: list[str] = []
-    pos = 0
-    for sm in _SENTENCE.finditer(text):
-        if sm.start() == sm.end():
-            continue
-        s, e = sm.start(), sm.end()
-        if not any(s <= b.start < e for b in bad):
-            kept.append(text[s:e])
-        pos = e
-    cleaned = "".join(kept).strip()
+    out_lines: list[str] = []
+    offset = 0
+    for line in text.split("\n"):
+        kept = []
+        for sm in _SENTENCE.finditer(line):
+            s, e = offset + sm.start(), offset + sm.end()
+            if sm.group(0).strip() and not any(s <= b.start < e or s < b.end <= e for b in bad):
+                kept.append(sm.group(0).strip())
+        out_lines.append(" ".join(kept))
+        offset += len(line) + 1
+    cleaned = "\n".join(out_lines).strip()
     cleaned = (cleaned + ("\n\n" if cleaned else "") + SPECIALIST_LINE).strip()
     return GuardResult(text=cleaned, passed=False, violations=bad, checked=mentions)
 

@@ -601,6 +601,9 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
 def _closest_tours(ctx: AgentContext, text: str, duration: int | None, exclude: str | None = None,
                    limit: int = 3) -> list[UIComponent]:
     ids: list[str] = [m.tour_id for m in ctx.resolver.candidates(text, duration)]
+    for tid in ctx.resolver.rank_by_places(text):  # planners: tours visiting the most mentioned places
+        if tid not in ids:
+            ids.append(tid)
     for hit in ctx.retriever.search(text, k=12):
         if hit.passage.doc_type == "tour" and hit.passage.doc_id not in ids:
             ids.append(hit.passage.doc_id)
