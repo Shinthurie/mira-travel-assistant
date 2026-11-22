@@ -39,3 +39,7 @@ traces/
 
 # Eval run cache (LLM judge responses)
 evals/.cache/
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm

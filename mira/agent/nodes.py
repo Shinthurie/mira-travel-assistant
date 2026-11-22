@@ -267,6 +267,9 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
         route = ["respond"]
         if ex.price_variant in (PriceVariant.DISCOUNT, PriceVariant.NONE, PriceVariant.TEASER) and (s.tour_id or session.quotes):
             route.append("pricing" if _ready_to_price(session) else "discovery")
+        elif ex.price_variant in (PriceVariant.PER_PERSON, PriceVariant.CURRENCY) and not session.quotes \
+                and _ready_to_price(session):
+            route.append("pricing")  # first give the real total (USD, per booking), then the variant is declined
         return route
     if intent == Intent.GREETING:
         return ["respond"] + (["pricing"] if session.greeted_returning and _ready_to_price(session) else [])

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-22T09:33:02+00:00",
-  "git_sha": "7b5d4f8-dirty",
+  "generated_at": "2026-11-22T10:26:59+00:00",
+  "git_sha": "96e42e6-dirty",
   "mode": "offline-rules",
   "mira_model": null,
   "judge_model": null,
@@ -72,13 +72,13 @@
   },
   "latency_ms": {
     "turns": 136,
-    "p50": 38.0,
-    "p95": 47,
-    "max": 225
+    "p50": 34.0,
+    "p95": 55,
+    "max": 64
   },
   "time_to_first_quote_ms": {
-    "median": 42,
-    "max": 225,
+    "median": 39,
+    "max": 96,
     "under_60s": 57,
     "total": 57
   },
@@ -137,10 +137,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a7ce56b3ec1541e3977171faf6343ff2.json"
+        "local://traces/47c4b9f0bbbd4b1eaa205c090ed10045.json"
       ],
       "latencies_ms": [
-        58
+        17
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -208,17 +208,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/aae44f9b5fb04b5b87706436029a6d40.json"
+        "local://traces/a8410431aaa94c4ba0665f7cec308029.json"
       ],
       "latencies_ms": [
-        47,
-        42,
-        39
+        32,
+        28,
+        23
       ],
       "first_quote_ms": [
-        47,
-        42,
-        40
+        32,
+        28,
+        23
       ],
       "transcript": [
         {
@@ -239,7 +239,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-93EFC28D"
+            "quote_ref": "Q-C4BED086"
           }
         }
       ]
@@ -301,21 +301,21 @@
         }
       ],
       "trace_urls": [
-        "local://traces/656254c616504a0babe5282f9524be43.json",
-        "local://traces/116cb113657b45c7aff58223308df44e.json"
+        "local://traces/cb6e3a542b464cf0a1b24dbdc9493765.json",
+        "local://traces/19071a52c17c44e2a33d7b96b998750f.json"
       ],
       "latencies_ms": [
-        33,
-        40,
+        15,
         27,
-        39,
-        24,
-        40
+        10,
+        16,
+        9,
+        18
       ],
       "first_quote_ms": [
-        74,
-        66,
-        65
+        43,
+        26,
+        27
       ],
       "transcript": [
         {
@@ -350,7 +350,7 @@
                 10
               ]
             },
-            "quote_ref": "Q-752032D0"
+            "quote_ref": "Q-836B9C6D"
           }
         }
       ]
@@ -421,12 +421,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/93dee7f3a8f94f0f87d09074272b571b.json"
+        "local://traces/e80845066e90472cb397a79e67bdd684.json"
       ],
       "latencies_ms": [
-        43,
-        43,
-        36
+        28,
+        32,
+        39
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -511,12 +511,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/1ad3e6e8d01e4619849565a5421a3460.json"
+        "local://traces/9e191cb5ec8943c9873dd81c7ecf24ab.json"
       ],
       "latencies_ms": [
-        43,
-        37,
-        41
+        36,
+        33,
+        37
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -609,12 +609,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/24bd3c6fb80146bb8bbd5bd61fa6620b.json"
+        "local://traces/b8d97dcc228f4409a7d85404e8e59762.json"
       ],
       "latencies_ms": [
-        46,
-        46,
-        42
+        38,
+        43,
+        59
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -707,10 +707,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a0d5c3ce23374d509806ded4c129fbca.json"
+        "local://traces/f20688eb8e4d4967b1a8e4977714da5c.json"
       ],
       "latencies_ms": [
-        30
+        31
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -792,10 +792,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/dfb9cb7c4bae4fcfbd55a65da2d25e7f.json"
+        "local://traces/e454a785e23740458de92367ab27c125.json"
       ],
       "latencies_ms": [
-        28
+        32
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -877,10 +877,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/99ea962c3ac24f18a9d9be84b1a7ebb6.json"
+        "local://traces/15c050a9560e464ea60e61015422d1c2.json"
       ],
       "latencies_ms": [
-        27
+        32
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -961,7 +961,7 @@
         }
       ],
       "trace_urls": [
-        "local://traces/2787cee5116e436b9b787fb3802c9d84.json"
+        "local://traces/b143dafad017483484013227dcdafda1.json"
       ],
       "latencies_ms": [
         19
@@ -1037,12 +1037,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/69f0121933fa49d0afbe52e847dd9f22.json"
+        "local://traces/825f0318cb7145479473e4c37b6947b9.json"
       ],
       "latencies_ms": [
-        35,
+        54,
         37,
-        46
+        33
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -1108,7 +1108,7 @@
         }
       ],
       "trace_urls": [
-        "local://traces/26ba7abe3aab4883af6c9c0569958811.json"
+        "local://traces/1517cb7b54f74abe9a07efc2f135aee9.json"
       ],
       "latencies_ms": [
         26
@@ -1189,25 +1189,25 @@
         }
       ],
       "trace_urls": [
-        "local://traces/6621828b11424c65b9b792129fd6e880.json",
-        "local://traces/562de3f0f96245a093ef20bd2fdd20ec.json",
-        "local://traces/e07e91cd038a4b67bea713f6afcc9857.json"
+        "local://traces/2b47147bd8f3424cb0816052e3629b05.json",
+        "local://traces/4f179883cb044b2f9afc9d70b6a9468c.json",
+        "local://traces/c7f907154492440595dfa2421fce083d.json"
       ],
       "latencies_ms": [
-        26,
-        54,
-        35,
-        29,
-        38,
+        33,
+        62,
+        34,
+        21,
+        36,
         32,
-        23,
-        39,
-        38
+        22,
+        36,
+        34
       ],
       "first_quote_ms": [
-        81,
-        67,
-        62
+        96,
+        58,
+        59
       ],
       "transcript": [
         {
@@ -1238,7 +1238,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-68D5000E"
+            "quote_ref": "Q-DCCEB0AB"
           }
         },
         {
@@ -1259,7 +1259,7 @@
               "adults": 4,
               "child_ages": []
             },
-            "quote_ref": "Q-BF26BBBB"
+            "quote_ref": "Q-D250B367"
           }
         }
       ]
@@ -1311,10 +1311,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/ae202b9f832a414e8258add51f1b3ca3.json"
+        "local://traces/c5881765fbb64fef94ffe637ce93ed7a.json"
       ],
       "latencies_ms": [
-        17
+        18
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -1381,17 +1381,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/f34ac125238147da9bf1f9211dbbb6fe.json"
+        "local://traces/e0e57defa3c14dd1a8412bdc933c9139.json"
       ],
       "latencies_ms": [
-        41,
-        40,
-        41
+        48,
+        35,
+        48
       ],
       "first_quote_ms": [
-        41,
-        40,
-        41
+        48,
+        35,
+        48
       ],
       "transcript": [
         {
@@ -1414,7 +1414,7 @@
                 1
               ]
             },
-            "quote_ref": "Q-F375210D"
+            "quote_ref": "Q-FAD0E611"
           }
         }
       ]
@@ -1467,10 +1467,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/70af6efe77cf4c10929643c3fdca8899.json"
+        "local://traces/8487820eb3834d74b5b4d7a00bb5eca5.json"
       ],
       "latencies_ms": [
-        51
+        39
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -1536,10 +1536,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/2f0c5ee66b274633b0d9f8d710f1125c.json"
+        "local://traces/eb59e26af83945e380417323d2ba8202.json"
       ],
       "latencies_ms": [
-        22
+        25
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -1628,17 +1628,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/8d464f4de81842648ca421cd2aab9dbf.json"
+        "local://traces/d4fd5c306dcd445d8a64a4da7e819b21.json"
       ],
       "latencies_ms": [
-        40,
-        43,
-        44
+        38,
+        47,
+        59
       ],
       "first_quote_ms": [
-        40,
-        44,
-        44
+        38,
+        47,
+        59
       ],
       "transcript": [
         {
@@ -1659,7 +1659,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-65A332C6"
+            "quote_ref": "Q-BCC46E85"
           }
         }
       ]
@@ -1718,17 +1718,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/963f97558aa64fbab72add0b2833e538.json"
+        "local://traces/373e410dcce64c1b94cd3398bcfb4203.json"
       ],
       "latencies_ms": [
-        43,
-        45,
-        36
+        36,
+        48,
+        40
       ],
       "first_quote_ms": [
-        43,
-        45,
-        37
+        36,
+        48,
+        40
       ],
       "transcript": [
         {
@@ -1749,7 +1749,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-1D13ED2D"
+            "quote_ref": "Q-EF6903CC"
           }
         }
       ]
@@ -1807,17 +1807,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/62766265a207482c95ac012ebb79e009.json"
+        "local://traces/edb526172b08459ba87757b7b52e67ae.json"
       ],
       "latencies_ms": [
-        54,
-        46,
-        38
+        35,
+        37,
+        41
       ],
       "first_quote_ms": [
-        54,
-        46,
-        38
+        35,
+        37,
+        41
       ],
       "transcript": [
         {
@@ -1838,7 +1838,7 @@
               "adults": 4,
               "child_ages": []
             },
-            "quote_ref": "Q-BDB25C18"
+            "quote_ref": "Q-9A9FD87C"
           }
         }
       ]
@@ -1909,11 +1909,11 @@
         }
       ],
       "trace_urls": [
-        "local://traces/bcc7ae62277a4f34b73fedc36730a3d0.json"
+        "local://traces/b7fe9d8c644c437a809f93fd64d45e0b.json"
       ],
       "latencies_ms": [
-        43,
-        33,
+        34,
+        37,
         36
       ],
       "first_quote_ms": [],
@@ -1992,12 +1992,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/f0ee0697d87f4c52951f8423450edb6a.json"
+        "local://traces/f002132b28264e7b9c01a033afa552cd.json"
       ],
       "latencies_ms": [
-        25,
-        20,
-        18
+        23,
+        22,
+        25
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -2086,12 +2086,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7d50b04eba9647b886952f80471158b2.json"
+        "local://traces/d4d621bfcb9f4e34b6bd975ca4743ae7.json"
       ],
       "latencies_ms": [
-        38,
-        37,
-        36
+        43,
+        42,
+        34
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -2169,17 +2169,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/e9bdeb3453524a53ab8b84c9eb28c012.json"
+        "local://traces/c43327b3b5844e91a33f7a4cffbfed2e.json"
       ],
       "latencies_ms": [
-        45,
-        33,
-        43
+        53,
+        59,
+        46
       ],
       "first_quote_ms": [
-        45,
-        33,
-        43
+        53,
+        59,
+        46
       ],
       "transcript": [
         {
@@ -2200,7 +2200,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-8B3DE734"
+            "quote_ref": "Q-361B17E1"
           }
         }
       ]
@@ -2258,17 +2258,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/98eec3f1052d4905bc531310183baec9.json"
+        "local://traces/13d50e4d79424352a8dab29b29e7c4ed.json"
       ],
       "latencies_ms": [
-        41,
-        46,
-        40
+        44,
+        48,
+        61
       ],
       "first_quote_ms": [
-        41,
-        46,
-        40
+        44,
+        48,
+        61
       ],
       "transcript": [
         {
@@ -2289,7 +2289,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-1BC4F0F7"
+            "quote_ref": "Q-0DB71AE4"
           }
         }
       ]
@@ -2360,12 +2360,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/89e8fcdc2bcf4d6f822cda195c25aaff.json"
+        "local://traces/fc53ff01a8974b6b99b17adfc443f44e.json"
       ],
       "latencies_ms": [
-        38,
+        55,
         40,
-        47
+        35
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -2456,11 +2456,11 @@
         }
       ],
       "trace_urls": [
-        "local://traces/5c3938fed19a46dd82d30405089cb579.json"
+        "local://traces/cd93a6fa5b514f88aebaa864a203ed67.json"
       ],
       "latencies_ms": [
-        46,
-        40,
+        53,
+        37,
         40
       ],
       "first_quote_ms": [],
@@ -2552,11 +2552,11 @@
         }
       ],
       "trace_urls": [
-        "local://traces/ed5fc534b68e41888efb7763bf76f28e.json"
+        "local://traces/ea92e8e4e35c4539a4bd65ac7fcecc64.json"
       ],
       "latencies_ms": [
-        31,
-        41,
+        39,
+        33,
         37
       ],
       "first_quote_ms": [],
@@ -2635,16 +2635,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/9056ec8cb8484553b4d561ed19276657.json"
+        "local://traces/ef56b6dccb4e4892b44befae94512d6b.json"
       ],
       "latencies_ms": [
-        47,
-        47,
+        55,
+        42,
         44
       ],
       "first_quote_ms": [
-        47,
-        47,
+        55,
+        42,
         44
       ],
       "transcript": [
@@ -2666,7 +2666,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-A81C162F"
+            "quote_ref": "Q-EF6D1061"
           }
         }
       ]
@@ -2724,16 +2724,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/07642dfafb174588927e0d0ea740ce6e.json"
+        "local://traces/1b9363aca16a48c0899c0ac391d06592.json"
       ],
       "latencies_ms": [
         38,
-        41,
-        38
+        40,
+        39
       ],
       "first_quote_ms": [
         38,
-        41,
+        40,
         39
       ],
       "transcript": [
@@ -2755,7 +2755,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-E71248C3"
+            "quote_ref": "Q-186C2006"
           }
         }
       ]
@@ -2821,21 +2821,21 @@
         }
       ],
       "trace_urls": [
-        "local://traces/8f9ac7497bca48a6949c47f02f464936.json",
-        "local://traces/926716ff78264493af63245581fa1fdd.json"
+        "local://traces/99139fcfbec14c4b826e06e6377d230d.json",
+        "local://traces/44179495b656465a9b005db9626a2231.json"
       ],
       "latencies_ms": [
-        46,
-        18,
-        225,
+        37,
         17,
-        45,
-        20
+        38,
+        17,
+        38,
+        16
       ],
       "first_quote_ms": [
-        46,
-        225,
-        45
+        37,
+        38,
+        38
       ],
       "transcript": [
         {
@@ -2859,7 +2859,7 @@
                 10
               ]
             },
-            "quote_ref": "Q-78816529"
+            "quote_ref": "Q-5A883DD7"
           }
         },
         {
@@ -2932,21 +2932,21 @@
         }
       ],
       "trace_urls": [
-        "local://traces/1db376f3f88642b38c79ca2e31b4cbc3.json",
-        "local://traces/205d38082acc4f90ab6f78b11d5fa833.json"
+        "local://traces/4534c86123fc4811b5ef036ded49553a.json",
+        "local://traces/495a3770a3c64f068c3861f63ad1ba6d.json"
       ],
       "latencies_ms": [
         40,
-        18,
-        37,
-        18,
-        38,
-        18
+        21,
+        50,
+        29,
+        35,
+        19
       ],
       "first_quote_ms": [
         40,
-        38,
-        38
+        50,
+        35
       ],
       "transcript": [
         {
@@ -2967,7 +2967,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-B60359D3"
+            "quote_ref": "Q-F74DAC9A"
           }
         },
         {
@@ -3046,21 +3046,21 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7419b784fdb341dfb3a655272576a732.json",
-        "local://traces/caf47b3194704814ae45c534db767c27.json"
+        "local://traces/fcb8f348777d4d548aab3a1ea0a34121.json",
+        "local://traces/1a15691bc8c24566a92719e1f37a883e.json"
       ],
       "latencies_ms": [
-        37,
+        34,
         32,
-        43,
-        35,
-        40,
-        34
+        39,
+        37,
+        34,
+        32
       ],
       "first_quote_ms": [
-        37,
-        43,
-        41
+        34,
+        39,
+        34
       ],
       "transcript": [
         {
@@ -3081,7 +3081,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-EB2DF6A4"
+            "quote_ref": "Q-2B53F5CA"
           }
         },
         {
@@ -3102,7 +3102,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-0454F167"
+            "quote_ref": "Q-7BDADBB6"
           }
         }
       ]
@@ -3167,17 +3167,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a8eefa2e670c4a87aeda175a2a0069eb.json"
+        "local://traces/371ef3b021b342e69c7832bfa99af5c0.json"
       ],
       "latencies_ms": [
-        42,
-        43,
-        39
+        44,
+        52,
+        46
       ],
       "first_quote_ms": [
-        42,
-        43,
-        39
+        44,
+        52,
+        46
       ],
       "transcript": [
         {
@@ -3198,7 +3198,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-91494E76"
+            "quote_ref": "Q-4E300363"
           }
         }
       ]
@@ -3257,17 +3257,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/f87b642ae2ac4e628726dc26c3848ba0.json"
+        "local://traces/7cc66625b7e746a981f9ce428287e9fd.json"
       ],
       "latencies_ms": [
-        38,
-        42,
-        38
+        63,
+        64,
+        16
       ],
       "first_quote_ms": [
-        38,
-        42,
-        38
+        63,
+        64,
+        16
       ],
       "transcript": [
         {
@@ -3288,7 +3288,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-4E269A53"
+            "quote_ref": "Q-785105F1"
           }
         }
       ]
@@ -3353,21 +3353,21 @@
         }
       ],
       "trace_urls": [
-        "local://traces/ccd659d560014a1cb1583d2ee25c45c2.json",
-        "local://traces/818bcfd3c6b8413691ce7ac0f2b23166.json"
+        "local://traces/d2deeb5df8264968a8576e77f4b87c2a.json",
+        "local://traces/0905912ec012474aa744f1389697e7e0.json"
       ],
       "latencies_ms": [
-        41,
-        32,
-        37,
-        32,
-        39,
-        33
+        13,
+        12,
+        16,
+        14,
+        26,
+        14
       ],
       "first_quote_ms": [
-        41,
-        37,
-        39
+        13,
+        16,
+        26
       ],
       "transcript": [
         {
@@ -3388,7 +3388,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-A24AF1B9"
+            "quote_ref": "Q-2D46286B"
           }
         },
         {
@@ -3411,7 +3411,7 @@
                 5
               ]
             },
-            "quote_ref": "Q-F9E564CD"
+            "quote_ref": "Q-0332B8C8"
           }
         }
       ]
@@ -3469,10 +3469,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/f3e4d5a941914a0bbfe16e680702cb21.json"
+        "local://traces/725e5ed850d942748ff237f4fea923f6.json"
       ],
       "latencies_ms": [
-        18
+        6
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -3538,10 +3538,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/690a8d62102346d8aeedecdbfb12318f.json"
+        "local://traces/ce862776853243ce92f7cf5a95314ca7.json"
       ],
       "latencies_ms": [
-        19
+        7
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -3607,10 +3607,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a43dfb2c620f47a0930cb2548a54b9c7.json"
+        "local://traces/d897d90136f0467c9478afeb59a519c9.json"
       ],
       "latencies_ms": [
-        16
+        6
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -3676,10 +3676,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/77fbc11392454697b1cf2791e39425d1.json"
+        "local://traces/25026e2340944e98b184dec50d052951.json"
       ],
       "latencies_ms": [
-        17
+        9
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -3767,10 +3767,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7bccc423aeff406e888a595e7ab49df0.json"
+        "local://traces/232908f5446148f4ad1184e582236763.json"
       ],
       "latencies_ms": [
-        27
+        9
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -3858,10 +3858,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/4f4ae0010db34600958bfdd0de295e9b.json"
+        "local://traces/d6bdc7f96e784e87a33d898f59e3b257.json"
       ],
       "latencies_ms": [
-        24
+        21
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -3948,10 +3948,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/4a4be830213d4f6d9535c8503d900f08.json"
+        "local://traces/a50f335c84d34749824e3a0cad7b6587.json"
       ],
       "latencies_ms": [
-        28
+        22
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -4032,10 +4032,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/37821b7f092f4b758a6c479c65f2259c.json"
+        "local://traces/71e52496c91a4294a8470a084586cf6c.json"
       ],
       "latencies_ms": [
-        28
+        17
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -4130,14 +4130,14 @@
         }
       ],
       "trace_urls": [
-        "local://traces/ccb60597b9214a8f9e6305daa3aac4ed.json",
-        "local://traces/a99113f815e843ed828b3845dc90359d.json",
-        "local://traces/c4d36d6d2db1405cb3c2a39a4a974d2b.json"
+        "local://traces/7fd36c590c994a7b8eed74c636f70be7.json",
+        "local://traces/307cc64c2e0d4c1186028ee0078b1502.json",
+        "local://traces/7581cfa04258439a82f14bc23c48440a.json"
       ],
       "latencies_ms": [
-        18,
-        26,
-        23
+        14,
+        21,
+        17
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -4225,17 +4225,17 @@
         }
       ],
       "trace_urls": [
-        "local://traces/46bc44eba4a845d0ab86fa629b610be8.json"
+        "local://traces/cd4323527af847cd9f34e81322b5825d.json"
       ],
       "latencies_ms": [
-        45,
-        36,
-        40
+        33,
+        25,
+        22
       ],
       "first_quote_ms": [
-        45,
-        36,
-        40
+        33,
+        25,
+        22
       ],
       "transcript": [
         {
@@ -4256,7 +4256,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-2C586CAA"
+            "quote_ref": "Q-F397B075"
           }
         }
       ]
@@ -4329,12 +4329,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/25981cb7150a4fc6944c8a3e80a36414.json"
+        "local://traces/ccb914ab74b940ceb3bf50ad6c5d2972.json"
       ],
       "latencies_ms": [
-        42,
-        49,
-        45
+        23,
+        35,
+        32
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -4403,10 +4403,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/5edb625c779a4810bddb1c71d1f5b335.json"
+        "local://traces/d15915af2f484cc3b32e1046e017fd31.json"
       ],
       "latencies_ms": [
-        19
+        16
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -4478,13 +4478,13 @@
         }
       ],
       "trace_urls": [
-        "local://traces/2f4e88ac034f44128803864ba57fd33e.json"
+        "local://traces/0fb3b4386a964f1d8f3a524d714ca6f8.json"
       ],
       "latencies_ms": [
-        46
+        26
       ],
       "first_quote_ms": [
-        46
+        26
       ],
       "transcript": [
         {
@@ -4505,7 +4505,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-1CDD02D5"
+            "quote_ref": "Q-8B3AB91C"
           }
         }
       ]
@@ -4564,10 +4564,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/266932da625d4f53a9ed0f7eac095f6d.json"
+        "local://traces/1d127f4306e74ef1a3ad6c65c05165dd.json"
       ],
       "latencies_ms": [
-        22
+        13
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -4642,13 +4642,13 @@
         }
       ],
       "trace_urls": [
-        "local://traces/86005777289c4efe92a508f1a54a5e15.json"
+        "local://traces/5e4fc245ed824f99bbe2997f62439f14.json"
       ],
       "latencies_ms": [
-        45
+        22
       ],
       "first_quote_ms": [
-        46
+        22
       ],
       "transcript": [
         {
@@ -4669,7 +4669,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-382DF7AB"
+            "quote_ref": "Q-DFBAE395"
           }
         }
       ]
@@ -4746,15 +4746,15 @@
         }
       ],
       "trace_urls": [
-        "local://traces/1bfbd5ddf2014c058e5692a58622c7e8.json",
-        "local://traces/109e666121f24817b2c9e99ddb2f43a8.json"
+        "local://traces/8ed8f48a2c2c4f65b85d20ed0d4fa842.json",
+        "local://traces/5773a447a8f44332b8cf15efc67ca290.json"
       ],
       "latencies_ms": [
-        42,
-        44
+        29,
+        49
       ],
       "first_quote_ms": [
-        42
+        29
       ],
       "transcript": [
         {
@@ -4775,7 +4775,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-6542A742"
+            "quote_ref": "Q-218E900D"
           }
         },
         {
@@ -4796,7 +4796,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-863D6879"
+            "quote_ref": "Q-A47CFCB4"
           }
         }
       ]
@@ -4854,10 +4854,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/c07c28eeb3b64efba9188bb0c3acb91f.json"
+        "local://traces/0f6190bcc7024fe3a08ed3e4ced63f84.json"
       ],
       "latencies_ms": [
-        31
+        13
       ],
       "first_quote_ms": [],
       "transcript": [
@@ -4968,10 +4968,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/600992c8ba26429ebb974bc0df3eb7a0.json"
+        "local://traces/2cabce6ef75e45408235155404910d84.json"
       ],
       "latencies_ms": [
-        42
+        33
       ],
       "first_quote_ms": [],
       "transcript": [

@@ -22,7 +22,8 @@ async function api<T>(path: string, token: string, init?: RequestInit): Promise<
     ...init, headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...(init?.headers || {}) },
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+  // The backend answers unexpected errors with a friendly { ok: false, message } body: treat it as an error.
+  if (!res.ok || (data && data.ok === false)) throw new Error(data.detail || data.message || `HTTP ${res.status}`);
   return data as T;
 }
 
@@ -108,9 +109,9 @@ export default function StaffPage() {
   async function publish(id: number) {
     try {
       await api(`staff/content/drafts/${id}/publish`, auth!.token, { method: "POST" });
+      await load();
       setMessage("Published. Mira can now answer questions about it (it has no rates, so no price).");
-    } catch (e) { setMessage(String(e)); }
-    void load();
+    } catch (e) { setMessage(String(e)); void load(); }
   }
 
   return (

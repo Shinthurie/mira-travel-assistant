@@ -18,3 +18,4 @@ copilotkit==0.1.97
 google-genai==3.6.1
 langfuse==5.2.0
 sqlmodel==0.0.50
+mcp==2.3.0
