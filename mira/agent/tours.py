@@ -42,6 +42,9 @@ SERVICES = re.compile(r"\b(airport transfers?|transfers? (from|to)|pick-?up from
                       r"hotel only|flights?|visa)\b", re.IGNORECASE)
 
 
+PRICE_WORDS = re.compile(r"\b(how much|price|prices|cost|quote|book|rate)\b", re.IGNORECASE)
+
+
 def mentions_service(text: str) -> bool:
     """Services we have no rates for (FAQ: airport transfers are priced by our team)."""
     return bool(SERVICES.search(text))
@@ -112,9 +115,19 @@ class TourResolver:
         return sorted(matches, key=key)
 
     def resolve(self, text: str, duration_days: int | None = None) -> str | None:
-        """The single best tour id, or None if nothing matches (or the message is about a service)."""
+        """The single best tour id, or None if nothing matches (or the message is about a service).
+
+        If the message mentions several tours ("We loved Treasures last year! What's the price of the
+        Kandy City Tour?"), the tour named in the sentence that asks for the price wins: a tour mentioned
+        in passing is never the one we price (eval case M18, docs/FIXED_PROBLEM.md).
+        """
         if mentions_service(text):
             return None
+        for sentence in re.split(r"(?<=[.!?])\s+", text):
+            if PRICE_WORDS.search(sentence):
+                found = self.candidates(sentence, duration_days)
+                if found:
+                    return found[0].tour_id
         found = self.candidates(text, duration_days)
         return found[0].tour_id if found else None
 

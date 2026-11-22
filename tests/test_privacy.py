@@ -42,3 +42,9 @@ def test_turn_trace_contains_no_pii(tmp_path, monkeypatch):
     names = [s["name"] for s in trace["spans"]]
     assert {"intake", "pricing_engine", "compose_ui", "guard"} <= set(names)
     assert turn["pricing"]["price_usd"] == "275"   # the price itself still works
+
+
+def test_trace_details_with_dates_are_not_mistaken_for_phones():
+    """Found in a trace: 'night 5 (2027-02-09)' was redacted as a phone number."""
+    text = "night 5 (2027-02-09): H03 has conflicting rates"
+    assert redact_text(text) == text

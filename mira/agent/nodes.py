@@ -569,7 +569,9 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
                 if s.suggested_tour_id and not s.tour_id:
                     turn.reply_parts.append(f"The closest match in our catalogue is {card.props['title']} "
                                             f"({card.props['duration']}).")
-        if session.questions_asked >= 3 or not missing:
+        # Never ask the same question twice: if every missing detail was already asked, show tours instead.
+        unasked = [m for m in missing if m not in session.asked]
+        if session.questions_asked >= 3 or not unasked:
             # Something useful now: closest tours and an offer to hand over.
             for c in _closest_tours(ctx, turn.user_text, s.duration_days, exclude=tour_id):
                 turn.components.append(c)
@@ -577,7 +579,7 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
                                     "I can price any of them, or pass your plans to a specialist.")
             span.output = {"action": "show_tours"}
         else:
-            slot = missing[0]
+            slot = unasked[0]
             if slot == "travellers" and s.adults and not s.children_known:
                 question = "Will any children be travelling? If so, how old are they?"
             else:

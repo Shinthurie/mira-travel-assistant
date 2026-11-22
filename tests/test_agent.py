@@ -240,3 +240,24 @@ def test_forget_me(agent):
     assert ctx.store.get_visitor("visitor-forget-1") is None
     turn = chat(graph, ["Hello"], visitor_id="visitor-forget-1")[0]
     assert "Welcome back" not in turn["final_text"]
+
+
+# --- Regressions found by the evals (docs/FIXED_PROBLEM.md) ---------------------------
+
+
+def test_tour_mentioned_in_passing_is_not_priced(agent):
+    """M18: 'We loved Treasures last year! What's the price of the Kandy City Tour ...' prices T02."""
+    _, graph = agent
+    turn = chat(graph, ["We loved Treasures of Sri Lanka last year! This time, what's the price of the "
+                        "Kandy City Tour for 2 adults on 5 February 2027?"])[0]
+    assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["tour_id"] == "T02"
+
+
+def test_discovery_never_repeats_a_question(agent):
+    """M28: an unanswered question is not asked again; Mira shows tours instead."""
+    _, graph = agent
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing", "Not sure yet"])
+    asked = [t["question_slot"] for t in turns if t.get("question_slot")]
+    assert len(asked) == len(set(asked))
+    assert any("TourCard" in components(t) for t in turns)
+    assert turns[0]["extraction"]["intent"] == "greeting"

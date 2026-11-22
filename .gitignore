@@ -36,3 +36,6 @@ generated_content/
 
 # Local JSON traces (may contain conversation text, already PII-redacted)
 traces/
+
+# Eval run cache (LLM judge responses)
+evals/.cache/

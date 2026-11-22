@@ -26,6 +26,8 @@ def _is_phone(match: re.Match[str]) -> bool:
     text = match.group(0).strip()
     if re.fullmatch(r"\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[.-]\d{1,2}[.-]\d{4}", text):  # dates, not phones
         return False
+    if re.search(r"\b(19|20)\d{2}-\d{2}-\d{2}\b", text):  # contains an ISO date ("5 (2027-02-09")
+        return False
     digits = re.sub(r"\D", "", text)
     return len(digits) >= 7
 
