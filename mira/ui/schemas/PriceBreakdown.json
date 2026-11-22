@@ -1,0 +1,49 @@
+[
+  {
+    "id": "root",
+    "component": "PriceBreakdown",
+    "accent": "teal",
+    "quote_ref": {
+      "path": "/quote_ref"
+    },
+    "tour_id": {
+      "path": "/tour_id"
+    },
+    "tour_title": {
+      "path": "/tour_title"
+    },
+    "start_date": {
+      "path": "/start_date"
+    },
+    "end_date": {
+      "path": "/end_date"
+    },
+    "duration": {
+      "path": "/duration"
+    },
+    "travellers_summary": {
+      "path": "/travellers_summary"
+    },
+    "currency": {
+      "path": "/currency"
+    },
+    "price_usd": {
+      "path": "/price_usd"
+    },
+    "deposit_usd": {
+      "path": "/deposit_usd"
+    },
+    "balance_usd": {
+      "path": "/balance_usd"
+    },
+    "balance_due_date": {
+      "path": "/balance_due_date"
+    },
+    "pay_in_full": {
+      "path": "/pay_in_full"
+    },
+    "inclusions": {
+      "path": "/inclusions"
+    }
+  }
+]

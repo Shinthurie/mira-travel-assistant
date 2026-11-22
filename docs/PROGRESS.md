@@ -1,34 +1,34 @@
 # Progress
 
-## Phase 0: read everything and plan (done, Sat 21 Nov)
-- Extracted the brief into `docs/brief/` and the dataset into `data/ceylon-compass-dataset/` from the original zip (all 37 files verified byte-for-byte against the zip).
-- Read the brief (PDF and DOCX, same content), every content file, all six workbook tabs, the sample quotes, the brand pack and the 17 seed cases.
-- Checked all six golden quotes by hand (S02, S03, S13a/b, S15, Q-1041/42/44). Q-1043 as sent is wrong (missing the children's extra beds).
-- Wrote `docs/DATA_AUDIT.md` (22 confirmed issues + 20 new ones) and `docs/PLAN.md` (architecture, catalog, DB, eval plan, schedule, risks).
+| Phase | Status | Where |
+|---|---|---|
+| 0 Plan + data audit | done (21 Nov) | `docs/PLAN.md`, `docs/DATA_AUDIT.md` |
+| 1 Skeleton + loaders | done (21 Nov) | `mira/data/`, `tests/test_*loader*.py`, CI |
+| 2 Pricing engine | done (21 Nov) | `mira/pricing/`, `tests/test_pricing.py` |
+| 2.5 Thin A2UI slice | done (22 Nov), verified in Chromium | `mira/ui/`, `mira/agent/graph.py`, `frontend/` |
+| 3 Retrieval + grounding | done (21 Nov) | `mira/retrieval/` |
+| 4 LangGraph agent + guard + flags + CLI | done (22 Nov) | `mira/agent/`, `mira/chat.py` |
+| 5 Generative UI | done (22 Nov), desktop + 375px screenshots | `frontend/lib/catalog/`, `docs/screenshots/` |
+| 6 Tracing | done; **Langfuse keys not set yet** (local JSON traces in use) | `mira/tracing.py`, `mira/privacy.py` |
+| 7 Evals | done; **offline numbers only until a Gemini key is set** | `evals/`, `reports/` |
+| 7b Fixed problem | done | `docs/FIXED_PROBLEM.md` |
+| 8 Enquiries, staff page, returning visitors | done | `mira/api.py`, `frontend/app/staff/` |
+| 9 AI content + approval | done | `mira/content_agent.py` |
+| 10 Submission package | done except the video and the final LLM run | `README.md`, `docs/DEMO_SCRIPT.md`, `docs/DEMO_VIDEO_PLAN.md` |
+| Bonus: MCP server | done | `mira/mcp_server.py`, `tests/test_mcp.py` |
 
-## Phase 1: skeleton + data loading (done, Sat 21 Nov)
-- Skeleton: `requirements.txt` (pinned), `pyproject.toml`, `.env.example`, `.gitattributes` (keeps dataset bytes exact on Windows), `.gitignore`, GitHub Actions CI (`pytest`, no LLM).
-- Entry points: `python scripts/dev.py` (runs a data check now; starts backend and frontend once they exist), `python -m mira.data` (dataset summary + every data issue). The `mira.pricing`, `mira.chat` and `evals.run` entry points are clear "not built yet" stubs.
-- `mira/data/workbook.py`: typed loader for Settings (with a JSON override file), Seasons, Tours, Hotels and Transport. `rate_for(hotel, night)` returns `ok / conflict / expired / beyond_validity / missing / unknown_hotel`.
-- `mira/data/content.py`: front matter + body, published-only filter, HTML comments stripped, sections for citations, policy supersession.
-- `config/data_decisions.yaml` + `mira/data/decisions.py`: T14 not quotable; T06 is a 1-day tour.
-- Tests: **67 passed** (`pytest`): dataset SHA-256, a test for each data issue, parsers, and a synthetic messy workbook.
+## Latest numbers (offline rules mode, no LLM key)
+- `pytest`: 241 passed.
+- `python -m evals.run`: 54/54 cases; golden 18/18; consistency 100%; invented prices 0; missing/expired handling 10/10. Judge: skipped (no key).
+- `python scripts/adversarial.py`: 20 attacks, 0 invented amounts.
+- Live margin change rehearsed: consistency stays 100%, golden 4/6 (the two day-tour seeds change, as expected).
+
+## What only Shinthurie can do
+1. Put `GEMINI_API_KEY` in `.env` (and optionally the Langfuse keys), then run `python -m evals.run` for the real LLM numbers.
+2. `python -m evals.labels make` (regenerates the template from the LLM run), label the 10 cases by hand, then `python -m evals.labels agreement`.
+3. Record the 5-minute video (`docs/DEMO_VIDEO_PLAN.md`).
+4. Push, check CI is green, add Senura as a collaborator on submission day.
 
 ### Open questions
-- H03 overlapping Peak row: waiting for Senura. Currently `conflicting_rate` for 1 Jan to 31 Mar 2027.
-- T06 decision (price as a 1-day tour + staff flag): Shinthurie to confirm.
-- LLM provider and model for Mira and for the judge: to be chosen before Phase 4.
-- P02's "USD 50 admin fee" vs the price guard (DATA_AUDIT B21): proposed handling noted, decide in Phase 4.
-
-## Phase 2: pricing engine (done, Sat 21 Nov)
-- `mira/pricing/schemas.py`: `PricingRequest`, `QuoteInternal` (cost, GP, breakdown), `QuoteForTraveller` (no cost/margin fields; extras forbidden), `NoQuote(reason)` with 12 reasons.
-- `mira/pricing/engine.py`: `quote()` follows the READ ME rules with `Decimal`; no LLM, no I/O.
-- `python -m mira.pricing T09 2027-04-12 --adults 2 --children 7 10` prints the staff breakdown (`--json` for everything).
-- Golden values reproduced exactly: S02 315/315, S03 2965/742, S13 2125/532 → 3640/910, S15 275/275, Q-1041, Q-1042, Q-1044 2505/2505. A test documents that Q-1043 (2,680) leaves out 64,000 LKR of children's extra beds.
-
-## Phase 3: retrieval + grounded answers (done, Sat 21 Nov)
-- `mira/retrieval/index.py`: 95 passages from the 31 published docs; hand-written BM25; supersession pointers + automatic policy pull-in; injection and discount lines removed; testimonials only when asked.
-- `mira/retrieval/grounding.py`: untrusted-content wrapping (escaped), the grounded system prompt, code-attached citations, a `NOT_IN_CONTENT` path that offers an enquiry. The LLM is passed in as a function; **no real model is wired up yet** (Phase 4).
-- Tests: **164 passed** in total.
-
-## Next: Phase 2.5 (thin A2UI slice), then Phase 4 (agent)
+- H03 overlapping Peak row: waiting for Senura (currently `conflicting_rate` for 1 Jan to 31 Mar 2027).
+- T06 decision (priced as a 1-day tour + staff flag): Shinthurie to confirm.

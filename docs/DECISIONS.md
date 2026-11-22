@@ -43,3 +43,30 @@ Superseded lines become a pointer to the newer policy, and that policy's passage
 
 ## D12. Citations are attached by code (Phase 3)
 The model writes the wording and names the source ids it used. Code keeps only ids that were actually retrieved, so a citation can't be invented. With no retrieval hits, the model isn't called at all.
+
+## D13. A2UI over AG-UI with CopilotKit, wired through a real tool call (Phase 2.5)
+The graph ends with a `render_mira_ui` ToolNode. `ag-ui-langgraph` turns a real tool run into `TOOL_CALL_RESULT`, and the CopilotKit runtime's A2UI middleware turns a result containing `a2ui_operations` into an `a2ui-surface` activity. The model never writes the operations: the node returns ones built and validated by code. No fallback to plain CopilotKit generative UI was needed.
+
+## D14. A2UI v0.9, our catalog only (Phase 2.5)
+The pinned `copilotkit` Python SDK and `@copilotkit/a2ui-renderer` speak v0.9 (`createSurface`, `updateComponents`, `updateDataModel`); the spec's v1.0 is newer but not what the renderer consumes. The catalog has `includeBasicCatalog: false` and the runtime has `injectA2UITool: false`, so only our 8 components can be drawn.
+
+## D15. Validation on both sides (Phase 5)
+Server: Pydantic props models (`mira/ui/catalog.py`), invalid → text fallback + `ui_payload_invalid` trace event. Client: zod schemas (`frontend/lib/catalog/definitions.ts`); every renderer re-validates resolved props strictly (the binder's `set<Prop>` functions are ignored) and shows a fallback if they fail.
+
+## D16. Gemini via the official SDK, not LangChain (Phase 4)
+`mira/llm.py` wraps `google-genai` directly (structured output with a Pydantic schema, temperature 0, seed 0, retry with backoff on 429/5xx). Fewer moving parts than a LangChain chat model, and the model is only used for extraction, grounded wording, the content agent and the judge. Mira and the judge are separate env settings so they are always different models.
+
+## D17. Offline mode (Phase 4)
+Without a key, `mira/agent/rules.py` extracts details with regular expressions and answers are extractive quotes from the retrieved passages. It keeps CI, tests and evals network-free and deterministic, and the demo cannot be broken by an API quota. Prices, flags, UI, guard and permissions are identical in both modes.
+
+## D18. Policy amounts in answers (Phase 4)
+P02's "USD 50 admin fee" is the only money amount in published content. The guard allows a USD amount only if it is an engine value from this conversation, or appears in a policy passage cited in the same turn (DATA_AUDIT B21). Anything else is removed.
+
+## D19. Tour in the price sentence wins (Phase 7b)
+When several tours are named, the one in the sentence asking for the price is priced (see FIXED_PROBLEM.md).
+
+## D20. Staff auth is deliberately simple (Phase 8)
+Two seeded demo users (passwords from env, PBKDF2-hashed), HMAC-signed bearer tokens, and role checks as FastAPI dependencies. Publishing is checked twice: the API dependency (`approver`) and `content_agent.publish_draft` itself.
+
+## D21. Returning visitors need consent (Phase 8)
+A visitor-id cookie is only meaningful after "Yes, remember me". Mira then pre-fills known details and re-prices the last quote with the current engine (never shows a stale stored price). "Forget me" wipes stored knowledge and detaches quotes/enquiries.

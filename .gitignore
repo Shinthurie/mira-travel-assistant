@@ -33,3 +33,13 @@ config/pricing_overrides.json
 # Generated content and logs
 generated_content/
 *.log
+
+# Local JSON traces (may contain conversation text, already PII-redacted)
+traces/
+
+# Eval run cache (LLM judge responses)
+evals/.cache/
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm

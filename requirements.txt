@@ -1,7 +1,21 @@
-# Pinned backend dependencies (Python 3.11). Later phases add their packages here
-# only after installing and testing them; target pins are listed in docs/PLAN.md.
+# Pinned backend dependencies (Python 3.11). Installed and tested together.
 pydantic==2.14.4
 openpyxl==3.1.5
 PyYAML==6.0.4
 python-dotenv==1.2.4
 pytest==9.2.0
+# API + agent
+fastapi==0.165.0
+uvicorn==0.54.0
+httpx==0.28.1
+langgraph==1.2.24
+langchain-core==1.8.4
+# AG-UI / A2UI (CopilotKit Python SDK)
+ag-ui-langgraph==0.0.47
+ag-ui-protocol==1.0.0
+copilotkit==0.1.97
+# LLM (Google Gemini), tracing, storage
+google-genai==3.6.1
+langfuse==5.2.0
+sqlmodel==0.0.50
+mcp==2.3.0

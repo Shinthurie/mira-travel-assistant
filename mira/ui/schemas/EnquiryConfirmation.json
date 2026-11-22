@@ -1,0 +1,16 @@
+[
+  {
+    "id": "root",
+    "component": "EnquiryConfirmation",
+    "accent": "leaf",
+    "enquiry_ref": {
+      "path": "/enquiry_ref"
+    },
+    "summary": {
+      "path": "/summary"
+    },
+    "next_steps": {
+      "path": "/next_steps"
+    }
+  }
+]
