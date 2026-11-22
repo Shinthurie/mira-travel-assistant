@@ -1,0 +1,98 @@
+/* All colours, type and spacing come from brand_pack.json via CSS variables (see lib/brand.ts).
+   Motion rule: no scroll-triggered or parallax animation; transitions under 200 ms. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--cc-font);
+  font-size: var(--cc-text-md);
+  color: var(--cc-text);
+  background: var(--cc-white);
+  line-height: 1.45;
+}
+a { color: inherit; }
+button, input, select, textarea { font: inherit; }
+
+.app { display: flex; flex-direction: column; height: 100dvh; max-width: 980px; margin: 0 auto; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--cc-space-3);
+  padding: var(--cc-space-3) var(--cc-space-4); border-bottom: 1px solid var(--cc-border);
+}
+.brand { display: flex; align-items: center; gap: var(--cc-space-2); font-weight: var(--cc-weight-bold); }
+.brand-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--cc-orange); }
+.brand small { color: var(--cc-muted); font-weight: var(--cc-weight-regular); }
+.toplinks { display: flex; gap: var(--cc-space-3); font-size: var(--cc-text-sm); color: var(--cc-muted); }
+.chat { flex: 1; min-height: 0; }
+.chat > * { height: 100%; }
+
+.consent {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--cc-space-2);
+  padding: var(--cc-space-2) var(--cc-space-4); font-size: var(--cc-text-sm); color: var(--cc-muted);
+  border-bottom: 1px solid var(--cc-border);
+}
+
+/* Buttons: pill-shaped (radius_px.button), orange primary */
+.btn {
+  border: 1px solid var(--cc-black); background: var(--cc-white); color: var(--cc-black);
+  border-radius: var(--cc-radius-button); padding: var(--cc-space-1) var(--cc-space-4);
+  cursor: pointer; transition: background-color 150ms ease, color 150ms ease;
+  font-size: var(--cc-text-sm); font-weight: var(--cc-weight-semibold);
+}
+.btn:hover { background: var(--cc-black); color: var(--cc-white); }
+.btn-primary { background: var(--cc-orange); border-color: var(--cc-orange); color: var(--cc-white); }
+.btn-primary:hover { background: var(--cc-black); border-color: var(--cc-black); }
+.btn-link { border: none; background: none; text-decoration: underline; padding: 0; cursor: pointer; color: var(--cc-muted); }
+
+/* Cards: small, white, exactly ONE accent colour each (brand rule) */
+.cc-card {
+  --accent: var(--cc-teal);
+  width: 100%; max-width: var(--cc-card-max);
+  background: var(--cc-surface); border: 1px solid var(--cc-border);
+  border-top: 4px solid var(--accent); border-radius: var(--cc-radius-card);
+  padding: var(--cc-space-4); margin: var(--cc-space-2) 0;
+  display: flex; flex-direction: column; gap: var(--cc-space-2);
+}
+.cc-card.wide { max-width: 420px; }
+.accent-teal { --accent: var(--cc-teal); }
+.accent-leaf { --accent: var(--cc-leaf); }
+.accent-sun { --accent: var(--cc-sun); }
+.accent-sky { --accent: var(--cc-sky); }
+.accent-coral { --accent: var(--cc-coral); }
+.cc-kicker { font-size: var(--cc-text-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); font-weight: var(--cc-weight-bold); }
+.cc-title { font-size: var(--cc-text-lg); font-weight: var(--cc-weight-bold); margin: 0; line-height: 1.25; }
+.cc-muted { color: var(--cc-muted); font-size: var(--cc-text-sm); }
+.cc-price { font-size: var(--cc-text-xl); font-weight: var(--cc-weight-bold); }
+.cc-row { display: flex; justify-content: space-between; gap: var(--cc-space-2); font-size: var(--cc-text-sm); }
+.cc-list { margin: 0; padding-left: 18px; font-size: var(--cc-text-sm); }
+.cc-chips { display: flex; flex-wrap: wrap; gap: var(--cc-space-1); }
+.cc-chip { font-size: var(--cc-text-xs); border: 1px solid var(--cc-border); border-radius: var(--cc-radius-button); padding: 2px var(--cc-space-2); }
+.cc-image {
+  height: 96px; border-radius: var(--cc-radius-input); background: var(--cc-border);
+  display: flex; align-items: center; justify-content: center; color: var(--cc-muted); font-size: var(--cc-text-xs);
+}
+.cc-actions { display: flex; flex-wrap: wrap; gap: var(--cc-space-2); margin-top: var(--cc-space-1); }
+.cc-field { display: flex; flex-direction: column; gap: 4px; font-size: var(--cc-text-sm); }
+.cc-field input, .cc-field textarea {
+  border: 1px solid var(--cc-border); border-radius: var(--cc-radius-input); padding: var(--cc-space-2);
+}
+.cc-stepper { display: flex; align-items: center; gap: var(--cc-space-2); }
+.cc-stepper button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--cc-border); background: var(--cc-white); cursor: pointer; }
+.cc-fallback { font-size: var(--cc-text-sm); color: var(--cc-muted); border: 1px dashed var(--cc-border); border-radius: var(--cc-radius-input); padding: var(--cc-space-2); }
+.cc-notice { font-size: var(--cc-text-sm); padding: var(--cc-space-2); border-radius: var(--cc-radius-input); background: #fff7f2; }
+
+/* Staff page */
+.staff { max-width: 1100px; margin: 0 auto; padding: var(--cc-space-4); }
+.staff h1 { font-size: var(--cc-text-xl); margin: 0 0 var(--cc-space-3); }
+.staff table { width: 100%; border-collapse: collapse; font-size: var(--cc-text-sm); }
+.staff th, .staff td { text-align: left; border-bottom: 1px solid var(--cc-border); padding: var(--cc-space-2); vertical-align: top; }
+.staff .tabs { display: flex; gap: var(--cc-space-2); margin-bottom: var(--cc-space-3); flex-wrap: wrap; }
+.staff pre { white-space: pre-wrap; font-size: var(--cc-text-xs); background: #fafafa; padding: var(--cc-space-2); border-radius: var(--cc-radius-input); max-height: 320px; overflow: auto; }
+.badge { display: inline-block; font-size: var(--cc-text-xs); padding: 1px 8px; border-radius: var(--cc-radius-button); border: 1px solid var(--cc-border); }
+.badge.blocking { border-color: var(--cc-coral); color: var(--cc-coral); }
+.badge.warning { border-color: var(--cc-sun); }
+
+@media (max-width: 480px) {
+  .topbar { padding: var(--cc-space-2) var(--cc-space-3); }
+  .toplinks { display: none; }
+  .cc-card, .cc-card.wide { max-width: 100%; }
+  .staff table, .staff thead, .staff tbody, .staff tr, .staff td, .staff th { display: block; }
+}

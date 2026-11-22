@@ -33,3 +33,6 @@ config/pricing_overrides.json
 # Generated content and logs
 generated_content/
 *.log
+
+# Local JSON traces (may contain conversation text, already PII-redacted)
+traces/

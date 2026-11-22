@@ -1,0 +1,25 @@
+[
+  {
+    "id": "root",
+    "component": "BookingForm",
+    "accent": "teal",
+    "quote_ref": {
+      "path": "/quote_ref"
+    },
+    "tour_title": {
+      "path": "/tour_title"
+    },
+    "price_usd": {
+      "path": "/price_usd"
+    },
+    "deposit_usd": {
+      "path": "/deposit_usd"
+    },
+    "pay_in_full": {
+      "path": "/pay_in_full"
+    },
+    "consent_text": {
+      "path": "/consent_text"
+    }
+  }
+]

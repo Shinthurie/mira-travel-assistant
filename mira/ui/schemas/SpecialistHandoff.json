@@ -1,0 +1,25 @@
+[
+  {
+    "id": "root",
+    "component": "SpecialistHandoff",
+    "accent": "coral",
+    "title": {
+      "path": "/title"
+    },
+    "reason_text": {
+      "path": "/reason_text"
+    },
+    "tour_title": {
+      "path": "/tour_title"
+    },
+    "flag_ref": {
+      "path": "/flag_ref"
+    },
+    "enquiry_ref": {
+      "path": "/enquiry_ref"
+    },
+    "cta_label": {
+      "path": "/cta_label"
+    }
+  }
+]
