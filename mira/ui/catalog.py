@@ -118,7 +118,15 @@ class SourceCitationProps(_Props):
     sources: list[Source] = Field(min_length=1, max_length=8)
 
 
-CATALOG: dict[str, type[_Props]] = {
+class TourShelfProps(BaseModel):
+    """Dynamic. Several tour cards in one row (swipeable on mobile). Each card keeps its own single accent."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    title: str
+    tours: list[TourCardProps] = Field(min_length=2, max_length=4)
+
+
+CATALOG: dict[str, type[BaseModel]] = {
     "PriceBreakdown": PriceBreakdownProps,
     "BookingForm": BookingFormProps,
     "SpecialistHandoff": SpecialistHandoffProps,
@@ -127,6 +135,7 @@ CATALOG: dict[str, type[_Props]] = {
     "ItineraryDay": ItineraryDayProps,
     "TravellerPicker": TravellerPickerProps,
     "SourceCitation": SourceCitationProps,
+    "TourShelf": TourShelfProps,
 }
 FIXED_SCHEMA = {"PriceBreakdown", "BookingForm", "SpecialistHandoff", "EnquiryConfirmation"}
 DYNAMIC_SCHEMA = set(CATALOG) - FIXED_SCHEMA

@@ -1,18 +1,36 @@
 "use client";
 // Traveller chat page: CopilotKit chat + our A2UI catalog. The conversation is the product.
 import { CopilotChat, CopilotKitProvider, useAgent, useCopilotKit, useRenderTool } from "@copilotkit/react-core/v2";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactElement } from "react";
 import { z } from "zod";
 import { miraCatalog } from "@/lib/catalog";
+import { say } from "@/lib/catalog/renderers";
 
 const VISITOR_COOKIE = "mira_visitor";
+
+const SUGGESTIONS = [
+  { label: "Price a day tour", text: "How much is the Sigiriya and Minneriya day tour from Kandy for 2 adults on 10 January 2027?" },
+  { label: "Plan a family trip", text: "We're a family of four and want a custom 10 days across Kandy, Ella and the south coast." },
+  { label: "See the Cultural Triangle", text: "Tell me about the Cultural Triangle Sri Lanka Package." },
+  { label: "Cancellation terms", text: "What's your cancellation policy for day tours?" },
+];
 
 function readCookie(name: string): string | null {
   const m = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return m ? decodeURIComponent(m[1]) : null;
 }
 
-function ConsentBar({ onChange }: { onChange: (visitorId: string | null) => void }) {
+function CompassMark() {
+  return (
+    <svg className="mark" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M16 5.5 19.2 16 16 26.5 12.8 16Z" fill="var(--cc-orange)" />
+      <circle cx="16" cy="16" r="1.8" fill="var(--cc-white)" />
+    </svg>
+  );
+}
+
+function Consent({ onChange }: { onChange: (visitorId: string | null) => void }) {
   const [consent, setConsent] = useState<boolean | null>(null);
   const [returning, setReturning] = useState<string | null>(null);
 
@@ -40,23 +58,45 @@ function ConsentBar({ onChange }: { onChange: (visitorId: string | null) => void
   }
   if (consent === null) return null;
   return (
-    <div className="consent">
+    <div className="consent" data-testid="consent">
       {consent ? (
         <>
-          <span>{returning ? `Welcome back. Say hello and I'll pick up your ${returning} quote.` : "I'll remember your trip details next time."}</span>
-          <button className="btn-link" onClick={forget}>Forget me</button>
+          <p>{returning ? `Welcome back. Say hello and I'll pick up your ${returning} quote.` : "I'll remember your trip details next time."}</p>
+          <button className="link" onClick={forget}>Forget me</button>
         </>
       ) : (
         <>
-          <span>Can I remember your trip details for next time? Nothing is stored without your OK.</span>
-          <button className="btn" onClick={allow}>Yes, remember me</button>
+          <p>Want me to remember your trip details next time? Nothing is stored unless you say yes.</p>
+          <button className="btn btn-small" onClick={allow}>Yes, remember me</button>
         </>
       )}
     </div>
   );
 }
 
-function Chat() {
+/** Replaces CopilotKit's default welcome: our greeting, starter questions, then the input. */
+function Welcome({ input }: { input: ReactElement }) {
+  return (
+    <div className="welcome" data-testid="welcome">
+      <div className="welcome-inner">
+        <p className="welcome-kicker">Ceylon Compass Holidays</p>
+        <h1>Hello, I&apos;m Mira.</h1>
+        <p className="welcome-lede">Tell me where you&apos;d like to go and who&apos;s coming. I&apos;ll find the right tour and give you a confirmed price.</p>
+        <div className="starters">
+          {SUGGESTIONS.map((s) => (
+            <button key={s.label} className="starter" onClick={() => say(s.text)}>
+              <span className="starter-label">{s.label}</span>
+              <span className="starter-text">{s.text}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="welcome-input">{input}</div>
+    </div>
+  );
+}
+
+function Chat({ onVisitor }: { onVisitor: (setter: (id: string | null) => void) => void }) {
   const { agent } = useAgent({ agentId: "mira" });
   const { copilotkit } = useCopilotKit();
   // The graph's render_mira_ui tool only carries A2UI operations (drawn as surfaces by the A2UI
@@ -68,8 +108,9 @@ function Chat() {
     if (visitorId) state.visitor_id = visitorId; else delete state.visitor_id;
     agent.setState(state);
   }, [agent]);
+  useEffect(() => onVisitor(setVisitor), [onVisitor, setVisitor]);
 
-  // Buttons inside A2UI components "say" things on the traveller's behalf.
+  // Buttons inside A2UI components (and the starters) "say" things on the traveller's behalf.
   useEffect(() => {
     const onSay = (e: Event) => {
       const text = (e as CustomEvent<string>).detail;
@@ -81,28 +122,51 @@ function Chat() {
   }, [agent, copilotkit]);
 
   return (
-    <>
-      <ConsentBar onChange={setVisitor} />
-      <div className="chat">
-        <CopilotChat agentId="mira" labels={{
-          chatInputPlaceholder: "Ask about tours, or tell me your dates and who's travelling",
-          chatDisclaimerText: "Prices come only from our rate sheet. Answers come only from our tour pages.",
-        }} />
-      </div>
-    </>
+    <div className="chat">
+      <CopilotChat
+        agentId="mira"
+        welcomeScreen={Welcome as never}
+        labels={{
+          chatInputPlaceholder: "Ask about a tour, or tell me your dates and who's travelling",
+          chatDisclaimerText: "Prices come from our rate sheet. Answers come from our tour pages.",
+        }}
+      />
+    </div>
   );
 }
 
 export default function Page() {
+  const [visitorSetter, setVisitorSetter] = useState<((id: string | null) => void) | null>(null);
+  const registerSetter = useCallback((fn: (id: string | null) => void) => setVisitorSetter(() => fn), []);
+  const onConsent = useCallback((id: string | null) => visitorSetter?.(id), [visitorSetter]);
+
   return (
     <CopilotKitProvider runtimeUrl="/api/copilotkit" a2ui={{ catalog: miraCatalog }} enableInspector={false}>
-      <main className="app">
-        <header className="topbar">
-          <div className="brand"><span className="brand-dot" /> Ceylon Compass Holidays <small>· Mira</small></div>
-          <nav className="toplinks"><a href="/staff">Staff</a></nav>
-        </header>
-        <Chat />
-      </main>
+      <div className="shell">
+        <aside className="side">
+          <a className="brand" href="/"><CompassMark /><span>Ceylon Compass<small>Holidays</small></span></a>
+          <div className="side-body">
+            <h2>Plan and price your Sri Lanka trip in one conversation.</h2>
+            <ol className="promises">
+              <li><strong>Real prices only.</strong> Every price is worked out from our current rate sheet, never guessed.</li>
+              <li><strong>Sources shown.</strong> Answers come from our own tour pages, and I show you which ones.</li>
+              <li><strong>A person when it counts.</strong> If I can&apos;t price something, a specialist from our team picks it up.</li>
+            </ol>
+          </div>
+          {visitorSetter && <Consent onChange={onConsent} />}
+          <footer className="side-foot">
+            <span>Prices in US dollars, per booking.</span>
+            <a href="/staff">Staff login</a>
+          </footer>
+        </aside>
+        <main className="main">
+          <header className="topbar">
+            <a className="brand" href="/"><CompassMark /><span>Ceylon Compass<small>Holidays</small></span></a>
+            <a className="topbar-link" href="/staff">Staff</a>
+          </header>
+          <Chat onVisitor={registerSetter} />
+        </main>
+      </div>
     </CopilotKitProvider>
   );
 }

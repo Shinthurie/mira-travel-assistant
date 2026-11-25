@@ -2,6 +2,7 @@
 const backend = process.env.MIRA_BACKEND_URL || `http://127.0.0.1:${process.env.BACKEND_PORT || "8123"}`;
 
 const nextConfig = {
+  devIndicators: false,
   async rewrites() {
     return [{ source: "/api/backend/:path*", destination: `${backend}/api/:path*` }];
   },

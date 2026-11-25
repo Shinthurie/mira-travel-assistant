@@ -70,3 +70,9 @@ Two seeded demo users (passwords from env, PBKDF2-hashed), HMAC-signed bearer to
 
 ## D21. Returning visitors need consent (Phase 8)
 A visitor-id cookie is only meaningful after "Yes, remember me". Mira then pre-fills known details and re-prices the last quote with the current engine (never shows a stale stored price). "Forget me" wipes stored knowledge and detaches quotes/enquiries.
+
+## D22. Workaround for a CopilotKit SDK bug: text before cards (UI redesign)
+`copilotkit==0.1.97` builds TEXT_MESSAGE events for `copilotkit_manually_emit_message` but discards them, so only a raw CUSTOM event reached the browser and Mira's text always appeared after its cards. `mira/agui.py` (`MiraAGUIAgent`) handles that one event with the base AG-UI dispatcher and leaves everything else to CopilotKit. The text is emitted with the same id as the stored message, so the snapshot merges it (no duplicate bubble). Delete the class when the SDK is fixed. Test: `test_agui_agent_turns_manual_emit_into_text_events`.
+
+## D23. TourShelf and itinerary days (UI redesign)
+Each A2UI surface is drawn as its own block, so several tour cards stacked into a long column. When a turn has two or more tour cards, `compose` groups them into one `TourShelf` component (a swipeable row on phones, a grid on desktop), keeping one accent per card. Questions about a multi-day tour now also show its first three `ItineraryDay` cards; that component existed before but was never chosen.

@@ -15,10 +15,11 @@
 | 8 Enquiries, staff page, returning visitors | done | `mira/api.py`, `frontend/app/staff/` |
 | 9 AI content + approval | done | `mira/content_agent.py` |
 | 10 Submission package | done except the video and the final LLM run | `README.md`, `docs/DEMO_SCRIPT.md`, `docs/DEMO_VIDEO_PLAN.md` |
+| UI redesign (25 Nov) | done: Inter, side panel, welcome starters, text before cards, 320px cards, tour shelf, itinerary days, staff tiles | `frontend/`, `docs/SYSTEM_REVIEW.md` |
 | Bonus: MCP server | done | `mira/mcp_server.py`, `tests/test_mcp.py` |
 
 ## Latest numbers (offline rules mode, no LLM key)
-- `pytest`: 241 passed.
+- `pytest`: 246 passed.
 - `python -m evals.run`: 54/54 cases; golden 18/18; consistency 100%; invented prices 0; missing/expired handling 10/10. Judge: skipped (no key).
 - `python scripts/adversarial.py`: 20 attacks, 0 invented amounts.
 - Live margin change rehearsed: consistency stays 100%, golden 4/6 (the two day-tour seeds change, as expected).

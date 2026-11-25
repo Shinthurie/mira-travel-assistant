@@ -1,7 +1,7 @@
 "use client";
 // React renderers for Mira's catalog. Each one re-validates its resolved props with zod and shows a
 // plain-text fallback if they don't match (and logs it), so a bad payload never breaks the page.
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { z } from "zod";
 import { resolved, type ComponentName } from "./definitions";
 
@@ -10,11 +10,15 @@ export function say(text: string) {
   window.dispatchEvent(new CustomEvent("mira:say", { detail: text }));
 }
 
-const fmtUsd = (v: string) => `USD ${Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
-const fmtDate = (iso?: string | null) =>
+const usd = (v: string) => Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const longDate = (iso?: string | null) =>
   iso ? new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "";
+const shortDate = (iso?: string | null) =>
+  iso ? new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
 
-function useValid<N extends ComponentName>(name: N, props: unknown): z.SafeParseReturnType<unknown, z.infer<(typeof resolved)[N]>> {
+type Valid<N extends ComponentName> = z.SafeParseReturnType<unknown, z.infer<(typeof resolved)[N]>>;
+
+function useValid<N extends ComponentName>(name: N, props: unknown): Valid<N> {
   const schema = resolved[name] as unknown as z.ZodType<z.infer<(typeof resolved)[N]>>;
   // The A2UI binder adds a `set<Prop>` function per bound prop (two-way binding). Drop functions;
   // every DATA key is still validated strictly (unknown data keys are rejected).
@@ -29,47 +33,64 @@ function useValid<N extends ComponentName>(name: N, props: unknown): z.SafeParse
 }
 
 const Fallback = ({ name }: { name: string }) => (
-  <div className="cc-fallback">This {name} couldn&apos;t be shown. The details are in Mira&apos;s message.</div>
+  <div className="cc-fallback">This {name} couldn&apos;t be shown. The details are in Mira&apos;s message above.</div>
 );
+
+function Card({ accent, children, testid, className }: {
+  accent: string; children: ReactNode; testid?: string; className?: string;
+}) {
+  return <div className={className ?? `cc-card accent-${accent}`} data-testid={testid}>{children}</div>;
+}
+
+// ---------- Fixed schema: money and bookings ----------------------------------------------
 
 function PriceBreakdown({ props }: { props: unknown }) {
   const v = useValid("PriceBreakdown", props);
   if (!v.success) return <Fallback name="price" />;
   const p = v.data;
   return (
-    <div className={`cc-card wide accent-${p.accent}`} data-testid="price-breakdown">
-      <div className="cc-kicker">Confirmed price · {p.quote_ref}</div>
-      <h3 className="cc-title">{p.tour_title}</h3>
-      <div className="cc-muted">{fmtDate(p.start_date)} to {fmtDate(p.end_date)} · {p.duration}</div>
-      <div className="cc-muted">{p.travellers_summary}</div>
-      <div className="cc-price">{fmtUsd(p.price_usd)}</div>
-      <div className="cc-muted">Total for your group</div>
+    <Card accent={p.accent} testid="price-breakdown">
+      <div className="cc-kicker">Confirmed price</div>
+      <div>
+        <h3 className="cc-title">{p.tour_title}</h3>
+        <p className="cc-sub">{p.travellers_summary}</p>
+      </div>
+      <div className="price-total"><span className="cur">USD</span><span className="amount num">{usd(p.price_usd)}</span></div>
+      <dl className="facts">
+        <dt>Dates</dt><dd>{p.start_date === p.end_date ? shortDate(p.start_date) : `${shortDate(p.start_date)} – ${shortDate(p.end_date)}`}</dd>
+        <dt>Length</dt><dd>{p.duration}</dd>
+        <dt>Quote</dt><dd className="num">{p.quote_ref}</dd>
+      </dl>
+      <div className="cc-divider" />
       {p.pay_in_full ? (
-        <div className="cc-row"><span>Pay in full when you book</span><strong>{fmtUsd(p.deposit_usd)}</strong></div>
+        <ul className="plan">
+          <li><span className="dot" /><span>Pay in full when you book</span><strong className="num">USD {usd(p.deposit_usd)}</strong></li>
+        </ul>
       ) : (
-        <>
-          <div className="cc-row"><span>Deposit to confirm</span><strong>{fmtUsd(p.deposit_usd)}</strong></div>
-          <div className="cc-row"><span>Balance due {fmtDate(p.balance_due_date)}</span><strong>{fmtUsd(p.balance_usd)}</strong></div>
-        </>
+        <ul className="plan">
+          <li><span className="dot" /><span>Deposit to confirm</span><strong className="num">USD {usd(p.deposit_usd)}</strong></li>
+          <li><span className="dot" /><span>Balance by {shortDate(p.balance_due_date)}</span><strong className="num">USD {usd(p.balance_usd)}</strong></li>
+        </ul>
       )}
       {p.inclusions.length > 0 && (
-        <details>
-          <summary className="cc-muted">What&apos;s included</summary>
-          <ul className="cc-list">{p.inclusions.map((x) => <li key={x}>{x}</li>)}</ul>
+        <details className="incl">
+          <summary>What&apos;s included</summary>
+          <ul>{p.inclusions.map((x) => <li key={x}>{x}</li>)}</ul>
         </details>
       )}
-      <div className="cc-actions">
-        <button className="btn btn-primary" onClick={() => say("I'd like to book it.")}>Book this</button>
-      </div>
-    </div>
+      <button className="btn btn-primary btn-block" onClick={() => say("I'd like to book it.")}>Book this trip</button>
+    </Card>
   );
 }
 
+type BookingState = { status: "idle" | "sending" | "done" | "failed"; message?: string; steps?: string[]; ref?: string };
+
 function BookingForm({ props }: { props: unknown }) {
   const v = useValid("BookingForm", props);
-  const [state, setState] = useState<{ status: "idle" | "sending" | "done" | "failed"; message?: string; steps?: string[]; ref?: string }>({ status: "idle" });
+  const [state, setState] = useState<BookingState>({ status: "idle" });
   if (!v.success) return <Fallback name="booking form" />;
   const p = v.data;
+
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
@@ -84,41 +105,44 @@ function BookingForm({ props }: { props: unknown }) {
         }),
       });
       const data = await res.json();
-      setState(data.ok ? { status: "done", ref: data.enquiry_ref, steps: data.next_steps, message: data.summary }
+      setState(data.ok ? { status: "done", ref: data.enquiry_ref, steps: data.next_steps }
         : { status: "failed", message: data.message, steps: data.next_steps });
     } catch {
       setState({ status: "failed", message: "We couldn't reach our booking system. Nothing has been charged.",
         steps: ["Try again in a minute", "Or ask Mira to pass your request to a specialist"] });
     }
   }
+
   if (state.status === "done") {
     return (
-      <div className={`cc-card accent-${p.accent}`}>
+      <Card accent="leaf" testid="booking-done">
         <div className="cc-kicker">Booking request {state.ref}</div>
-        <h3 className="cc-title">Thank you</h3>
-        <ul className="cc-list">{state.steps?.map((s) => <li key={s}>{s}</li>)}</ul>
-      </div>
+        <h3 className="cc-title">Thank you. Your request is in.</h3>
+        <ol className="steps">{state.steps?.map((s) => <li key={s}>{s}</li>)}</ol>
+      </Card>
     );
   }
   return (
-    <form className={`cc-card accent-${p.accent}`} onSubmit={submit} data-testid="booking-form">
+    <form className={`cc-card accent-${p.accent}`} data-testid="booking-form" onSubmit={submit}>
       <div className="cc-kicker">Book · {p.quote_ref}</div>
-      <h3 className="cc-title">{p.tour_title}</h3>
-      <div className="cc-row"><span>{p.pay_in_full ? "Pay in full" : "Deposit today"}</span><strong>{fmtUsd(p.deposit_usd)}</strong></div>
-      <label className="cc-field">Name<input name="name" required maxLength={120} autoComplete="name" /></label>
-      <label className="cc-field">Email<input name="email" type="email" required autoComplete="email" /></label>
-      <label className="cc-field">Phone (optional)<input name="phone" autoComplete="tel" /></label>
-      <label className="cc-field">Notes (optional)<textarea name="notes" rows={2} /></label>
-      <label className="cc-muted"><input type="checkbox" name="consent" required /> {p.consent_text}</label>
+      <div>
+        <h3 className="cc-title">{p.tour_title}</h3>
+        <p className="cc-sub num">{p.pay_in_full ? "Paid in full today" : "Deposit today"}: USD {usd(p.deposit_usd)}</p>
+      </div>
+      <label className="field">Full name<input name="name" required maxLength={120} autoComplete="name" /></label>
+      <label className="field">Email<input name="email" type="email" required autoComplete="email" /></label>
+      <label className="field">Phone <span className="cc-muted">(optional)</span><input name="phone" autoComplete="tel" /></label>
+      <label className="field">Anything we should know? <span className="cc-muted">(optional)</span><textarea name="notes" rows={2} /></label>
+      <label className="check"><input type="checkbox" name="consent" required /> <span>{p.consent_text}</span></label>
       {state.status === "failed" && (
         <div className="cc-notice" role="alert">
-          <div>{state.message}</div>
-          <ul className="cc-list">{state.steps?.map((s) => <li key={s}>{s}</li>)}</ul>
+          <strong>{state.message}</strong>
+          <ol className="steps">{state.steps?.map((s) => <li key={s}>{s}</li>)}</ol>
         </div>
       )}
       <div className="cc-actions">
         <button className="btn btn-primary" type="submit" disabled={state.status === "sending"}>
-          {state.status === "sending" ? "Sending..." : state.status === "failed" ? "Try again" : "Pay and book (demo)"}
+          {state.status === "sending" ? "Sending…" : state.status === "failed" ? "Try again" : "Pay and book (demo)"}
         </button>
         {state.status === "failed" && (
           <button className="btn" type="button" onClick={() => say("Please ask a specialist to contact me to finish my booking.")}>
@@ -135,16 +159,19 @@ function SpecialistHandoff({ props }: { props: unknown }) {
   if (!v.success) return <Fallback name="message" />;
   const p = v.data;
   return (
-    <div className={`cc-card accent-${p.accent}`} data-testid="specialist-handoff">
-      <div className="cc-kicker">No price yet</div>
-      <h3 className="cc-title">{p.title}</h3>
-      {p.tour_title && <div><strong>{p.tour_title}</strong></div>}
-      <div className="cc-muted">{p.reason_text}</div>
-      <div className="cc-muted">Your request is saved{p.enquiry_ref ? ` (${p.enquiry_ref})` : ""}. A specialist will get back to you.</div>
-      <div className="cc-actions">
-        <button className="btn" onClick={() => say("Please ask a specialist to contact me.")}>{p.cta_label}</button>
+    <Card accent={p.accent} testid="specialist-handoff">
+      <div className="cc-kicker">A specialist will confirm</div>
+      <div>
+        <h3 className="cc-title">{p.tour_title || "We'll check this for you"}</h3>
+        <p className="cc-sub">{p.reason_text}</p>
       </div>
-    </div>
+      <ol className="steps">
+        <li>Your request is saved{p.enquiry_ref ? ` as ${p.enquiry_ref}` : ""}.</li>
+        <li>A specialist checks the rates with our hotels.</li>
+        <li>They get back to you with a confirmed price.</li>
+      </ol>
+      <button className="btn" onClick={() => say("Please ask a specialist to contact me.")}>{p.cta_label}</button>
+    </Card>
   );
 }
 
@@ -153,25 +180,45 @@ function EnquiryConfirmation({ props }: { props: unknown }) {
   if (!v.success) return <Fallback name="confirmation" />;
   const p = v.data;
   return (
-    <div className={`cc-card accent-${p.accent}`}>
+    <Card accent={p.accent} testid="enquiry-confirmation">
       <div className="cc-kicker">Saved · {p.enquiry_ref}</div>
       <h3 className="cc-title">{p.summary}</h3>
-      <ul className="cc-list">{p.next_steps.map((s) => <li key={s}>{s}</li>)}</ul>
+      <ol className="steps">{p.next_steps.map((s) => <li key={s}>{s}</li>)}</ol>
+    </Card>
+  );
+}
+
+// ---------- Dynamic schema: content ----------------------------------------------------------
+
+/** A quiet "route line" in the card's accent: one dot per place. Honest stand-in for a photo. */
+function RouteArt({ seed, stops }: { seed: string; stops: number }) {
+  let h = 0;
+  for (const ch of seed) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const n = Math.max(2, Math.min(stops, 6));
+  const pts = Array.from({ length: n }, (_, i) => {
+    h = (h * 1103515245 + 12345) >>> 0;
+    return [24 + (i * 272) / (n - 1), 26 + (h % 40)] as const;
+  });
+  const d = pts.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `Q${(pts[i - 1][0] + x) / 2},${y - 18} ${x},${y}`)).join(" ");
+  return (
+    <div className="tour-art" aria-hidden="true">
+      <svg viewBox="0 0 320 92" preserveAspectRatio="none">
+        <path d={d} fill="none" stroke="var(--accent)" strokeWidth="2" strokeDasharray="5 6" strokeLinecap="round" />
+        {pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i === 0 || i === n - 1 ? 5 : 3.5} fill="var(--cc-white)" stroke="var(--accent)" strokeWidth="2" />)}
+      </svg>
+      <span className="art-note">Photos to come</span>
     </div>
   );
 }
 
-function TourCard({ props }: { props: unknown }) {
-  const v = useValid("TourCard", props);
-  if (!v.success) return <Fallback name="tour" />;
-  const p = v.data;
+function TourCardView({ p }: { p: z.infer<(typeof resolved)["TourCard"]> }) {
   return (
-    <div className={`cc-card accent-${p.accent}`} data-testid="tour-card">
-      <div className="cc-image" aria-label="Photo placeholder">Photo coming soon</div>
+    <Card accent={p.accent} testid="tour-card">
+      <RouteArt seed={p.tour_id} stops={p.places.length} />
       <div className="cc-kicker">{p.category} · {p.duration}</div>
       <h3 className="cc-title">{p.title}</h3>
-      <div className="cc-muted">{p.summary}</div>
-      <div className="cc-chips">{p.places.map((x) => <span key={x} className="cc-chip">{x}</span>)}</div>
+      <p className="tour-summary">{p.summary}</p>
+      <div className="chips">{p.places.map((x) => <span key={x} className="chip">{x}</span>)}</div>
       <div className="cc-actions">
         {p.priceable ? (
           <button className="btn btn-primary" onClick={() => say(`I'd like a price for ${p.title}.`)}>Get a price</button>
@@ -180,7 +227,24 @@ function TourCard({ props }: { props: unknown }) {
         )}
         <button className="btn" onClick={() => say(`Tell me about ${p.title}.`)}>Details</button>
       </div>
-    </div>
+    </Card>
+  );
+}
+
+function TourCard({ props }: { props: unknown }) {
+  const v = useValid("TourCard", props);
+  if (!v.success) return <Fallback name="tour" />;
+  return <TourCardView p={v.data} />;
+}
+
+function TourShelf({ props }: { props: unknown }) {
+  const v = useValid("TourShelf", props);
+  if (!v.success) return <Fallback name="tour list" />;
+  return (
+    <section className="shelf" data-testid="tour-shelf">
+      <h3 className="shelf-head">{v.data.title}</h3>
+      <div className="shelf-row">{v.data.tours.map((t) => <TourCardView key={t.tour_id} p={t} />)}</div>
+    </section>
   );
 }
 
@@ -189,13 +253,15 @@ function ItineraryDay({ props }: { props: unknown }) {
   if (!v.success) return <Fallback name="itinerary day" />;
   const p = v.data;
   return (
-    <div className={`cc-card accent-${p.accent}`}>
-      <div className="cc-kicker">Day {p.day_number}</div>
-      <h3 className="cc-title">{p.title}</h3>
-      <div className="cc-muted">{p.description}</div>
-      {p.meals.length > 0 && <div className="cc-row"><span>Meals</span><span>{p.meals.join(", ")}</span></div>}
-      {p.accommodation && <div className="cc-row"><span>Stay</span><span>{p.accommodation}</span></div>}
-    </div>
+    <Card accent={p.accent} testid="itinerary-day" className={`cc-card accent-${p.accent} day`}>
+      <div className="day-num"><span>Day</span><b>{p.day_number}</b></div>
+      <div className="day-body">
+        <h3 className="cc-title" style={{ fontSize: "var(--cc-text-md)" }}>{p.title}</h3>
+        <p className="cc-sub">{p.description}</p>
+        {p.meals.length > 0 && <p className="cc-muted">Meals: {p.meals.join(", ")}</p>}
+        {p.accommodation && <p className="cc-muted">Stay: {p.accommodation}</p>}
+      </div>
+    </Card>
   );
 }
 
@@ -212,30 +278,34 @@ function TravellerPicker({ props }: { props: unknown }) {
     say(`We are ${adults} adults${childText}.`);
   }
   return (
-    <div className={`cc-card accent-${p.accent}`} data-testid="traveller-picker">
+    <Card accent={p.accent} testid="traveller-picker">
       <div className="cc-kicker">Travellers</div>
       <h3 className="cc-title">{p.prompt}</h3>
-      <div className="cc-row"><span>Adults (12+)</span>
-        <span className="cc-stepper">
-          <button aria-label="fewer adults" onClick={() => setAdults(Math.max(1, adults - 1))}>-</button>{adults}
-          <button aria-label="more adults" onClick={() => total < p.max_group && setAdults(adults + 1)}>+</button>
+      <div className="counter">
+        <div>Adults<small>12 and over</small></div>
+        <span className="stepper">
+          <button aria-label="Fewer adults" onClick={() => setAdults(Math.max(1, adults - 1))}>−</button>
+          <output>{adults}</output>
+          <button aria-label="More adults" onClick={() => total < p.max_group && setAdults(adults + 1)}>+</button>
         </span>
       </div>
       {kids.map((age, i) => (
-        <div className="cc-row" key={i}><span>Child {i + 1} age</span>
-          <span className="cc-stepper">
-            <button aria-label="younger" onClick={() => setKids(kids.map((a, j) => (j === i ? Math.max(0, a - 1) : a)))}>-</button>{age}
-            <button aria-label="older" onClick={() => setKids(kids.map((a, j) => (j === i ? Math.min(11, a + 1) : a)))}>+</button>
-            <button aria-label="remove child" onClick={() => setKids(kids.filter((_, j) => j !== i))}>x</button>
+        <div className="counter" key={i}>
+          <div>Child {i + 1}<small>{age < 2 ? "under 2, travels free" : `aged ${age}`}</small></div>
+          <span className="stepper">
+            <button aria-label="Younger" onClick={() => setKids(kids.map((a, j) => (j === i ? Math.max(0, a - 1) : a)))}>−</button>
+            <output>{age}</output>
+            <button aria-label="Older" onClick={() => setKids(kids.map((a, j) => (j === i ? Math.min(11, a + 1) : a)))}>+</button>
           </span>
         </div>
       ))}
       <div className="cc-actions">
         <button className="btn" onClick={() => total < p.max_group && setKids([...kids, 6])}>Add a child</button>
-        <button className="btn btn-primary" onClick={send}>Use these</button>
+        {kids.length > 0 && <button className="link" onClick={() => setKids(kids.slice(0, -1))}>Remove last child</button>}
       </div>
-      <div className="cc-muted">Up to {p.max_group} travellers. Children under 2 travel free.</div>
-    </div>
+      <button className="btn btn-primary btn-block" onClick={send}>Use these travellers</button>
+      <p className="cc-muted">Private tours are for up to {p.max_group} travellers.</p>
+    </Card>
   );
 }
 
@@ -244,16 +314,18 @@ function SourceCitation({ props }: { props: unknown }) {
   if (!v.success) return <Fallback name="sources" />;
   const p = v.data;
   return (
-    <div className={`cc-card accent-${p.accent}`} data-testid="source-citation">
-      <div className="cc-kicker">Sources</div>
-      <ul className="cc-list">
-        {p.sources.map((s) => <li key={s.passage_id}>{s.title} · {s.section} <span className="cc-muted">({s.doc_id})</span></li>)}
+    <Card accent={p.accent} testid="source-citation">
+      <div className="cc-kicker">Where this comes from</div>
+      <ul className="sources">
+        {p.sources.map((s) => (
+          <li key={s.passage_id}><span className="ref">{s.doc_id}</span><span>{s.title} <span className="cc-muted">· {s.section}</span></span></li>
+        ))}
       </ul>
-    </div>
+    </Card>
   );
 }
 
 export const renderers = {
   PriceBreakdown, BookingForm, SpecialistHandoff, EnquiryConfirmation, TourCard, ItineraryDay, TravellerPicker,
-  SourceCitation,
+  SourceCitation, TourShelf,
 };

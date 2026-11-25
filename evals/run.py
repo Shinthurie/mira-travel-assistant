@@ -139,8 +139,13 @@ def run_case(case: dict, repeat: int, use_llm: bool) -> RunResult:
                 state = graph.invoke(payload, config={"configurable": {"thread_id": thread}})
                 turn = state["turn"]
                 latency = int((time.perf_counter() - start) * 1000)
-                comps = [op["updateComponents"]["components"][0]["component"] for op in turn.get("ops", [])
-                         if "updateComponents" in op]
+                comps = []
+                for op in turn.get("ops", []):
+                    if "updateComponents" in op:
+                        comp = op["updateComponents"]["components"][0]
+                        comps.append(comp["component"])
+                        if comp["component"] == "TourShelf":  # count the cards inside a shelf
+                            comps += ["TourCard"] * len(comp["tours"])
                 result.transcript.append({
                     "user": text, "text": turn.get("final_text", ""), "components": comps, "ops": turn.get("ops", []),
                     "pricing": turn.get("pricing"), "citations": turn.get("citations", []), "guard": turn.get("guard"),
@@ -187,9 +192,9 @@ def code_checks(case: dict, run: RunResult, ctx, info: dict) -> list[Check]:
 
     # 3. No draft / unpublished content used
     banned = {"T15"} | ({info["draft_id"]} if "draft_id" in info and case.get("setup") == "draft_only" else set())
-    shown_tours = [op["updateComponents"]["components"][0].get("tour_id") for t in tr for op in t["ops"]
-                   if "updateComponents" in op] + [op["updateDataModel"]["value"].get("tour_id") for t in tr
-                                                     for op in t["ops"] if "updateDataModel" in op]
+    roots = [op["updateComponents"]["components"][0] for t in tr for op in t["ops"] if "updateComponents" in op]
+    shown_tours = [r.get("tour_id") for r in roots] + [x.get("tour_id") for r in roots for x in r.get("tours", [])] \
+        + [op["updateDataModel"]["value"].get("tour_id") for t in tr for op in t["ops"] if "updateDataModel" in op]
     used = {c["doc_id"] for t in tr for c in t["citations"]} | {x for x in shown_tours if isinstance(x, str)}
     checks.append(Check("no_unapproved_content", not (used & banned), ", ".join(sorted(used & banned))))
 

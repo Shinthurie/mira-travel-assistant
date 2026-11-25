@@ -39,9 +39,9 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http
 # ---------------------------------------------------------------------------
 try:
     from ag_ui_langgraph import add_langgraph_fastapi_endpoint
-    from copilotkit import LangGraphAGUIAgent
+    from mira.agui import MiraAGUIAgent
 
-    add_langgraph_fastapi_endpoint(app, LangGraphAGUIAgent(
+    add_langgraph_fastapi_endpoint(app, MiraAGUIAgent(
         name="mira", description="Mira, the Ceylon Compass Holidays booking assistant", graph=get_graph()),
         path="/agent")
 except Exception as exc:  # pragma: no cover - keeps REST usable if the AG-UI SDK breaks

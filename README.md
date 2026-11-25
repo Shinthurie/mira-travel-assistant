@@ -21,7 +21,7 @@ Other commands:
 
 | Command | What it does |
 |---|---|
-| `pytest` | 241 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
+| `pytest` | 246 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
 | `python -m evals.run` | Evaluation suite → `reports/eval_report.md` (+ JSON, + `reports/history/`) |
 | `python -m evals.run --tag pricing` | Just the pricing/flag cases (for the live margin change) |
 | `python -m mira.pricing T09 2027-04-12 --adults 2 --children 7 10` | Staff price breakdown from the engine |
@@ -35,7 +35,7 @@ Other commands:
 ```mermaid
 flowchart LR
     subgraph Browser["Browser (Next.js 16)"]
-        Chat["CopilotChat"] --> Renderer["CopilotKit A2UI renderer<br/>+ OUR catalog (8 components, zod)"]
+        Chat["CopilotChat"] --> Renderer["CopilotKit A2UI renderer<br/>+ OUR catalog (9 components, zod)"]
         Staff["/staff page"]
     end
     subgraph Runtime["Next.js server"]
@@ -74,7 +74,8 @@ One message, end to end:
 
 - **Rules in code, not prompts.** Pricing, the price guard, permissions, publishing, routing and tour resolution are deterministic Python. The LLM only extracts details and writes wording.
 - **Two quote schemas.** `QuoteInternal` (cost, GP%) is stored for staff; `QuoteForTraveller` has no cost/margin fields and forbids extra fields. UI components only accept it.
-- **Fixed vs dynamic A2UI surfaces.** PriceBreakdown, BookingForm, SpecialistHandoff and EnquiryConfirmation use layouts we wrote (`mira/ui/schemas/*.json`) bound to data filled by code; TourCard, ItineraryDay, TravellerPicker and SourceCitation are chosen per turn by the graph.
+- **Fixed vs dynamic A2UI surfaces.** PriceBreakdown, BookingForm, SpecialistHandoff and EnquiryConfirmation use layouts we wrote (`mira/ui/schemas/*.json`) bound to data filled by code; TourCard, TourShelf, ItineraryDay, TravellerPicker and SourceCitation are chosen per turn by the graph.
+- **Text before cards.** Mira's guarded text is emitted before the UI tool result; `mira/agui.py` works around a CopilotKit 0.1.97 bug that dropped those text events.
 - **The A2UI renderer is our catalog only** (`includeBasicCatalog: false`, `injectA2UITool: false`): the model cannot draw arbitrary UI.
 - **No valid rate, no price.** The engine returns `NoQuote(reason)`; Mira hands over and a staff flag is saved.
 - **Hand-written BM25** over published, cleaned content (drafts excluded, HTML comments stripped, superseded lines replaced by pointers to the newer policy, injection/discount lines removed).
@@ -89,6 +90,8 @@ The problem found and fixed through the evals: [docs/FIXED_PROBLEM.md](docs/FIXE
 ## Data issues
 
 The dataset is loaded as-is and never modified (a SHA-256 test checks every file). 45 issues are recorded with their handling in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md). The key ones: H02 text rate (parsed), H08 text date (parsed), H10 rates in USD, H04 no single room → no price for solo travellers on T12, H07 expired → no price for T11, H03 overlapping Peak rows → no price for 1 Jan to 31 Mar 2027 (awaiting Sales), T10/T16 no rates, T15 draft, T14 stale promotion (not quotable), T06 duration conflict (priced as a 1-day tour + staff flag), newer policies override older page terms (P02, P03), no photos (placeholder), rates end 31 Oct 2027.
+
+Screenshots (desktop and 375px mobile): [docs/screenshots/](docs/screenshots/). Full requirement-by-requirement review: [docs/SYSTEM_REVIEW.md](docs/SYSTEM_REVIEW.md).
 
 ## Known limitations (honest)
 

@@ -439,6 +439,9 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
         card = tour_card(ctx, tour_id)
         if card:
             turn.components.insert(0, card)
+            # Multi-day tour: show the first days of its itinerary (ItineraryDay cards, from content only).
+            if "pricing" not in turn.route:
+                turn.components[1:1] = itinerary_days(ctx, tour_id, limit=3)
     session.stage = "informing"
     return _out(session, turn)
 
@@ -691,6 +694,24 @@ def enquiry(state: dict, config: RunnableConfig | None = None) -> dict:
     return _out(session, turn)
 
 
+def group_tour_cards(components: list[UIComponent]) -> list[UIComponent]:
+    """Two or more tour cards in one turn become one TourShelf (a swipeable row), placed where the first was."""
+    cards = [c for c in components if c.component == "TourCard"]
+    if len(cards) < 2:
+        return components
+    shelf = UIComponent(component="TourShelf", props={
+        "title": "Tours that match", "tours": [c.props for c in cards[:4]]})
+    shelf = UIComponent(component="TourShelf", props=validate_component("TourShelf", shelf.props))
+    out: list[UIComponent] = []
+    for c in components:
+        if c.component == "TourCard":
+            if c is cards[0]:
+                out.append(shelf)
+            continue
+        out.append(c)
+    return out
+
+
 def compose(state: dict, config: RunnableConfig | None = None) -> dict:
     """Validate every component against the catalog; invalid ones fall back to text (logged)."""
     ctx = get_context()
@@ -705,6 +726,7 @@ def compose(state: dict, config: RunnableConfig | None = None) -> dict:
                 trace = ctx.trace(_thread_id(config))
                 if trace:
                     trace.event("ui_payload_invalid", {"component": c.component, "error": str(exc)}, level="ERROR")
+        valid = group_tour_cards(valid)
         span.output = {"valid": [c.component for c in valid], "fallbacks": turn.ui_fallbacks}
     turn.components = valid
     turn.final_text = "\n\n".join(p for p in turn.reply_parts if p.strip()) or replies.QUESTIONS["tour"]
@@ -747,6 +769,18 @@ def guard(state: dict, config: RunnableConfig | None = None) -> dict:
     return _out(session, turn)
 
 
+def _emit_text_early(text: str, message_id: str, config: RunnableConfig | None) -> None:
+    """CopilotKit's manual-emit event: AG-UI sends TEXT_MESSAGE_* now, before the UI tool result."""
+    if not config or not (config.get("callbacks")):
+        return  # plain graph.invoke (CLI, tests): nothing is listening
+    try:
+        from langchain_core.callbacks.manager import dispatch_custom_event
+        dispatch_custom_event("copilotkit_manually_emit_message",
+                              {"message": text, "message_id": message_id, "role": "assistant"}, config=config)
+    except Exception as exc:  # never break a turn over presentation order
+        log.debug("early text emit skipped: %s", exc)
+
+
 def persist(state: dict, config: RunnableConfig | None = None) -> dict:
     """Write the reply (+ A2UI tool result), finish the trace."""
     ctx = get_context()
@@ -754,14 +788,18 @@ def persist(state: dict, config: RunnableConfig | None = None) -> dict:
     thread = _thread_id(config)
     messages: list = []
     turn.ops = build_operations(turn.components, turn_id=uuid.uuid4().hex[:8]) if turn.components else []
+    message_id = f"msg_{uuid.uuid4().hex[:10]}"
     if turn.ops:
+        # Send the (already guarded) text first, with the SAME id as the stored message, so the browser shows
+        # Mira's words before the cards and doesn't duplicate the bubble.
+        _emit_text_early(turn.final_text, message_id, config)
         # A real tool call: the ToolNode runs render_mira_ui, so AG-UI emits TOOL_CALL_RESULT and the
         # CopilotKit A2UI middleware turns the result into surfaces in the browser.
         call_id = f"ui_{uuid.uuid4().hex[:10]}"
-        messages.append(AIMessage(content=turn.final_text, id=f"msg_{uuid.uuid4().hex[:10]}",
+        messages.append(AIMessage(content=turn.final_text, id=message_id,
                                   tool_calls=[{"id": call_id, "name": RENDER_TOOL, "args": {}}]))
     else:
-        messages.append(AIMessage(content=turn.final_text, id=f"msg_{uuid.uuid4().hex[:10]}"))
+        messages.append(AIMessage(content=turn.final_text, id=message_id))
 
     trace = ctx.traces.pop(thread, None)
     if trace is not None:

@@ -34,7 +34,15 @@ def chat(graph, turns: list[str], thread: str | None = None, visitor_id: str | N
 
 
 def components(turn: dict) -> list[str]:
-    return [op["updateComponents"]["components"][0]["component"] for op in turn.get("ops", []) if "updateComponents" in op]
+    """Component names shown this turn; a TourShelf also counts each tour card inside it."""
+    out: list[str] = []
+    for op in turn.get("ops", []):
+        if "updateComponents" in op:
+            comp = op["updateComponents"]["components"][0]
+            out.append(comp["component"])
+            if comp["component"] == "TourShelf":
+                out += ["TourCard"] * len(comp["tours"])
+    return out
 
 
 def data_models(turn: dict) -> list[dict]:
