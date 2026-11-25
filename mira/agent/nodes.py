@@ -158,6 +158,11 @@ def browse_picks(ctx: AgentContext, session: MiraSession, text: str = "", limit:
     return picks[:limit]
 
 
+NOT_COVERED = re.compile(r"(don'?t|do not|doesn'?t|does not) (say|mention|cover|include|have|list)|not (mentioned|covered|"
+                         r"listed|in our)|no information|can'?t find|cannot find|isn'?t (mentioned|covered)", re.I)
+ENQUIRY_OFFER = "I can pass your question to our team as an enquiry, and a specialist will get back to you."
+
+
 def bookable_start_range(ctx: AgentContext, tour_id: str | None) -> tuple[str, str]:
     """First and last start dates the pricing engine accepts for this tour: from today until the tour would
     end on the last day the rates and FX are fixed (the engine's BEYOND_RATE_VALIDITY rule)."""
@@ -617,6 +622,10 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
         if result is not None and result.supported:
             turn.reply_parts.append(result.text)
             turn.citations = [c.model_dump() for c in result.citations]
+            # Requirement 4: "not in the content" always comes with the enquiry offer, even when the model
+            # wrote its own "the sources don't say" sentence (S09, final DeepSeek run).
+            if NOT_COVERED.search(result.text) and "team" not in result.text.lower():
+                turn.reply_parts.append(ENQUIRY_OFFER)
         elif "no_tour_handoff" not in turn.route:  # the handoff already says we don't have it (S16)
             turn.reply_parts.append(NO_ANSWER_TEXT)
     elif hits and "no_tour_handoff" not in turn.route:

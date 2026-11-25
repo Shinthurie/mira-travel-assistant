@@ -524,3 +524,12 @@ def test_hi_again_counts_as_a_greeting():
     from datetime import date
     from mira.agent.rules import rule_extract
     assert rule_extract("Hi again", date(2026, 11, 19)).intent == Intent.GREETING
+
+
+def test_model_not_covered_answer_gets_the_enquiry_offer():
+    """S09 (final DeepSeek run): 'The sources don't say...' without offering to ask the team."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True),
+                   "The sources don't say whether Yala is open in September.\nSOURCES: yala#overview"])
+    _, graph = fresh_agent(llm=llm)
+    text = chat(graph, ["Is Yala open in September?"])[0]["final_text"]
+    assert "pass your question to our team" in text
