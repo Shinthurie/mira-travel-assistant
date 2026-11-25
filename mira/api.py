@@ -70,6 +70,21 @@ def brand() -> dict:
     return json.loads(config.BRAND_PACK_PATH.read_text(encoding="utf-8"))
 
 
+@app.get("/api/tours")
+def tours() -> list[dict]:
+    """Published tours Mira can price, for the side panel: id, title and length only. Never prices, never
+    drafts, and never stale or rate-less tours (T14's 2023/24 promotion, T10, T16)."""
+    ctx = get_context()
+    out = []
+    for doc in ctx.resolver.tours:  # published only
+        if not ctx.resolver.priceable(doc.id):
+            continue
+        decision = ctx.catalog.decisions.for_tour(doc.id)
+        duration = decision.display_duration if decision and decision.display_duration else (doc.duration or "")
+        out.append({"id": doc.id, "title": doc.title, "duration": duration})
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Visitors (requirement 2): consent first, "forget me" any time
 # ---------------------------------------------------------------------------

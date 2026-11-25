@@ -74,6 +74,85 @@ function Consent({ onChange }: { onChange: (visitorId: string | null) => void })
   );
 }
 
+type TourItem = { id: string; title: string; duration: string };
+type QuoteState = { ref: string; tour_title: string; start_date: string; adults: number; child_ages: number[];
+  price_usd: string; deposit_usd: string; balance_usd: string };
+type SessionState = { slots?: { tour_id?: string | null; suggested_tour_id?: string | null; adults?: number | null;
+  child_ages?: number[]; start_date?: string | null }; quotes?: QuoteState[] };
+
+/** "2125" -> "USD 2,125": formatting only, never arithmetic. The number is the engine's quote. */
+function usd(value: string) { return `USD ${Number(value).toLocaleString("en-US")}`; }
+function niceDate(iso: string) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** Live summary of the agent's shared state (AG-UI state snapshot). The price shown is the last quote the
+ *  pricing engine produced in this conversation; the state never contains cost or margin (tested). */
+function TripSoFar({ tours }: { tours: TourItem[] }) {
+  const { agent } = useAgent({ agentId: "mira" });
+  const session = ((agent.state || {}) as { session?: SessionState }).session || {};
+  const s = session.slots || {};
+  const q = session.quotes?.length ? session.quotes[session.quotes.length - 1] : null;
+  const tourId = s.tour_id || s.suggested_tour_id;
+  const tour = q?.tour_title || tours.find((t) => t.id === tourId)?.title;
+  const kids = s.child_ages?.length ? `, ${s.child_ages.length} child${s.child_ages.length > 1 ? "ren" : ""} (${s.child_ages.join(", ")})` : "";
+  const who = s.adults ? `${s.adults} adult${s.adults > 1 ? "s" : ""}${kids}` : null;
+  const start = q?.start_date || s.start_date;
+  if (!tour && !who && !start) {
+    return <p className="side-empty">Nothing yet. Tell Mira where you&apos;d like to go, when, and who&apos;s coming.</p>;
+  }
+  return (
+    <dl className="trip">
+      <dt>Tour</dt><dd>{tour || <span className="cc-muted">Not chosen yet</span>}</dd>
+      <dt>Who</dt><dd>{who || <span className="cc-muted">Not known yet</span>}</dd>
+      <dt>Starts</dt><dd>{start ? niceDate(start) : <span className="cc-muted">No date yet</span>}</dd>
+      <dt>Price</dt>
+      <dd>{q ? <><b>{usd(q.price_usd)}</b><small>Deposit {usd(q.deposit_usd)} · {q.ref}</small></> : <span className="cc-muted">Not priced yet</span>}</dd>
+    </dl>
+  );
+}
+
+/** Desktop side panel: four collapsible sections, one open at a time (no scrolling). */
+function SidePanel() {
+  const [tours, setTours] = useState<TourItem[]>([]);
+  useEffect(() => {
+    fetch("/api/backend/tours").then((r) => r.json()).then(setTours).catch(() => setTours([]));
+  }, []);
+  return (
+    <div className="side-sections">
+      <details name="side" open>
+        <summary>Your trip so far</summary>
+        <TripSoFar tours={tours} />
+      </details>
+      <details name="side">
+        <summary>How booking works</summary>
+        <ol className="side-steps">
+          <li><strong>Tell Mira your trip.</strong> Where, when and who&apos;s coming.</li>
+          <li><strong>Get a confirmed price.</strong> Worked out from our current rate sheet.</li>
+          <li><strong>Book with a deposit.</strong> Or a specialist confirms anything we can&apos;t price.</li>
+        </ol>
+      </details>
+      <details name="side">
+        <summary>Popular tours</summary>
+        <ul className="side-tours">
+          {tours.slice(0, 4).map((t) => (
+            <li key={t.id}><button onClick={() => say(`Tell me about the ${t.title}.`)}>
+              <span>{t.title}</span><small>{t.duration}</small></button></li>
+          ))}
+        </ul>
+      </details>
+      <details name="side">
+        <summary>Our promises</summary>
+        <ul className="side-promises">
+          <li><strong>Real prices only.</strong> Never guessed.</li>
+          <li><strong>Sources shown.</strong> From our own tour pages.</li>
+          <li><strong>A person when it counts.</strong> A specialist picks it up.</li>
+        </ul>
+      </details>
+    </div>
+  );
+}
+
 /** Replaces CopilotKit's default welcome: our greeting, starter questions, then the input. */
 function Welcome({ input }: { input: ReactElement }) {
   return (
@@ -157,11 +236,7 @@ export default function Page() {
           <a className="brand" href="/"><CompassMark /><span>Ceylon Compass<small>Holidays</small></span></a>
           <div className="side-body">
             <h2>Plan and price your Sri Lanka trip in one conversation.</h2>
-            <ol className="promises">
-              <li><strong>Real prices only.</strong> Every price is worked out from our current rate sheet, never guessed.</li>
-              <li><strong>Sources shown.</strong> Answers come from our own tour pages, and I show you which ones.</li>
-              <li><strong>A person when it counts.</strong> If I can&apos;t price something, a specialist from our team picks it up.</li>
-            </ol>
+            <SidePanel />
           </div>
           {visitorSetter && <Consent onChange={onConsent} />}
           <footer className="side-foot">

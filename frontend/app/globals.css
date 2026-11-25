@@ -331,3 +331,36 @@ h1, h2, h3, p { margin: 0; }
 .welcome { justify-content: safe center !important; }
 @media (max-width: 960px) { .welcome { padding-top: var(--cc-space-4); padding-bottom: var(--cc-space-4); } }
 .welcome-input div:has(> [data-testid="copilot-chat-input"]) { padding-left: 0; padding-right: 0; }
+
+/* ---------- Side panel sections (one open at a time) ------------------------------------ */
+.side { gap: var(--cc-space-4); padding-top: var(--cc-space-5); padding-bottom: var(--cc-space-4); scrollbar-width: none; }
+.side::-webkit-scrollbar { display: none; }
+.side-body h2 { font-size: var(--cc-text-lg); line-height: 1.25; }
+.side-sections { margin-top: var(--cc-space-4); border-top: 1px solid var(--cc-line); }
+.side-sections details { border-bottom: 1px solid var(--cc-line); }
+.side-sections summary {
+  list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  padding: var(--cc-space-3) 0; font-size: var(--cc-text-sm); font-weight: var(--cc-weight-semibold);
+}
+.side-sections summary::-webkit-details-marker { display: none; }
+.side-sections summary::after { content: "+"; color: var(--cc-muted); font-weight: var(--cc-weight-regular); }
+.side-sections details[open] summary::after { content: "–"; }
+.side-sections details > :not(summary) { margin: 0 0 var(--cc-space-3); }
+.side-empty { font-size: var(--cc-text-sm); color: var(--cc-muted); }
+.trip { display: grid; grid-template-columns: 56px 1fr; gap: 6px var(--cc-space-2); font-size: var(--cc-text-sm); }
+.trip dt { color: var(--cc-muted); }
+.trip dd { margin: 0; }
+.trip dd b { display: block; font-variant-numeric: tabular-nums; }
+.trip dd small { display: block; color: var(--cc-muted); font-size: var(--cc-text-xs); }
+.side-steps, .side-promises { margin: 0; padding-left: 18px; display: grid; gap: var(--cc-space-2); font-size: var(--cc-text-sm); color: var(--cc-muted); }
+.side-promises { list-style: disc; }
+.side-steps strong, .side-promises strong { color: var(--cc-ink); font-weight: var(--cc-weight-semibold); }
+.side-tours { list-style: none; padding: 0; display: grid; gap: 2px; }
+.side-tours button {
+  width: 100%; display: flex; justify-content: space-between; gap: var(--cc-space-2); text-align: left;
+  border: 0; background: none; padding: 6px var(--cc-space-2); margin: 0 calc(-1 * var(--cc-space-2));
+  border-radius: var(--cc-radius-input); cursor: pointer; font-size: var(--cc-text-sm); transition: background-color var(--cc-fast);
+}
+.side-tours button:hover { background: var(--cc-paper); }
+.side-tours small { color: var(--cc-muted); white-space: nowrap; font-size: var(--cc-text-xs); }
+.side .consent { padding: var(--cc-space-3); gap: var(--cc-space-2); }

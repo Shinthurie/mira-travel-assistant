@@ -115,3 +115,24 @@ def test_brand_and_health_are_public(client):
     c, _, _ = client
     assert c.get("/health").json()["status"] == "ok"
     assert c.get("/api/brand").json()["assistant_name"] == "Mira"
+
+
+def test_tours_endpoint_lists_published_tours_only_and_no_prices(client):
+    data = client[0].get("/api/tours").json()
+    ids = {t["id"] for t in data}
+    assert "T09" in ids and "T15" not in ids  # T15 is a draft
+    assert not ids & {"T14", "T10", "T16"}  # stale promotion, no rates
+    assert all(set(t) == {"id", "title", "duration"} for t in data)
+    assert "1 day" == next(t["duration"] for t in data if t["id"] == "T06")
+
+
+def test_agent_state_sent_to_the_browser_has_no_internal_figures():
+    """The side panel reads the graph state (AG-UI STATE_SNAPSHOT): it must never hold cost or margin."""
+    import json as _json
+    from tests.agent_helpers import chat, fresh_agent
+    _, graph = fresh_agent()
+    chat(graph, ["Cultural Triangle package for 2 adults from 12 April 2027"], thread="state-leak-1")
+    state = graph.get_state({"configurable": {"thread_id": "state-leak-1"}}).values
+    blob = _json.dumps({k: v for k, v in state.items() if k != "messages"}, default=str).lower()
+    for word in ("cost", "margin", "gross", "lkr", "gp_pct", "internal"):
+        assert word not in blob, word
