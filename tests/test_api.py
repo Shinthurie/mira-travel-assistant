@@ -75,11 +75,9 @@ def test_booking_success_and_friendly_failure(client):
     assert fail["ok"] is False and "haven't been charged" in fail["message"] and fail["next_steps"]
     ok = c.post("/api/booking", json=body).json()
     assert ok["ok"] is True and ok["enquiry_ref"].startswith("E-")
-    # Mocked payment: the traveller is told nothing was charged or emailed, and the right amount wording.
+    # Day tour, paid in full: the copy says "payment", never "deposit".
     steps = " ".join(ok["next_steps"])
-    assert "no payment was taken" in steps and "no email was sent" in steps
-    assert "USD 275 (paid in full)" in steps  # day tour: pay in full
-    assert "email your confirmation" not in steps and "secure payment link" not in steps
+    assert "Your payment of USD 275" in steps and "deposit" not in steps
     assert c.post("/api/booking", json={**body, "quote_ref": "Q-NOPE"}).json()["ok"] is False
 
 

@@ -476,3 +476,37 @@ def test_travellers_and_date_are_asked_together_with_the_bookable_range():
     assert picker["props"]["date_min"] == "2026-11-19"
     assert picker["props"]["date_max"] == "2027-10-25"  # 7-day tour must end by 31 Oct 2027
     assert turns[1]["pricing"]["kind"] == "quote" and turns[1]["pricing"]["price_usd"] == "2125"
+
+
+def test_asking_for_more_tours_shows_a_row_of_tours_not_a_search_answer():
+    """UI review: 'i want to know about some more tours you have' got 'I don't have details on other tours'."""
+    _, graph = fresh_agent()
+    turn = chat(graph, ["i want to know about some more tours you have"])[0]
+    shelf = next(c for c in turn["components"] if c["component"] == "TourShelf")
+    assert shelf["props"]["title"] == "Our tours" and len(shelf["props"]["tours"]) == 4
+    assert "don't have details" not in turn["final_text"]
+    assert not {"T14", "T15", "T10", "T16"} & {t["tour_id"] for t in shelf["props"]["tours"]}
+
+
+def test_browsing_by_place_puts_tours_visiting_it_first():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["What tours go to Ella?"])[0]
+    shelf = next(c for c in turn["components"] if c["component"] == "TourShelf")
+    first = shelf["props"]["tours"][0]
+    assert "Ella" in first["places"]
+
+
+def test_a_question_about_the_tour_is_not_browsing():
+    from mira.agent.nodes import ASKS_TO_BROWSE
+    assert not ASKS_TO_BROWSE.search("What is included in the tour?")
+
+
+def test_no_picked_for_you_on_top_of_a_specific_request():
+    """UI review: a returning visitor asking for a price got 'Picked for you' cards above the quote."""
+    ctx, graph = fresh_agent()
+    ctx.store.give_consent("visitor-picks-3")
+    chat(graph, ["Whale watching in Mirissa on 15 March 2027 for 2 adults. Price?"], visitor_id="visitor-picks-3")
+    turn = chat(graph, ["How much is the Sigiriya and Minneriya day tour from Kandy for 2 adults on 10 January 2027?"],
+                visitor_id="visitor-picks-3")[0]
+    assert not any(c["component"] == "TourShelf" for c in turn["components"])
+    assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["tour_id"] == "T01"

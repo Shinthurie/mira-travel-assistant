@@ -141,6 +141,23 @@ def _cleaned_passages(ctx: AgentContext, tour_id: str, prefixes: tuple[str, ...]
             yield p
 
 
+ASKS_TO_BROWSE = re.compile(r"\b(more|other|all|some|which|what|any)\b.{0,20}\btours\b|\btours? (do )?you (have|offer|do)"
+                            r"|\bshow me (some |your |the )?tours?\b|\bwhat do you offer\b|\blist of tours\b", re.I)
+
+
+def browse_picks(ctx: AgentContext, session: MiraSession, text: str = "", limit: int = 4) -> list[str]:
+    """Up to four priceable tours not yet shown in this conversation: tours visiting the places mentioned
+    first ("What tours go to Ella?"), then one per category (variety)."""
+    fresh = [d for d in ctx.resolver.tours if ctx.resolver.priceable(d.id) and d.id not in session.shown_tours]
+    by_place = [t for t in ctx.resolver.rank_by_places(text) if t in {d.id for d in fresh}]
+    picks, seen = list(by_place), set()
+    for d in fresh:
+        if d.category not in seen:
+            picks.append(d.id); seen.add(d.category)
+    picks += [d.id for d in fresh if d.id not in picks]
+    return picks[:limit]
+
+
 def bookable_start_range(ctx: AgentContext, tour_id: str | None) -> tuple[str, str]:
     """First and last start dates the pricing engine accepts for this tour: from today until the tour would
     end on the last day the rates and FX are fixed (the engine's BEYOND_RATE_VALIDITY rule)."""
@@ -361,6 +378,8 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
     route: list[str] = []
     # "Not sure yet" in the middle of discovery is an answer, not a question for the content search
     # (eval M28, LLM run): keep helping with the trip instead of saying "not in our information".
+    if not ex.tour_id and ASKS_TO_BROWSE.search(text) and not SPECIFIC_QUESTION.search(text):
+        return ["answer"]  # "What other tours do you have?": a row of our tours
     if session.asked and not asks_about_price(text) and not looks_like_question(text) and not _ready_to_price(session):
         return ["discovery"]
     # "I'd like the Highlights of Sri Lanka tour." names a choice, not a question (eval M33, DeepSeek run):
@@ -442,6 +461,7 @@ def intake(state: dict, config: RunnableConfig | None = None) -> dict:
     turn.trace_id, turn.trace_url = trace.trace_id, trace.url
 
     # Returning visitor (requirement 2): only with consent, only at the start of a conversation.
+    returning_from: str | None = None
     if session.turns == 1 and session.visitor_id:
         visitor = ctx.store.get_visitor(session.visitor_id)
         if visitor and visitor.consent_given_at:
@@ -457,13 +477,7 @@ def intake(state: dict, config: RunnableConfig | None = None) -> dict:
                     title = ctx.catalog.content.get(rec.tour_id).title if ctx.catalog.content.get(rec.tour_id) else rec.tour_id
                     turn.reply_parts.append(f"Welcome back. Last time you looked at {title}.")
                     session.slots.tour_id = rec.tour_id
-                    # Personalisation (bonus): only here, i.e. only with consent and stored history.
-                    picks = ctx.resolver.similar_to([rec.tour_id], session.slots.interests)
-                    cards = [c for c in (tour_card(ctx, t, accent) for t, accent in zip(picks, ("teal", "leaf", "sky"))) if c]
-                    if len(cards) >= 2:
-                        turn.reply_parts.append("Based on what you looked at, you might also like these.")
-                        turn.components.extend(cards)
-                        turn.shelf_title = "Picked for you"
+                    returning_from = rec.tour_id  # personalisation is decided after reading the message
 
     with trace.span("intake", as_type="chain", input={"message": text, "known": session.slots}) as span:
         ex, mode = extract(ctx, text, session)
@@ -474,6 +488,16 @@ def intake(state: dict, config: RunnableConfig | None = None) -> dict:
             if found:
                 session.slots.suggested_tour_id = found[0].tour_id
         turn.extraction, turn.mode = ex, mode
+        # Personalisation (bonus, consent only): "Picked for you" only when a returning visitor just says hello,
+        # never on top of a specific request (UI review), and only tours Mira can price.
+        if returning_from and ex.intent == Intent.GREETING:
+            picks = [t for t in ctx.resolver.similar_to([returning_from], session.slots.interests, limit=6)
+                     if ctx.resolver.priceable(t)][:3]
+            cards = [c for c in (tour_card(ctx, t, a) for t, a in zip(picks, ("teal", "leaf", "sky"))) if c]
+            if len(cards) >= 2:
+                turn.reply_parts.append("Based on what you looked at, you might also like these.")
+                turn.components.extend(cards)
+                turn.shelf_title = "Picked for you"
         turn.route = plan_route(session, ex, text)
         span.output = {"mode": mode, "extraction": ex, "slots": session.slots, "route": turn.route}
     return _out(session, turn)
@@ -539,8 +563,21 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
     turn.retrieved_ids = [h.passage.passage_id for h in hits]
     tour_id = turn.extraction.tour_id if turn.extraction else None
     overview = bool(tour_id and ASKS_FOR_OVERVIEW.search(query) and not SPECIFIC_QUESTION.search(query))
+    browse = not tour_id and bool(ASKS_TO_BROWSE.search(query)) and not SPECIFIC_QUESTION.search(query)
 
-    if overview:
+    if browse:
+        # "What other tours do you have?": a row of our tours, not a search answer (the search once matched
+        # a destination page and replied "I don't have details on other tours").
+        cards = [c for c in (tour_card(ctx, t, accent) for t, accent in
+                             zip(browse_picks(ctx, session, query), ("teal", "leaf", "sky", "teal"))) if c]
+        turn.reply_parts.append("Here are some of our tours. Tap a tour name to see everything about it, "
+                                "or Get a price when one looks right." if cards else
+                                "You've seen all the tours I can price. Tell me what you'd like and I'll narrow it down.")
+        turn.components.extend(cards)
+        turn.shelf_title = "Our tours"
+        turn.citations = [Citation(passage_id=f"{c.props['tour_id']}#overview", doc_id=c.props["tour_id"],
+                                   title=c.props["title"], section="Overview").model_dump() for c in cards]
+    elif overview:
         # "Tell me about <tour>": the open tour card IS the answer (every line from the cleaned page), so no
         # model-written paragraph that could misquote it. Sources: that tour's own passages.
         card = tour_card(ctx, tour_id, expanded=True)
