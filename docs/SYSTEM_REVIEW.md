@@ -1,10 +1,10 @@
 # System review: Mira against the brief
 
-Reviewed on 25 Nov 2026 (submission day). Every "met" below points to code or a test that proves it; every gap says why it exists and what it would take. Numbers are from the latest runs: `pytest` **246 passed**, `python -m evals.run` **54/54** (offline mode), `python scripts/adversarial.py` **20 attacks, 0 invented amounts**.
+Reviewed on 25 Nov 2026 (submission day), updated after the real-LLM runs. Every "met" below points to code or a test that proves it; every gap says why it exists and what it would take. Latest numbers: `pytest` **272 passed**; `python -m evals.run` with DeepSeek **55/55** (judge 32/32, 0 invented prices, every turn understood by the LLM); offline baseline **55/55**; `python scripts/adversarial.py` with DeepSeek **20 attacks, 0 invented amounts**; judge vs human agreement **10/10**.
 
 ## 1. Verdict in one paragraph
 
-The parts that decide the score are strong and proven: prices only ever come from a deterministic, golden-tested engine; every reply and every UI payload passes a price guard; anything without a valid rate goes to a specialist with a staff flag; content is published-only and injection-resistant; and the evaluation suite measures all of this with code checks rather than opinions. The honest weak spot is that **all eval numbers so far are from offline (rule-based) mode**, because no Gemini key has been added yet. That means the LLM judge, the judge-human agreement and the "real model" behaviour numbers do not exist yet. This is the single most important thing to fix today, and it takes about 15 minutes once the key is in `.env`.
+The parts that decide the score are strong and proven: prices only ever come from a deterministic, golden-tested engine; every reply and every UI payload passes a price guard; anything without a valid rate goes to a specialist with a staff flag; content is published-only and injection-resistant; and the evaluation suite measures all of this with code checks rather than opinions. The suite now runs against a real model (DeepSeek) with a different, stronger judge model, Langfuse traces linked from every case, and a judge calibrated against hand labels. Running with a real model found five real behaviour bugs that the rule-based mode could not show. All were fixed in code, with regression tests (FIXED_PROBLEM.md, second round). The honest limits: the 10 hand labels were all "pass", so judge calibration on failures rests on the eval history; and Gemini's free tier was too small for a full run, so the final numbers use DeepSeek.
 
 ## 2. Core requirements (1, 3, 4, 5, 6)
 
@@ -31,7 +31,7 @@ The parts that decide the score are strong and proven: prices only ever come fro
 | LangGraph with ≥3 nodes and typed shared state | Met | 14 nodes; `MiraSession` / `TurnState` Pydantic models inside the graph state |
 | Pricing, permissions, publishing as deterministic code | Met | Engine, FastAPI role dependencies, `publish_draft` role check |
 | A2UI over AG-UI, payloads validated before the browser | Met | Pydantic catalog on the server (`compose`), zod on the client; invalid → text fallback + trace event |
-| Tracing: one trace per turn with model calls, tools, retrieval, prices; quotes link to trace; no PII | **Partly met** | All implemented and tested (`test_turn_trace_contains_no_pii`). **Langfuse keys not added yet**, so traces are local JSON files that the staff page opens. Langfuse needs only the two keys. |
+| Tracing: one trace per turn with model calls, tools, retrieval, prices; quotes link to trace; no PII | **Met** | Langfuse (US region) connected: every eval case and saved quote links to its Langfuse trace; without keys, local JSON traces that the staff page opens. PII is redacted before anything is sent (`test_turn_trace_contains_no_pii`). |
 | Dataset loaded with code, unchanged; configurable today | Met | SHA-256 test of all 37 files; `TODAY` env |
 | One command starts everything | Met | `python scripts/dev.py` (creates `.venv` on first run) |
 | Unit tests for pricing | Met | `tests/test_pricing.py` (golden + every NoQuote reason + boundaries) |
@@ -42,9 +42,9 @@ The parts that decide the score are strong and proven: prices only ever come fro
 |---|---|---|
 | ≥40 cases incl. 17 seeds, ≥5 multi-turn, every requirement, off-topic, injection | Met | 55 cases, 9 multi-turn, tagged by requirement |
 | Code checks where there is an exact answer | Met | Golden, consistency, invented amounts, flags, UI validity, drafts never used, leaks, PII in traces |
-| LLM judge checked against 10 hand-labelled cases, agreement reported | **Not yet** | Judge and `evals/labels.py` are built; **needs the key and your 10 labels**. By design the labels can only come from you. |
+| LLM judge checked against 10 hand-labelled cases, agreement reported | **Met** | Judge `deepseek-v4-pro` (Mira uses `deepseek-flash`). Agreement with Shinthurie's labels on the same transcripts: **10/10** (`reports/judge_agreement.md`). Limit: all 10 human labels were "pass"; the judge's ability to fail bad answers is shown by M28 and M33 in the eval history, both real bugs later fixed. |
 | One command, report with pass rates per requirement and trace links | Met | `python -m evals.run` → `reports/eval_report.md` + JSON + history |
-| Targets: 100% price accuracy, 0 invented, 100% missing/expired handling | Met (offline) | 18/18 golden, 0 invented, 10/10. **Must be re-run with the LLM** |
+| Targets: 100% price accuracy, 0 invented, 100% missing/expired handling | Met (LLM and offline) | DeepSeek run: golden 18/18, consistency 69/69, 0 invented, 10/10 missing/expired; worst of 3 runs for price and flag cases |
 | A real problem found and fixed with before/after | Met | `docs/FIXED_PROBLEM.md` (tour mentioned in passing was priced) |
 
 ## 6. Bonus
@@ -52,8 +52,8 @@ The parts that decide the score are strong and proven: prices only ever come fro
 | Bonus | Status | Why |
 |---|---|---|
 | MCP server (search_tours, get_quote, create_enquiry) on the same rules | Done | `mira/mcp_server.py`, `tests/test_mcp.py` |
-| Model routing (small vs large model per turn) | Not done | Cut first in the agreed cut order; with one free-tier provider and no key there was nothing real to evaluate. About 2 hours: route plan_custom/answer turns to the Pro model, everything else to Flash, add an eval column per route. |
-| Personalization with consent | Not done | Same cut order. The consent and memory plumbing exists (requirement 2), so it would mostly be a "recommended for you" shelf ranked by stored interests and past quotes. |
+| Model routing (small vs large model per turn) | Done (Gemini) | `RoutedLLM`: simple extraction turns go to a small model, answers and long messages to the main one; calls and latency per model in the report (DECISIONS D25, `tests/test_llm_routing.py`). With DeepSeek it is off: there are two models and the Pro one is the judge (D27). |
+| Personalization with consent | Done | "Picked for you" shelf for returning visitors who said yes to being remembered; ranked by shared places, category and stored interests; no prices; gone after "forget me" (D26, eval M38). |
 
 ## 7. Best practices we did not use, and why
 
@@ -77,9 +77,9 @@ The parts that decide the score are strong and proven: prices only ever come fro
 |---|---|---|
 | Working system (core 25, extended 10) | 35 | Strong. Every requirement works end to end in the browser and is tested. Risk: a live question in LLM mode that the rules never met; mitigated by the guard, which cannot be bypassed. |
 | Agent design and generative UI | 25 | Strong. Clear node responsibilities, typed state, A2UI fixed and dynamic surfaces, validation on both sides. Found and worked around a real CopilotKit SDK bug (`mira/agui.py`). |
-| Evaluation and tracing | 25 | Good, **not yet complete**: the judge, agreement and Langfuse traces need the keys and your labels. The code-check side is unusually thorough (consistency vs golden, worst of 3 runs, history). |
-| Code quality and demo | 15 | Good. Small modules with docstrings, 255 tests, CI green, demo script and video plan written. |
-| Bonus | +10 | MCP done; routing and personalization not done. |
+| Evaluation and tracing | 25 | Strong. Real-LLM run with a different judge model, judge calibrated on hand labels (10/10), Langfuse links per case, before/after history for two rounds of fixes. The code-check side is thorough (consistency vs golden, worst of 3 runs, LLM-vs-fallback turn counts, calls per model). |
+| Code quality and demo | 15 | Good. Small modules with docstrings, 272 tests, CI green, demo script and video plan written. |
+| Bonus | +10 | MCP server, model routing and consented personalisation all done and tested. |
 
 The hard cap ("an invented or wrong price caps the score at 50") is the main risk in any demo. Here it is defended three times: the model never sees prices, the engine is golden-tested, and the guard removes any amount that isn't an engine value from the same conversation (red-teamed with 20 attacks).
 
@@ -93,12 +93,8 @@ The hard cap ("an invented or wrong price caps the score at 50") is the main ris
 - Staff page: summary tiles, tabs, readable quote rows with cost and GP%, coloured flag pills, cards on mobile.
 - Checked in Chromium at 1366px and 375px: no horizontal scroll, no console errors.
 
-## 10. Checklist for today (in order)
+## 10. What is left (Shinthurie)
 
-1. Add `GEMINI_API_KEY` to `.env` (https://aistudio.google.com/apikey). Restart `python scripts/dev.py`.
-2. `python -m evals.run` → real LLM numbers. If anything fails, fix the cause, not the test.
-3. `python -m evals.labels make`, label the 10 cases yourself, `python -m evals.labels agreement`.
-4. Optional but valuable: add the Langfuse keys so the trace walkthrough uses real Langfuse links.
-5. `python scripts/adversarial.py` in LLM mode (must stay at 0 invented amounts).
-6. Record the 5-minute video (`docs/DEMO_VIDEO_PLAN.md`).
-7. Confirm T06; add Senura as a collaborator; submit by 22:00.
+1. Record the 5-minute video (`docs/DEMO_VIDEO_PLAN.md`).
+2. Add Senura as a collaborator on the private repository; submit by 22:00.
+3. H03's overlapping Peak row stays a `conflicting_rate` until Sales confirms (documented).

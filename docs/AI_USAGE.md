@@ -5,7 +5,8 @@ The brief allows AI coding assistants and asks us to mark code we did not write 
 | Tool | Used for |
 |---|---|
 | Claude Code (Anthropic, Claude Opus 5.5) | Planning (docs/PLAN.md), the data audit (docs/DATA_AUDIT.md), and generating code, tests and docs, phase by phase, under my direction and review. |
-| Google Gemini (in the product) | Mira's message understanding and wording (`MIRA_MODEL`), the content agent's drafts, and the eval judge (`JUDGE_MODEL`, a different model). Never used for prices. |
+| DeepSeek (in the product, final runs) | Mira's message understanding and wording (`deepseek-flash`), the content agent's drafts, and the eval judge (`deepseek-v4-pro`, a different and stronger model). Never used for prices. |
+| Google Gemini (in the product, supported) | Same roles when `MIRA_LLM_PROVIDER=google`. Used for a partial eval run until the free-tier quota ran out (DECISIONS D24, D27). |
 
 ## AI-generated parts (by phase)
 
@@ -20,5 +21,5 @@ The brief allows AI coding assistants and asks us to mark code we did not write 
 ## Not AI-generated
 
 - `CLAUDE.md` and `docs/PROMPTS.md` (my instructions and playbook).
-- The human labels in `evals/human_labels_template.jsonl`: filled in by me only, never by an AI.
+- The human labels in `evals/human_labels_template.jsonl`: filled in by me only, never by an AI (`python -m evals.labels review` only shows the cases and saves what I type).
 - The dataset and brief (provided by Alt SourceCode). `frontend/AGENTS.md` and `frontend/next-env.d.ts` are written by Next.js itself.

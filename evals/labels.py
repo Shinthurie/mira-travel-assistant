@@ -59,6 +59,12 @@ def agreement() -> int:
         print(f"Not labelled yet: {', '.join(unlabelled)}. Fill in human_label first.")
         return 1
     report = json.loads(REPORT.read_text(encoding="utf-8"))
+    runs = {r.get("report_generated_at") for r in rows}
+    if runs != {report["generated_at"]}:
+        print(f"The labels were made on the transcripts of run {sorted(runs)}, but the judge verdicts are from run "
+              f"{report['generated_at']}. They are not the same answers, so agreement would be meaningless. "
+              "Regenerate with `python -m evals.labels make --force` and label again.")
+        return 1
     judge = {c["id"]: next((x for x in c["checks"] if x["name"] == "judge_behaviour"), None) for c in report["cases"]}
     compared, agree, disagreements = 0, 0, []
     for r in rows:
@@ -81,6 +87,11 @@ def agreement() -> int:
     lines += [f"- **{cid}**: human {h}, judge {jl}. Human: {hr}. Judge: {jr}" for cid, h, jl, hr, jr in disagreements] or ["None."]
     lines += ["", "## Limits", "",
               "- 10 cases is a small sample: one disagreement moves agreement by 10 points.",
+              f"- Label balance: {sum(r['human_label'] == 'pass' for r in rows)} pass / "
+              f"{sum(r['human_label'] == 'fail' for r in rows)} fail (human)."
+              + (" With no human 'fail' in the sample, this agreement shows the judge accepts good answers; it cannot "
+                 "show on its own that the judge rejects bad ones (see the eval history for cases the judge failed)."
+                 if not any(r["human_label"] == "fail" for r in rows) else ""),
               "- The judge sees text, card names and sources, not the rendered UI.",
               "- Prices, flags, leaks and UI validity are never judged by the LLM; code checks them."]
     AGREEMENT.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -89,6 +100,12 @@ def agreement() -> int:
 
 
 def _save(rows: list[dict]) -> None:
+    """Write the labels, unless the template on disk now comes from a different eval run (it was regenerated
+    while this review was open): saving would put old transcripts back over the new ones."""
+    on_disk = [json.loads(l) for l in TEMPLATE.read_text(encoding="utf-8").splitlines() if l.strip()]
+    if on_disk and on_disk[0].get("report_generated_at") != rows[0].get("report_generated_at"):
+        raise SystemExit("The template was regenerated from another run while this review was open. "
+                         "Nothing saved. Start again: python -m evals.labels review")
     TEMPLATE.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", encoding="utf-8")
 
 

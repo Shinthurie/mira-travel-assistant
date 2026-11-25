@@ -9,21 +9,22 @@ Take-home assignment for Alt SourceCode (Gen AI Full Stack Engineer Intern).
 Needs Python 3.11 and Node 18+ (tested on Windows 11, Node 24).
 
 ```powershell
-copy .env.example .env      # optional: add GEMINI_API_KEY and Langfuse keys
+copy .env.example .env      # optional: add DEEPSEEK_API_KEY (or GEMINI_API_KEY) and Langfuse keys
 python scripts/dev.py
 ```
 
 - Chat: http://localhost:3000 · Staff page: http://localhost:3000/staff (demo users `staff` / `staff-demo`, `approver` / `approver-demo`)
 - First run creates `.venv`, installs the pinned Python packages and the npm packages (a few minutes).
-- **No key needed to run.** Without `GEMINI_API_KEY`, Mira runs in *offline mode* (rule-based understanding, extractive answers from content). Prices, flags, UI and guards are identical in both modes, because none of them use the model.
+- **No key needed to run.** Without an LLM key (`DEEPSEEK_API_KEY` or `GEMINI_API_KEY`, chosen by `MIRA_LLM_PROVIDER`), Mira runs in *offline mode* (rule-based understanding, extractive answers from content). Prices, flags, UI and guards are identical in both modes, because none of them use the model.
 
 Other commands:
 
 | Command | What it does |
 |---|---|
-| `pytest` | 255 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
+| `pytest` | 272 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
 | `python -m evals.run` | Evaluation suite → `reports/eval_report.md` (+ JSON, + `reports/history/`) |
 | `python -m evals.run --tag pricing` | Just the pricing/flag cases (for the live margin change) |
+| `python -m evals.labels review` | Label the 10 judge-calibration cases by hand, then `python -m evals.labels agreement` |
 | `python -m mira.pricing T09 2027-04-12 --adults 2 --children 7 10` | Staff price breakdown from the engine |
 | `python -m mira.chat --all-seeds` | Replays the 17 seed conversations in the terminal |
 | `python -m mira.data` | Loads the dataset and lists every data issue it found |
@@ -65,7 +66,7 @@ flowchart LR
 **The three layers, in one sentence each:** LangGraph decides *what the agent does*; AG-UI is *how the agent and the browser talk* (an event stream); A2UI is *what gets drawn*: declarative JSON that may only use components from our catalog.
 
 One message, end to end:
-1. `intake` reads the message. With a key, Gemini fills a strict JSON schema (intent, tour, adults, child ages, date); otherwise regular expressions do. **Code validates every value** (an invented or draft tour id is dropped; tours are resolved in code).
+1. `intake` reads the message. With a key, the model (DeepSeek or Gemini) fills a strict JSON schema (intent, tour, adults, child ages, date); otherwise regular expressions do. **Code validates every value** (an invented or draft tour id is dropped; tours are resolved in code).
 2. Code picks the route. Quotes go to `pricing`, which calls `mira.pricing.quote()`, a pure `Decimal` function. The model never sees or writes a price.
 3. `compose` validates each UI component against the Pydantic catalog; `guard` checks every money amount in the text **and** the UI against the engine's values; `persist` saves quotes/enquiries/flags and closes the turn's trace.
 4. The `render_mira_ui` ToolNode emits a `TOOL_CALL_RESULT` with A2UI v0.9 operations; CopilotKit's A2UI middleware turns it into an `a2ui-surface`; the browser renders it with our components, which re-validate with zod.
@@ -85,7 +86,18 @@ One message, end to end:
 
 55 cases (17 seeds loaded unchanged + 38 of ours, 9 multi-turn), each tagged with requirements. Code checks wherever there is an exact answer (price **consistency**: shown = engine; **golden**: engine = brief; no invented amounts; flags raised; UI payloads valid; no draft content; no cost/margin leaks; PII absent from traces). An LLM judge using a different model scores behaviour, calibrated against 10 cases labelled by hand (`evals/human_labels_template.jsonl` → `python -m evals.labels agreement`). Price and flag cases run 3× and the worst run counts.
 
-The problem found and fixed through the evals: [docs/FIXED_PROBLEM.md](docs/FIXED_PROBLEM.md) (a tour mentioned in passing was priced instead of the tour asked about).
+**Latest numbers** (DeepSeek: Mira `deepseek-flash`, judge `deepseek-v4-pro`; every turn understood by the model, none by the fallback):
+
+| Target | Result |
+|---|---|
+| Cases passed | **55/55** (offline baseline also 55/55: `reports/eval_report_offline.md`) |
+| Price accuracy (golden) / consistency | 18/18 / 69/69 |
+| Invented prices | **0** (also 0 in 20 adversarial attacks with DeepSeek) |
+| Missing / expired / no-rate handling | 10/10 |
+| LLM judge | 32 pass, 0 fail; agreement with hand labels **10/10** ([reports/judge_agreement.md](reports/judge_agreement.md)) |
+| Time to first quote | median about 2 s, all under 60 s |
+
+Problems found and fixed through the evals, with before/after numbers: [docs/FIXED_PROBLEM.md](docs/FIXED_PROBLEM.md). First round: a tour mentioned in passing was priced. Second round, found only with a real model and the judge: a repeated discovery question, "book" before a quote, a named tour not moving to a price, and over-use of "custom" and "info".
 
 ## Data issues
 
@@ -95,8 +107,8 @@ Screenshots (desktop and 375px mobile): [docs/screenshots/](docs/screenshots/). 
 
 ## Known limitations (honest)
 
-- **Real LLM numbers are pending a key.** The latest committed report is from offline mode. The judge is reported as *skipped* (not passed) without a key, and the judge–human agreement needs your 10 labels plus a judge run.
-- Offline answers are extractive (they quote the relevant passages) rather than conversational; with Gemini they are written in Mira's voice from the same passages.
+- **Gemini's free tier** (20 requests per model per day) was too small for a full run, so the final numbers use DeepSeek (prepaid; the whole suite costs a few cents). Gemini is still supported (`MIRA_LLM_PROVIDER=google`), and model routing is a Gemini setting. The 10 hand labels were all "pass", so the judge's ability to fail bad answers rests on the eval history (M28, M33).
+- Offline answers are extractive (they quote the relevant passages) rather than conversational; with a model they are written in Mira's voice from the same passages.
 - Search is BM25 without synonyms; tour resolution adds a small synonym list, and ambiguous requests fall back to discovery questions.
 - Mira replies arrive as one message (no token streaming), because replies are composed and guarded in code before they are sent.
 - Staff auth is a demo (two seeded users, HMAC tokens); A2UI uses v0.9 because that is what the pinned CopilotKit renderer speaks (the spec's v1.0 is newer).
