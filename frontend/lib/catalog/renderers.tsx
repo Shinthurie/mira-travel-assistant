@@ -240,7 +240,9 @@ function TourCardView({ p }: { p: z.infer<(typeof resolved)["TourCard"]> }) {
     <Card accent={p.accent} testid="tour-card" className={`cc-card accent-${p.accent}${open ? " cc-card-wide" : ""}`}>
       {!open && <RouteArt seed={p.tour_id} stops={p.places.length} />}
       <div className="cc-kicker">{p.category} · {p.duration}</div>
-      <h3 className="cc-title">{p.title}</h3>
+      {open || !d ? <h3 className="cc-title">{p.title}</h3> : (
+        <h3 className="cc-title"><button className="title-link" aria-expanded={false} onClick={() => setOpen(true)}>{p.title}</button></h3>
+      )}
       {!open && (
         <>
           <p className="tour-summary">{p.summary}</p>
@@ -302,7 +304,6 @@ function TourCardView({ p }: { p: z.infer<(typeof resolved)["TourCard"]> }) {
       )}
       <div className="cc-actions">
         {priceButton}
-        {d && <button className="btn" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Less" : "Details"}</button>}
       </div>
     </Card>
   );

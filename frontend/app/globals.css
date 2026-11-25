@@ -431,3 +431,7 @@ h1, h2, h3, p { margin: 0; }
 .pkg-days-wrap[open] summary::after { content: "▾"; }
 .pkg-days-wrap[open] summary { margin-bottom: var(--cc-space-2); }
 .pkg-days-wrap summary:hover { border-color: var(--cc-ink); }
+/* Closed tour card: the name opens the full box in place (no Details/Less buttons). */
+.title-link { all: unset; cursor: pointer; text-decoration: underline; text-decoration-color: var(--cc-line); text-underline-offset: 4px; transition: text-decoration-color var(--cc-fast); }
+.title-link:hover { text-decoration-color: var(--cc-orange); }
+.title-link:focus-visible { outline: 2px solid var(--cc-orange); outline-offset: 2px; border-radius: 4px; }
