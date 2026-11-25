@@ -334,6 +334,20 @@ def asks_about_price(text: str) -> bool:
     return bool(PRICE_WORDS.search(text))
 
 
+def order_citations(ctx: AgentContext, citations: list[dict]) -> list[dict]:
+    """Sources the answer relies on first. An older page whose terms a newer policy replaces goes last and
+    says so, so two different terms never look like two equal answers (S08, noted in the hand labels)."""
+    by_id = {p.passage_id: p for p in ctx.retriever.passages}
+    current, older = [], []
+    for c in citations:
+        passage = by_id.get(c["passage_id"])
+        if passage is not None and passage.superseded_by:
+            older.append({**c, "note": f"Older page: terms replaced by {', '.join(passage.superseded_by)}"})
+        else:
+            current.append(c)
+    return current + older
+
+
 def looks_like_question(text: str) -> bool:
     """A question for the content search ("Do infants travel free?"), as opposed to an answer ("Not sure yet")."""
     return "?" in text or bool(QUESTION_START.search(text))
@@ -486,6 +500,7 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
     elif "no_tour_handoff" not in turn.route:
         turn.reply_parts.append(NO_ANSWER_TEXT)
 
+    turn.citations = order_citations(ctx, turn.citations)
     if turn.citations:
         turn.components.append(UIComponent(component="SourceCitation", props={
             "sources": turn.citations[:8], "accent": "leaf"}))
@@ -745,7 +760,7 @@ def booking(state: dict, config: RunnableConfig | None = None) -> dict:
     turn.components.append(UIComponent(component="BookingForm", props={
         "quote_ref": q.ref, "tour_title": q.tour_title, "price_usd": q.price_usd, "deposit_usd": q.deposit_usd,
         "pay_in_full": Decimal(q.deposit_usd) == Decimal(q.price_usd),
-        "consent_text": "We use your details only for this booking.", "accent": "teal"}))
+        "consent_text": "I agree my details are used only for this booking.", "accent": "teal"}))
     session.stage = "booking"
     return _out(session, turn)
 

@@ -318,7 +318,7 @@ function SourceCitation({ props }: { props: unknown }) {
       <div className="cc-kicker">Where this comes from</div>
       <ul className="sources">
         {p.sources.map((s) => (
-          <li key={s.passage_id}><span className="ref">{s.doc_id}</span><span>{s.title} <span className="cc-muted">· {s.section}</span></span></li>
+          <li key={s.passage_id} className={s.note ? "older" : undefined}><span className="ref">{s.doc_id}</span><span>{s.title} <span className="cc-muted">· {s.section}</span>{s.note && <span className="src-note">{s.note}</span>}</span></li>
         ))}
       </ul>
     </Card>

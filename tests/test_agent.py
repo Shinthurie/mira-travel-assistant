@@ -398,3 +398,15 @@ def test_vague_trip_wish_flagged_as_price_is_not_told_we_have_no_such_tour():
     for t in turns[1:]:
         assert "catalogue" not in t["final_text"] and "don't have that in our tour information" not in t["final_text"]
     assert turns[2]["question_slot"] or "TourCard" in components(turns[2])
+
+
+def test_older_page_source_is_listed_last_and_labelled():
+    """S08 hand label ('two answers'): an older page whose terms a policy replaces must not look equal to it."""
+    from mira.agent.nodes import order_citations
+    ctx, _ = fresh_agent()
+    old = next(p for p in ctx.retriever.passages if p.superseded_by)
+    other = next(p for p in ctx.retriever.passages if not p.superseded_by)
+    cites = [{"passage_id": p.passage_id, "doc_id": p.doc_id, "title": p.title, "section": p.section} for p in (old, other)]
+    ordered = order_citations(ctx, cites)
+    assert ordered[0]["passage_id"] == other.passage_id
+    assert ordered[1]["note"].startswith("Older page: terms replaced by")

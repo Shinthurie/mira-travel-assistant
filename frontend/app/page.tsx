@@ -61,13 +61,13 @@ function Consent({ onChange }: { onChange: (visitorId: string | null) => void })
     <div className="consent" data-testid="consent">
       {consent ? (
         <>
-          <p>{returning ? `Welcome back. Say hello and I'll pick up your ${returning} quote.` : "I'll remember your trip details next time."}</p>
+          <p>{returning ? `Welcome back. Say hello and I'll pick up your ${returning} quote.` : <><span className="long">I'll remember your trip details next time.</span><span className="short">Remembering your trip.</span></>}</p>
           <button className="link" onClick={forget}>Forget me</button>
         </>
       ) : (
         <>
-          <p>Want me to remember your trip details next time? Nothing is stored unless you say yes.</p>
-          <button className="btn btn-small" onClick={allow}>Yes, remember me</button>
+          <p><span className="long">Want me to remember your trip details next time? Nothing is stored unless you say yes.</span><span className="short">Remember my trip next time?</span></p>
+          <button className="btn btn-small" onClick={allow}><span className="long">Yes, remember me</span><span className="short">Yes</span></button>
         </>
       )}
     </div>
@@ -99,6 +99,14 @@ function Welcome({ input }: { input: ReactElement }) {
 function Chat({ onVisitor }: { onVisitor: (setter: (id: string | null) => void) => void }) {
   const { agent } = useAgent({ agentId: "mira" });
   const { copilotkit } = useCopilotKit();
+  // CopilotKit sizes the input to fit its placeholder, so phones get a short one (a one-line composer).
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 560px)");
+    const update = () => setNarrow(mq.matches);
+    update(); mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
   // The graph's render_mira_ui tool only carries A2UI operations (drawn as surfaces by the A2UI
   // renderer), so its tool-call bubble itself renders nothing.
   useRenderTool({ name: "render_mira_ui", parameters: z.object({}).passthrough(), render: () => <></> });
@@ -124,10 +132,11 @@ function Chat({ onVisitor }: { onVisitor: (setter: (id: string | null) => void) 
   return (
     <div className="chat">
       <CopilotChat
+        key={narrow ? "narrow" : "wide"}  // re-measure the input when the placeholder changes
         agentId="mira"
         welcomeScreen={Welcome as never}
         labels={{
-          chatInputPlaceholder: "Ask about a tour, or tell me your dates and who's travelling",
+          chatInputPlaceholder: narrow ? "Message Mira…" : "Ask about a tour, or tell me your dates and who's travelling",
           chatDisclaimerText: "Prices come from our rate sheet. Answers come from our tour pages.",
         }}
       />

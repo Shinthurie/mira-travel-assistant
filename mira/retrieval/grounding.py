@@ -52,6 +52,7 @@ class Citation(BaseModel):
     doc_id: str
     title: str
     section: str
+    note: str = ""
 
 
 class GroundedAnswer(BaseModel):

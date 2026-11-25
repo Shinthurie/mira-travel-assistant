@@ -54,7 +54,7 @@ export const resolved = {
   }).strict(),
   SourceCitation: z.object({
     accent: Accent,
-    sources: z.array(z.object({ passage_id: z.string(), doc_id: z.string(), title: z.string(), section: z.string() }).strict())
+    sources: z.array(z.object({ passage_id: z.string(), doc_id: z.string(), title: z.string(), section: z.string(), note: z.string().optional() }).strict())
       .min(1).max(8),
   }).strict(),
 };

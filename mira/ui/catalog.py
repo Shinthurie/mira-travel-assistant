@@ -112,6 +112,7 @@ class Source(BaseModel):
     doc_id: str
     title: str
     section: str
+    note: str = ""  # e.g. "Older page: terms replaced by P02"
 
 
 class SourceCitationProps(_Props):

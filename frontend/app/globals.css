@@ -293,3 +293,31 @@ h1, h2, h3, p { margin: 0; }
 }
 /* The composer shows focus with its own border; no second outline inside it. */
 .shell .copilotKitInput textarea:focus-visible { outline: none; }
+
+/* ---------- Polish round (25 Nov, from the browser check) ------------------------------- */
+/* C. Cards in one reply sit together: CopilotKit pads each activity block 24px top and bottom. */
+.shell div:has(> div > .a2ui-surface) { padding-top: var(--cc-space-1); padding-bottom: var(--cc-space-1); gap: var(--cc-space-2); }
+.shell .a2ui-surface .cc-card { margin: var(--cc-space-1) 0; }
+/* A. One-line composer that grows while typing (CopilotKit's default minimum is 96px). */
+.shell [data-testid="copilot-chat-textarea"] { min-height: 24px !important; max-height: 160px; }
+/* D. No copy buttons under messages: they read as a developer tool in a booking chat. */
+.shell [data-testid="copilot-assistant-toolbar"], .shell [data-testid="copilot-user-toolbar"] { display: none; }
+/* F. Sources: an older page that a newer policy replaces is labelled and quieter. */
+.sources li.older { opacity: 0.75; }
+.src-note { display: block; font-size: var(--cc-text-xs); color: var(--cc-muted); margin-top: 2px; }
+/* B. Consent: full sentence on desktop, one short line beside the brand on phones. */
+.consent .short { display: none; }
+@media (max-width: 960px) {
+  .side { flex-wrap: nowrap; }
+  .side .consent { flex: 1 1 auto; justify-content: end; grid-template-columns: auto auto; }
+  .side .consent p { text-align: right; }
+  .consent .long { display: none; }
+  .consent .short { display: inline; }
+}
+/* A (cont.). Send button beside the text, not on a second row of its own. */
+.shell [data-testid="copilot-chat-input"] > div { row-gap: 0; align-items: end; }
+.shell [data-testid="copilot-chat-input"] > div > :first-child { display: none; }
+.shell [data-testid="copilot-chat-input"] > div > :nth-child(3) { grid-row: 1; padding-bottom: 6px; }
+.brand span { white-space: nowrap; }
+.shell [data-testid="copilot-chat-input"] > div > :nth-child(2) { grid-column: 1 / 3; grid-row: 1; }
+.shell [data-testid="copilot-chat-input"] > div > :nth-child(3) { grid-column: 3; }

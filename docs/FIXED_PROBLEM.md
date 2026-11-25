@@ -70,3 +70,17 @@ Also found while doing this: when the grounded-answer model call failed, Mira ad
 The run before `20261125-174210` crashed partway (a config file was edited while it ran, so no report was written). Before crashing it printed failures for M16 and M17. M17 is the booking bug above. M16 (discount refusal) did not fail again in 3 targeted runs or in either later full suite, so its cause stays unconfirmed; it is noted here rather than hidden.
 
 The judge was then checked against Shinthurie's own labels on the final run's transcripts: **10/10 agreement** (`reports/judge_agreement.md`). All 10 human labels were "pass", so that sample shows the judge accepts good answers. The table above shows it also rejects bad ones (M28, M33), each confirmed as a real bug and fixed.
+
+---
+
+# Third round (25 Nov): a price card that disappeared about once in a hundred quotes
+
+**Symptom.** Twice, in different full runs, a quote turn showed the right price in the text but **no price card** (first M16, later M32). Re-runs passed, so it looked random.
+
+**Evidence.** M32's Langfuse trace (`guard` span): `ui_violations: [PriceBreakdown: MoneyMention(text='CAD79', currency='CAD')]`. The guard had removed the card because it "found" 79 Canadian dollars in it.
+
+**Root cause.** Quote references are random hex (`Q-6CAD79F1`). "CAD" is a currency code made only of hex letters, and the money pattern had no word boundary, so `…6CAD79…` read as CAD 79. The guard failed safe: no wrong price was ever shown, but the traveller lost the card.
+
+**Fix.** Letter currency codes must start a word and must not follow a `X-` reference prefix; currency symbols still match anywhere, so "costs$40" is still caught (`mira/agent/guard.py`). Tests try every hex neighbour of "CAD" in both reference shapes and confirm real amounts are still found. The adversarial set still reports 0 invented amounts.
+
+**Why only the trace could find this:** every code check said the price was right, and it was. Only the guard span showed *why* the card was missing.
