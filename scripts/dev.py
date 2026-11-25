@@ -88,7 +88,9 @@ def start_frontend() -> subprocess.Popen:
         subprocess.run([npm, "ci", "--no-audit", "--no-fund"], cwd=FRONTEND, check=True)
     port = os.environ.get("FRONTEND_PORT", "3000")
     print(f"Frontend: http://localhost:{port}   Staff page: http://localhost:{port}/staff")
-    return subprocess.Popen([npm, "run", "dev", "--", "--port", port], cwd=FRONTEND)
+    # No usage telemetry to CopilotKit or Next.js: nothing leaves the machine except the LLM and Langfuse calls.
+    env = dict(os.environ, COPILOTKIT_TELEMETRY_DISABLED="true", NEXT_TELEMETRY_DISABLED="1")
+    return subprocess.Popen([npm, "run", "dev", "--", "--port", port], cwd=FRONTEND, env=env)
 
 
 def main() -> int:

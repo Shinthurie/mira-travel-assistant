@@ -367,3 +367,34 @@ def test_naming_a_tour_moves_towards_a_price():
     turn = chat(graph, ["I'd like the Cultural Triangle Sri Lanka Package."])[0]
     shown = components(turn)
     assert "TravellerPicker" in shown and shown.count("TourCard") == 1
+
+
+def test_short_answer_labelled_greeting_does_not_repeat_the_intro():
+    """Browser check with DeepSeek: 'Not sure yet' was labelled a greeting and Mira introduced herself again."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING),
+                   LLMExtraction(intent=Intent.QUOTE, duration_days=3),
+                   LLMExtraction(intent=Intent.GREETING)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing", "Not sure yet"])
+    assert "I'm Mira" in turns[0]["final_text"]
+    assert "I'm Mira" not in turns[2]["final_text"] and turns[2]["final_text"].strip()
+
+
+def test_a_second_hello_gets_a_short_reply_not_the_intro():
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING), LLMExtraction(intent=Intent.GREETING)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "Hi"])
+    assert "I'm Mira" not in turns[1]["final_text"] and "Hello again" in turns[1]["final_text"]
+
+
+def test_vague_trip_wish_flagged_as_price_is_not_told_we_have_no_such_tour():
+    """Browser check with DeepSeek: 'a few days somewhere relaxing' came back as info + wants_price, and Mira
+    answered 'We don't have that as a tour in our catalogue'. Price-only routes now need price words."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING),
+                   LLMExtraction(intent=Intent.INFO, wants_info=True, wants_price=True, duration_days=3),
+                   LLMExtraction(intent=Intent.INFO, wants_info=True, wants_price=True)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing", "Not sure yet"])
+    for t in turns[1:]:
+        assert "catalogue" not in t["final_text"] and "don't have that in our tour information" not in t["final_text"]
+    assert turns[2]["question_slot"] or "TourCard" in components(turns[2])

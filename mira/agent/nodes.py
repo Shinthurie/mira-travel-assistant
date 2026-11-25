@@ -227,6 +227,12 @@ def validate_extraction(ctx: AgentContext, ex: Extraction, text: str) -> Extract
             data["intent"] = rules.intent
         if data.get("trip_type") == "custom":
             data["trip_type"] = rules.trip_type
+    # The model sometimes labels a short answer ("Not sure yet") as a greeting, and Mira introduced herself
+    # again mid-conversation (found in the browser check). A greeting must look like one to the rules too.
+    if data.get("intent") == Intent.GREETING:
+        rules = rule_extract(text, ctx.today)
+        if rules.intent != Intent.GREETING:
+            data["intent"] = rules.intent
     return Extraction.model_validate(data)
 
 
@@ -292,7 +298,7 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
     route: list[str] = []
     # "Not sure yet" in the middle of discovery is an answer, not a question for the content search
     # (eval M28, LLM run): keep helping with the trip instead of saying "not in our information".
-    if session.asked and not ex.wants_price and not looks_like_question(text) and not _ready_to_price(session):
+    if session.asked and not asks_about_price(text) and not looks_like_question(text) and not _ready_to_price(session):
         return ["discovery"]
     # "I'd like the Highlights of Sri Lanka tour." names a choice, not a question (eval M33, DeepSeek run):
     # describe it, then move towards a price.
@@ -307,13 +313,25 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
             route.append("pricing" if _ready_to_price(session) else "discovery")
         elif intent == Intent.QUOTE and "answer" not in route:
             route.append("discovery")
-        elif "answer" in route:
+        elif "answer" in route and asks_about_price(text):  # "How much is the Adam's Peak climb?" (S16)
             route.append("no_tour_handoff")
+        elif "answer" in route:
+            route.append("discovery")  # the model flagged a price wish, but the words don't ask for one
     return route or ["answer"]
 
 
 QUESTION_START = re.compile(r"^\s*(what|how|when|where|which|who|why|do|does|did|is|are|can|could|should|will|"
                             r"would|tell me|explain|any)\b", re.I)
+
+
+PRICE_WORDS = re.compile(r"\b(price[sd]?|pricing|cost[s]?|how much|quote|rates?|budget|book(ing)?|pay|usd|dollars?|"
+                         r"per person|discount|cheaper|expensive)\b|\$", re.I)
+
+
+def asks_about_price(text: str) -> bool:
+    """The words ask about price or booking. The model's wants_price flag alone is not enough: it sets it for
+    vague trip wishes ("a few days somewhere relaxing"), which then got the "not in our catalogue" handoff."""
+    return bool(PRICE_WORDS.search(text))
 
 
 def looks_like_question(text: str) -> bool:
@@ -420,7 +438,11 @@ def respond(state: dict, config: RunnableConfig | None = None) -> dict:
                 last = session.quotes[-1]
                 turn.reply_parts.append(f"Your confirmed total for {last.tour_title} is {replies.usd(last.price_usd)}.")
         elif ex.intent == Intent.GREETING:
-            if not session.greeted_returning:
+            if session.greeted_returning:
+                pass
+            elif "trip_type" in session.asked:  # never introduce herself twice in one conversation
+                turn.reply_parts.append(replies.GREETING_AGAIN)
+            else:
                 turn.reply_parts.append(replies.INTRO)
                 session.questions_asked += 1
                 session.asked.append("trip_type")

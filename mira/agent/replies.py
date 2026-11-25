@@ -15,6 +15,9 @@ INTRO = ("Hello, I'm Mira from Ceylon Compass Holidays. I can suggest tours, ans
          "pages, and give you a confirmed price. What kind of trip are you thinking of: a day tour, a few days, "
          "or a longer custom trip?")
 
+GREETING_AGAIN = ("Hello again. Tell me where you'd like to go, your dates or who's travelling, "
+                  "and I'll find the right tour and a confirmed price.")
+
 OFF_TOPIC = ("I can only help with travel in Sri Lanka with Ceylon Compass Holidays, so I'll leave that one. "
              "Shall we look at a trip? Tell me where you'd like to go or what you'd like to see.")
 
