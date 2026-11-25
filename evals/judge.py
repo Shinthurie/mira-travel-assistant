@@ -36,15 +36,19 @@ def transcript_text(transcript: list[dict]) -> str:
         lines.append(f"Mira: {t['text']}")
         if t.get("components"):
             lines.append(f"[UI cards shown: {', '.join(t['components'])}]")
+        for text in t.get("card_text") or []:
+            lines.append(f"[Open tour card, shown to the traveller: {text}]")
         if t.get("citations"):
             lines.append(f"[Sources cited: {', '.join(c['doc_id'] + ' ' + c['title'] for c in t['citations'])}]")
     return "\n".join(lines)
 
 
 class Judge:
-    def __init__(self, llm: LLM | None = None, use_cache: bool = True):
-        self.llm = llm if llm is not None else get_llm("judge")
+    def __init__(self, llm: LLM | None | str = "default", use_cache: bool = True):
+        """``llm="default"`` uses JUDGE_MODEL; ``llm=None`` turns the judge off (``--no-judge``)."""
+        self.llm = get_llm("judge") if llm == "default" else llm
         self.use_cache = use_cache
+        self.last_error: str | None = None
 
     @property
     def available(self) -> bool:
@@ -55,6 +59,7 @@ class Judge:
         return getattr(self.llm, "model", None)
 
     def judge(self, behaviour: str, transcript: list[dict]) -> Verdict | None:
+        self.last_error = None
         if self.llm is None:
             return None
         user = f"Expected behaviour:\n{behaviour}\n\nConversation:\n{transcript_text(transcript)}"
@@ -65,7 +70,9 @@ class Judge:
         try:
             verdict = self.llm.structured(JUDGE_SYSTEM, user, Verdict, purpose="judge")
         except LLMError as exc:
-            return Verdict(verdict="fail", reason=f"judge error: {exc}")
+            # The judge being down (quota, overload) says nothing about Mira: the check is SKIPPED, not failed.
+            self.last_error = f"judge unavailable: {str(exc)[:160]}"
+            return None
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         cache.write_text(verdict.model_dump_json(), encoding="utf-8")
         return verdict

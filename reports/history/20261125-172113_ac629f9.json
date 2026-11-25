@@ -1,0 +1,388 @@
+{
+  "generated_at": "2026-11-25T11:51:13+00:00",
+  "git_sha": "ac629f9",
+  "mode": "llm",
+  "mira_model": "deepseek-flash",
+  "routing_small_model": null,
+  "judge_model": "deepseek-v4-pro",
+  "today": "2026-11-19",
+  "settings_overridden": [],
+  "margins": {
+    "day_tour": "0.3",
+    "multi_day": "0.25"
+  },
+  "filters": {
+    "tags": null,
+    "max_cases": null,
+    "repeats": 1
+  },
+  "totals": {
+    "cases": 3,
+    "passed": 2,
+    "multi_turn": 1,
+    "seed_cases": 2
+  },
+  "per_requirement": {
+    "1": {
+      "passed": 0,
+      "total": 1
+    },
+    "3": {
+      "passed": 1,
+      "total": 2
+    },
+    "4": {
+      "passed": 1,
+      "total": 1
+    },
+    "5": {
+      "passed": 1,
+      "total": 1
+    }
+  },
+  "targets": {
+    "price_accuracy_golden": {
+      "passed": 1,
+      "total": 1
+    },
+    "price_consistency": {
+      "passed": 1,
+      "total": 1
+    },
+    "invented_prices": 0,
+    "missing_expired_rate_handling": {
+      "passed": 0,
+      "total": 0
+    }
+  },
+  "latency_ms": {
+    "turns": 5,
+    "p50": 1526,
+    "p95": 1746,
+    "max": 2108
+  },
+  "time_to_first_quote_ms": {
+    "median": 1746,
+    "max": 1746,
+    "under_60s": 1,
+    "total": 1
+  },
+  "model_calls": [
+    {
+      "model": "deepseek-flash",
+      "purpose": "extract",
+      "calls": 5,
+      "median_ms": 1086,
+      "max_ms": 1556
+    },
+    {
+      "model": "deepseek-flash",
+      "purpose": "grounded_answer",
+      "calls": 1,
+      "median_ms": 989,
+      "max_ms": 989
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "purpose": "judge",
+      "calls": 2,
+      "median_ms": 7374.0,
+      "max_ms": 7425
+    }
+  ],
+  "turn_modes": {
+    "llm": 5,
+    "rules": 0
+  },
+  "judge": {
+    "model": "deepseek-v4-pro",
+    "available": true,
+    "passed": 1,
+    "failed": 1,
+    "skipped": 0
+  },
+  "cases": [
+    {
+      "id": "S02",
+      "category": "pricing",
+      "requirements": [
+        5,
+        3
+      ],
+      "tags": [
+        "pricing",
+        "golden"
+      ],
+      "source": "seed",
+      "turns": 1,
+      "runs": 1,
+      "passed": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "ui_payloads_valid",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_internal_leak",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_unapproved_content",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_invented_amounts",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "price_consistency_1",
+          "passed": true,
+          "detail": "shown 315/315 engine 315",
+          "kind": "code"
+        },
+        {
+          "name": "golden_price",
+          "passed": true,
+          "detail": "got [('T01', 315, 315)] want [('T01', 315, 315)]",
+          "kind": "code"
+        }
+      ],
+      "trace_urls": [
+        "local://traces/98592ec86add46018f78a830bf135453.json"
+      ],
+      "latencies_ms": [
+        1746
+      ],
+      "modes": [
+        "llm"
+      ],
+      "first_quote_ms": [
+        1746
+      ],
+      "transcript": [
+        {
+          "user": "How much is the Sigiriya and Minneriya day tour from Kandy for 2 adults on 10 January 2027?",
+          "text": "Here's your confirmed price for Sigiriya and Minneriya Day Tour from Kandy, starting 10 January 2027, for 2 adults: USD 315 in total. This is paid in full when you book (USD 315).",
+          "components": [
+            "PriceBreakdown"
+          ],
+          "citations": [],
+          "pricing": {
+            "kind": "quote",
+            "tour_id": "T01",
+            "price_usd": "315",
+            "deposit_usd": "315",
+            "request": {
+              "tour_id": "T01",
+              "start_date": "2027-01-10",
+              "adults": 2,
+              "child_ages": []
+            },
+            "quote_ref": "Q-FDB9AFFA"
+          }
+        }
+      ]
+    },
+    {
+      "id": "S07",
+      "category": "grounding",
+      "requirements": [
+        4
+      ],
+      "tags": [
+        "grounding"
+      ],
+      "source": "seed",
+      "turns": 1,
+      "runs": 1,
+      "passed": true,
+      "error": null,
+      "checks": [
+        {
+          "name": "ui_payloads_valid",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_internal_leak",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_unapproved_content",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_invented_amounts",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "judge_behaviour",
+          "passed": true,
+          "detail": "Mira correctly states that children aged 2 to 11 do not stay free; they pay extra charges. Infants under 2 travel free, which is not a promise of free stays for children under 12. The response aligns with the expected behaviour of not promising free stays for children.",
+          "kind": "judge"
+        }
+      ],
+      "trace_urls": [
+        "local://traces/c7f4151d7ab04d1aa681d2720e62cd41.json"
+      ],
+      "latencies_ms": [
+        2108
+      ],
+      "modes": [
+        "llm"
+      ],
+      "first_quote_ms": [],
+      "transcript": [
+        {
+          "user": "Do kids under 12 stay free on the Kandy Heritage Stay?",
+          "text": "Children aged 2 to 11 do not stay free. They pay child entrance fees, half-price meals and an extra bed in their parents' room on stays. Infants under 2 travel free and share their parents' seat and bed. This policy replaces any older family offers shown on individual tour pages.",
+          "components": [
+            "TourCard",
+            "ItineraryDay",
+            "ItineraryDay",
+            "ItineraryDay",
+            "SourceCitation"
+          ],
+          "citations": [
+            {
+              "passage_id": "P03#children-and-infants",
+              "doc_id": "P03",
+              "title": "Children and infants",
+              "section": "Children and infants"
+            },
+            {
+              "passage_id": "T07#kandy-heritage-stay",
+              "doc_id": "T07",
+              "title": "Kandy Heritage Stay",
+              "section": "Kandy Heritage Stay"
+            }
+          ],
+          "pricing": null
+        }
+      ]
+    },
+    {
+      "id": "M28",
+      "category": "discovery",
+      "requirements": [
+        1,
+        3
+      ],
+      "tags": [
+        "discovery",
+        "multi_turn"
+      ],
+      "source": "mira_cases.jsonl",
+      "turns": 3,
+      "runs": 1,
+      "passed": false,
+      "error": null,
+      "checks": [
+        {
+          "name": "ui_payloads_valid",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_internal_leak",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_unapproved_content",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "no_invented_amounts",
+          "passed": true,
+          "detail": "",
+          "kind": "code"
+        },
+        {
+          "name": "useful_within_3_questions",
+          "passed": true,
+          "detail": "asked ['tour', 'travellers']",
+          "kind": "code"
+        },
+        {
+          "name": "no_repeated_question",
+          "passed": true,
+          "detail": "asked ['tour', 'travellers']",
+          "kind": "code"
+        },
+        {
+          "name": "judge_behaviour",
+          "passed": false,
+          "detail": "Mira repeats the trip type question after the traveller already answered 'a few days', and in the same turn asks a second question about a place in mind, violating the rule of at most one question per turn and never repeating a question.",
+          "kind": "judge"
+        }
+      ],
+      "trace_urls": [
+        "local://traces/19fec52713e1439288b8a3e11352b691.json",
+        "local://traces/e9830bd16c2545b4b682da4aa2380e50.json",
+        "local://traces/27022f4b82344a8a9fb7d7b7ca430273.json"
+      ],
+      "latencies_ms": [
+        1205,
+        1173,
+        1526
+      ],
+      "modes": [
+        "llm",
+        "llm",
+        "llm"
+      ],
+      "first_quote_ms": [],
+      "transcript": [
+        {
+          "user": "Hi there",
+          "text": "Hello, I'm Mira from Ceylon Compass Holidays. I can suggest tours, answer questions from our tour pages, and give you a confirmed price. What kind of trip are you thinking of: a day tour, a few days, or a longer custom trip?",
+          "components": [],
+          "citations": [],
+          "pricing": null
+        },
+        {
+          "user": "We'd like a few days somewhere relaxing",
+          "text": "Which trip would you like: a day tour, a few days away, or a longer round trip? If you have a place in mind, tell me and I'll find the closest tours.",
+          "components": [
+            "TourShelf",
+            "TourCard",
+            "TourCard",
+            "TourCard"
+          ],
+          "citations": [],
+          "pricing": null
+        },
+        {
+          "user": "Not sure yet",
+          "text": "Who's travelling? Tell me how many adults, and the ages of any children.",
+          "components": [
+            "TravellerPicker"
+          ],
+          "citations": [],
+          "pricing": null
+        }
+      ]
+    }
+  ]
+}

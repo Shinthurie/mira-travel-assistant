@@ -149,6 +149,12 @@ class TurnTrace:
         }
 
 
+def langfuse_host() -> str:
+    """LANGFUSE_BASE_URL (the name Langfuse shows now, e.g. the US region) wins over the older LANGFUSE_HOST."""
+    return (os.environ.get("LANGFUSE_BASE_URL", "").strip() or os.environ.get("LANGFUSE_HOST", "").strip()
+            or "https://cloud.langfuse.com")
+
+
 class Tracer:
     """Creates TurnTraces. One per process (:func:`get_tracer`)."""
 
@@ -161,7 +167,7 @@ class Tracer:
             try:
                 from langfuse import Langfuse
                 self.langfuse = Langfuse(public_key=public, secret_key=secret,
-                                         host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
+                                         host=langfuse_host(),
                                          mask=langfuse_mask)
             except Exception as exc:  # pragma: no cover
                 log.warning("Langfuse disabled: %s", exc)

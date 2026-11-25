@@ -151,7 +151,7 @@ def rule_extract(text: str, today: date) -> Extraction:
         intent = Intent.PLAN_CUSTOM
     elif wants_price or adding_child:
         intent = Intent.QUOTE
-    elif re.fullmatch(r"(hi|hello|hey|good (morning|afternoon|evening))[!,. ]*(there|mira|everyone)?[!. ]*", t) or \
+    elif re.fullmatch(r"(hi|hello|hey|good (morning|afternoon|evening))[!,. ]*(there|mira|everyone|again)?[!. ]*", t) or \
             re.search(r"\bwhat can you do\b", t):
         intent = Intent.GREETING
     elif wants_info or t.endswith("?"):

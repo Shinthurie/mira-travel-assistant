@@ -8,6 +8,8 @@ from decimal import Decimal
 import pytest
 
 from mira.agent.guard import find_money
+from mira.agent.nodes import LLMExtraction
+from mira.agent.state import Intent
 from mira.llm import FakeLLM
 from mira.ui.a2ui import validate_operations
 from tests.agent_helpers import chat, components, data_models, fresh_agent
@@ -169,7 +171,7 @@ def test_llm_invented_amount_is_blocked_and_flagged():
     llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True),
                    "The Galle Fort walk is lovely and costs USD 99 per person.\nSOURCES: T04#galle-fort-walking-tour"])
     ctx, graph = fresh_agent(llm=llm)
-    turn = chat(graph, ["Tell me about the Galle Fort walking tour"])[0]
+    turn = chat(graph, ["What will we see on the Galle Fort walking tour?"])[0]
     assert "99" not in turn["final_text"]
     assert not turn["guard"]["passed"]
     assert any(f.reason == "unverified_amount_blocked" and f.severity == "blocking" for f in ctx.store.list_flags())
@@ -261,3 +263,273 @@ def test_discovery_never_repeats_a_question(agent):
     assert len(asked) == len(set(asked))
     assert any("TourCard" in components(t) for t in turns)
     assert turns[0]["extraction"]["intent"] == "greeting"
+
+
+def test_returning_visitor_gets_personalised_picks(agent):
+    """Bonus: with consent, a returning visitor sees 'Picked for you' tours like the one they quoted."""
+    ctx, graph = agent
+    ctx.store.give_consent("visitor-picks-1")
+    chat(graph, ["Whale watching in Mirissa on 15 March 2027 for 2 adults. Price?"], visitor_id="visitor-picks-1")
+    turn = chat(graph, ["Hello"], visitor_id="visitor-picks-1")[0]
+    shelves = [c for c in turn["components"] if c["component"] == "TourShelf"]
+    assert shelves and shelves[0]["props"]["title"] == "Picked for you"
+    ids = [t["tour_id"] for t in shelves[0]["props"]["tours"]]
+    assert "T05" not in ids and all(ctx.resolver.is_published_tour(t) for t in ids)
+
+
+def test_no_personalised_picks_without_consent(agent):
+    _, graph = agent
+    chat(graph, ["Whale watching in Mirissa on 15 March 2027 for 2 adults. Price?"], visitor_id="visitor-picks-2")
+    turn = chat(graph, ["Hello"], visitor_id="visitor-picks-2")[0]
+    assert not any(c["component"] == "TourShelf" and c["props"]["title"] == "Picked for you"
+                   for c in turn["components"])
+
+
+# --- Regressions found by the free-tier LLM eval run (25 Nov) ---------------------------
+
+
+def test_llm_calling_an_open_trip_custom_is_overruled_by_code():
+    """M28 (LLM): Gemini labelled 'a few days somewhere relaxing' as a custom plan -> specialist handoff."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING),
+                   LLMExtraction(intent=Intent.PLAN_CUSTOM, trip_type="custom", duration_days=3)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing"])
+    assert "planned and priced by our specialists" not in turns[1]["final_text"]
+    assert not any(c == "EnquiryConfirmation" for c in components(turns[1]))
+
+
+def test_explicit_custom_request_still_reaches_the_planner():
+    llm = FakeLLM([LLMExtraction(intent=Intent.PLAN_CUSTOM, trip_type="custom", duration_days=12)])
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["Can you plan a custom 12-day trip with tea country and beaches?"])[0]
+    assert "specialists" in turn["final_text"]
+
+
+def test_not_sure_during_discovery_is_not_sent_to_content_search():
+    """M28 (LLM): 'Not sure yet' was read as a question -> 'I don't have that in our tour information'."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING), LLMExtraction(intent=Intent.INFO, wants_info=True)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "Not sure yet"])
+    assert "don't have that in our tour information" not in turns[1]["final_text"]
+    assert any(c == "TourCard" for c in components(turns[1])) or turns[1]["question_slot"]
+
+
+def test_unknown_tour_price_question_is_answered_once():
+    """S16 (LLM): 'not in our information' and 'not in our catalogue' were both said."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True, wants_price=True), "Not found.\nSOURCES:"])
+    _, graph = fresh_agent(llm=llm)
+    text = chat(graph, ["Do you do an Adam's Peak sunrise climb? How much is it?"])[0]["final_text"]
+    assert "catalogue" in text and "don't have that in our tour information" not in text
+
+
+def test_trip_type_question_is_not_asked_twice_in_other_words():
+    """M28 (DeepSeek run, caught by the judge): after the greeting asked the trip type, discovery asked it again."""
+    _, graph = fresh_agent()
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing"])
+    assert "What kind of trip" in turns[0]["final_text"]
+    assert "a day tour, a few days away, or a longer round trip" not in turns[1]["final_text"]
+
+
+def test_t06_quote_says_there_is_no_overnight_stay():
+    """T06 decision (final): price the 1-day tour from the rates, tell the traveller, flag for staff."""
+    ctx, graph = fresh_agent()
+    turn = chat(graph, ["Train and day tour from Kandy to Nuwara Eliya for 2 adults on 5 February 2027, how much?"])[0]
+    assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["tour_id"] == "T06"
+    assert "no overnight stay" in turn["final_text"]
+    assert any(f.reason == "data_note" and f.tour_id == "T06" for f in ctx.store.list_flags())
+
+
+def test_book_request_with_all_details_prices_then_shows_the_form():
+    """M17 (DeepSeek run): 'Can you book 2 adults on 5 Feb at USD 40?' asked again for details it had."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.BOOK, wants_price=True, tour_id="T03", adults=2,
+                                 start_date="2027-02-05", price_variant="per_person")])
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["Your website says the Colombo City Tour is from USD 40 per person. "
+                        "Can you book 2 adults on 5 February 2027 at that price?"])[0]
+    assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["price_usd"] == "160"
+    assert "PriceBreakdown" in components(turn) and "BookingForm" in components(turn)
+    assert "not quotes" in turn["final_text"] and "40" not in turn["final_text"]
+    assert "Which tour, dates and travellers" not in turn["final_text"]
+
+
+def test_book_request_without_a_price_does_not_loop():
+    """A book request for a tour with no valid rate ends in a handoff, not a pricing/booking loop."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.BOOK, tour_id="T11", adults=2, start_date="2027-02-05")])
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["Book Mirissa Beach Stay for 2 adults on 5 February 2027"])[0]
+    assert turn["pricing"]["kind"] == "no_quote" and "BookingForm" not in components(turn)
+
+
+def test_naming_a_tour_moves_towards_a_price():
+    """M33 (DeepSeek run): 'I'd like the Highlights tour.' was read as a question; nobody asked who's travelling."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True, tour_id="T09"), "unused"] + ["x"] * 3)
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["I'd like the Cultural Triangle Sri Lanka Package."])[0]
+    shown = components(turn)
+    assert "TravellerPicker" in shown and shown.count("TourCard") == 1
+
+
+def test_short_answer_labelled_greeting_does_not_repeat_the_intro():
+    """Browser check with DeepSeek: 'Not sure yet' was labelled a greeting and Mira introduced herself again."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING),
+                   LLMExtraction(intent=Intent.QUOTE, duration_days=3),
+                   LLMExtraction(intent=Intent.GREETING)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing", "Not sure yet"])
+    assert "I'm Mira" in turns[0]["final_text"]
+    assert "I'm Mira" not in turns[2]["final_text"] and turns[2]["final_text"].strip()
+
+
+def test_a_second_hello_gets_a_short_reply_not_the_intro():
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING), LLMExtraction(intent=Intent.GREETING)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "Hi"])
+    assert "I'm Mira" not in turns[1]["final_text"] and "Hello again" in turns[1]["final_text"]
+
+
+def test_vague_trip_wish_flagged_as_price_is_not_told_we_have_no_such_tour():
+    """Browser check with DeepSeek: 'a few days somewhere relaxing' came back as info + wants_price, and Mira
+    answered 'We don't have that as a tour in our catalogue'. Price-only routes now need price words."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING),
+                   LLMExtraction(intent=Intent.INFO, wants_info=True, wants_price=True, duration_days=3),
+                   LLMExtraction(intent=Intent.INFO, wants_info=True, wants_price=True)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing", "Not sure yet"])
+    for t in turns[1:]:
+        assert "catalogue" not in t["final_text"] and "don't have that in our tour information" not in t["final_text"]
+    assert turns[2]["question_slot"] or "TourCard" in components(turns[2])
+
+
+def test_older_page_source_is_listed_last_and_labelled():
+    """S08 hand label ('two answers'): an older page whose terms a policy replaces must not look equal to it."""
+    from mira.agent.nodes import order_citations
+    ctx, _ = fresh_agent()
+    old = next(p for p in ctx.retriever.passages if p.superseded_by)
+    other = next(p for p in ctx.retriever.passages if not p.superseded_by)
+    cites = [{"passage_id": p.passage_id, "doc_id": p.doc_id, "title": p.title, "section": p.section} for p in (old, other)]
+    ordered = order_citations(ctx, cites)
+    assert ordered[0]["passage_id"] == other.passage_id
+    assert ordered[1]["note"].startswith("Older page: terms replaced by")
+
+
+def test_inclusions_question_shows_the_pages_inclusions_on_the_tour_card():
+    """Inclusions come from the cleaned published page, drawn as a checklist (not from the model)."""
+    _, graph = fresh_agent()
+    turn = chat(graph, ["What's included in the Colombo City Tour?"])[0]
+    card = next(c for c in turn["components"] if c["component"] == "TourCard")
+    assert card["props"]["included"] == ["Private vehicle and guide", "Temple entrance", "Lunch"]
+
+
+def test_tour_cards_carry_no_inclusions_unless_asked():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["Is the Colombo City Tour good for photography?"])[0]
+    card = next(c for c in turn["components"] if c["component"] == "TourCard")
+    assert card["props"]["included"] == [] and card["props"]["expanded"] is False
+
+
+def test_overview_question_is_answered_by_the_open_card_not_a_paragraph():
+    """'Tell me about X': the open card (from the cleaned page) replaces the model paragraph, which once
+    misquoted the start point ('Negroni' for Negombo). Sources stay attached; no teaser price anywhere."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True, tour_id="T03")])  # no answer queued
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["Tell me about the Colombo City Tour."])[0]
+    card = next(c for c in turn["components"] if c["component"] == "TourCard")
+    assert card["props"]["expanded"] is True
+    d = card["props"]["details"]
+    assert d["start"] == "Your hotel in Colombo or Negombo" and "Lunch" in d["included"]
+    assert d["about"].startswith("Colombo's landmarks")
+    assert "at a glance" in turn["final_text"] and turn["citations"]
+    assert "40" not in str(card["props"])  # teaser_price "From USD 40 per person" never shown
+
+
+def test_specific_questions_still_get_a_grounded_answer():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["What's the cancellation policy for the Galle Fort walking tour?"])[0]
+    assert "at a glance" not in turn["final_text"] and turn["citations"]
+
+
+def test_every_tour_card_can_open_its_details_without_asking_again():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["We'd like a few days somewhere relaxing"])[0]
+    shelves = [c for c in turn["components"] if c["component"] == "TourShelf"]
+    cards = shelves[0]["props"]["tours"] if shelves else [c["props"] for c in turn["components"] if c["component"] == "TourCard"]
+    assert cards and all(c["details"]["about"] for c in cards)
+
+
+def test_get_a_price_after_seeing_a_tour_does_not_show_the_card_again():
+    """UI review: after the tour box, 'I'd like a price for X' asked who's travelling AND repeated the card."""
+    _, graph = fresh_agent()
+    turns = chat(graph, ["Tell me about the Cultural Triangle Sri Lanka Package.",
+                         "I'd like a price for Cultural Triangle Sri Lanka Package."])
+    assert "TourCard" in components(turns[0])
+    assert "TourCard" not in components(turns[1]) and "TravellerPicker" in components(turns[1])
+
+
+def test_travellers_and_date_are_asked_together_with_the_bookable_range():
+    """UI review: one card asks who's travelling AND when; dates limited to what the engine can price."""
+    _, graph = fresh_agent()
+    turns = chat(graph, ["I'd like a price for Cultural Triangle Sri Lanka Package.",
+                         "We are 2 adults and no children, starting 12 April 2027."])
+    assert "Who's travelling, and when" in turns[0]["final_text"]
+    picker = next(c for c in turns[0]["components"] if c["component"] == "TravellerPicker")
+    assert picker["props"]["ask_date"] is True
+    assert picker["props"]["date_min"] == "2026-11-19"
+    assert picker["props"]["date_max"] == "2027-10-25"  # 7-day tour must end by 31 Oct 2027
+    assert turns[1]["pricing"]["kind"] == "quote" and turns[1]["pricing"]["price_usd"] == "2125"
+
+
+def test_asking_for_more_tours_shows_a_row_of_tours_not_a_search_answer():
+    """UI review: 'i want to know about some more tours you have' got 'I don't have details on other tours'."""
+    _, graph = fresh_agent()
+    turn = chat(graph, ["i want to know about some more tours you have"])[0]
+    shelf = next(c for c in turn["components"] if c["component"] == "TourShelf")
+    assert shelf["props"]["title"] == "Our tours" and len(shelf["props"]["tours"]) == 4
+    assert "don't have details" not in turn["final_text"]
+    assert not {"T14", "T15", "T10", "T16"} & {t["tour_id"] for t in shelf["props"]["tours"]}
+
+
+def test_browsing_by_place_puts_tours_visiting_it_first():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["What tours go to Ella?"])[0]
+    shelf = next(c for c in turn["components"] if c["component"] == "TourShelf")
+    first = shelf["props"]["tours"][0]
+    assert "Ella" in first["places"]
+
+
+def test_a_question_about_the_tour_is_not_browsing():
+    from mira.agent.nodes import ASKS_TO_BROWSE
+    assert not ASKS_TO_BROWSE.search("What is included in the tour?")
+
+
+def test_no_picked_for_you_on_top_of_a_specific_request():
+    """UI review: a returning visitor asking for a price got 'Picked for you' cards above the quote."""
+    ctx, graph = fresh_agent()
+    ctx.store.give_consent("visitor-picks-3")
+    chat(graph, ["Whale watching in Mirissa on 15 March 2027 for 2 adults. Price?"], visitor_id="visitor-picks-3")
+    turn = chat(graph, ["How much is the Sigiriya and Minneriya day tour from Kandy for 2 adults on 10 January 2027?"],
+                visitor_id="visitor-picks-3")[0]
+    assert not any(c["component"] == "TourShelf" for c in turn["components"])
+    assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["tour_id"] == "T01"
+
+
+def test_tours_visiting_a_place_are_named_in_the_reply():
+    """M27 (DeepSeek, final run): 'Which tours go to Ella?' got a generic row instead of naming the tours."""
+    _, graph = fresh_agent()
+    turn = chat(graph, ["Which tours go to Ella?"])[0]
+    assert "Treasures of Sri Lanka" in turn["final_text"] and "Instafamous Sri Lanka" in turn["final_text"]
+    assert "T14" not in str(turn["components"])
+
+
+def test_hi_again_counts_as_a_greeting():
+    from datetime import date
+    from mira.agent.rules import rule_extract
+    assert rule_extract("Hi again", date(2026, 11, 19)).intent == Intent.GREETING
+
+
+def test_model_not_covered_answer_gets_the_enquiry_offer():
+    """S09 (final DeepSeek run): 'The sources don't say...' without offering to ask the team."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True),
+                   "The sources don't say whether Yala is open in September.\nSOURCES: yala#overview"])
+    _, graph = fresh_agent(llm=llm)
+    text = chat(graph, ["Is Yala open in September?"])[0]["final_text"]
+    assert "pass your question to our team" in text

@@ -1,6 +1,7 @@
 """Human labels for judge calibration (10 behaviour cases, labelled by Shinthurie, never by an AI).
 
     python -m evals.labels make         # write evals/human_labels_template.jsonl from the latest report
+    python -m evals.labels review       # label the cases one at a time in the terminal (you, not an AI)
     python -m evals.labels agreement    # after labelling: judge vs human agreement -> reports/judge_agreement.md
 
 Each line has Mira's transcript and ``"human_label": null``. Fill in "pass" or "fail" and a one-line
@@ -16,7 +17,7 @@ import sys
 from mira import config
 
 TEMPLATE = config.REPO_ROOT / "evals" / "human_labels_template.jsonl"
-REPORT = config.REPO_ROOT / "reports" / "eval_report.json"
+REPORT = config.REPO_ROOT / "reports" / "eval_report.json"  # --report picks another run, e.g. the LLM subset
 AGREEMENT = config.REPO_ROOT / "reports" / "judge_agreement.md"
 LABEL_CASES = ["S01", "S07", "S08", "S09", "S12", "S14", "S16", "S17", "M23", "M28"]
 
@@ -58,6 +59,12 @@ def agreement() -> int:
         print(f"Not labelled yet: {', '.join(unlabelled)}. Fill in human_label first.")
         return 1
     report = json.loads(REPORT.read_text(encoding="utf-8"))
+    runs = {r.get("report_generated_at") for r in rows}
+    if runs != {report["generated_at"]}:
+        print(f"The labels were made on the transcripts of run {sorted(runs)}, but the judge verdicts are from run "
+              f"{report['generated_at']}. They are not the same answers, so agreement would be meaningless. "
+              "Regenerate with `python -m evals.labels make --force` and label again.")
+        return 1
     judge = {c["id"]: next((x for x in c["checks"] if x["name"] == "judge_behaviour"), None) for c in report["cases"]}
     compared, agree, disagreements = 0, 0, []
     for r in rows:
@@ -80,6 +87,11 @@ def agreement() -> int:
     lines += [f"- **{cid}**: human {h}, judge {jl}. Human: {hr}. Judge: {jr}" for cid, h, jl, hr, jr in disagreements] or ["None."]
     lines += ["", "## Limits", "",
               "- 10 cases is a small sample: one disagreement moves agreement by 10 points.",
+              f"- Label balance: {sum(r['human_label'] == 'pass' for r in rows)} pass / "
+              f"{sum(r['human_label'] == 'fail' for r in rows)} fail (human)."
+              + (" With no human 'fail' in the sample, this agreement shows the judge accepts good answers; it cannot "
+                 "show on its own that the judge rejects bad ones (see the eval history for cases the judge failed)."
+                 if not any(r["human_label"] == "fail" for r in rows) else ""),
               "- The judge sees text, card names and sources, not the rendered UI.",
               "- Prices, flags, leaks and UI validity are never judged by the LLM; code checks them."]
     AGREEMENT.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -87,14 +99,70 @@ def agreement() -> int:
     return 0
 
 
+def _save(rows: list[dict]) -> None:
+    """Write the labels, unless the template on disk now comes from a different eval run (it was regenerated
+    while this review was open): saving would put old transcripts back over the new ones."""
+    on_disk = [json.loads(l) for l in TEMPLATE.read_text(encoding="utf-8").splitlines() if l.strip()]
+    if on_disk and on_disk[0].get("report_generated_at") != rows[0].get("report_generated_at"):
+        raise SystemExit("The template was regenerated from another run while this review was open. "
+                         "Nothing saved. Start again: python -m evals.labels review")
+    TEMPLATE.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", encoding="utf-8")
+
+
+def review() -> int:
+    """Label the cases one at a time in the terminal. Saves after every answer; run again to continue.
+
+    Shows only the expected behaviour and the conversation, never the judge's verdict (no anchoring)."""
+    rows = [json.loads(l) for l in TEMPLATE.read_text(encoding="utf-8").splitlines() if l.strip()]
+    todo = [r for r in rows if r.get("human_label") not in ("pass", "fail")]
+    if not todo:
+        print("All cases are labelled. Next: python -m evals.labels agreement")
+        return 0
+    print(f"{len(todo)} of {len(rows)} cases to label. Type pass, fail, skip (later) or quit.\n")
+    for n, r in enumerate(todo, 1):
+        print("=" * 78)
+        print(f"Case {r['id']}  ({n}/{len(todo)})")
+        print(f"EXPECTED: {r['expected_behaviour']}\n")
+        for t in r["transcript"]:
+            print(f"  Traveller: {t['traveller']}")
+            print("  Mira:      " + t["mira"].replace("\n", "\n             "))
+            if t["ui"]:
+                print(f"  [cards shown: {', '.join(t['ui'])}]")
+            if t["sources"]:
+                print(f"  [sources: {'; '.join(t['sources'])}]")
+            print()
+        while True:
+            answer = input("Did Mira meet the expected behaviour? pass / fail / skip / quit: ").strip().lower()
+            if answer in ("pass", "fail", "skip", "quit"):
+                break
+        if answer == "quit":
+            break
+        if answer == "skip":
+            continue
+        reason = ""
+        while not reason:
+            reason = input("One-line reason: ").strip()
+        r["human_label"], r["human_reason"] = answer, reason
+        _save(rows)
+        print("Saved.\n")
+    left = sum(1 for r in rows if r.get("human_label") not in ("pass", "fail"))
+    print(f"{len(rows) - left}/{len(rows)} labelled." + (" Next: python -m evals.labels agreement" if not left else ""))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(prog="python -m evals.labels")
-    p.add_argument("command", choices=["make", "agreement"])
+    p.add_argument("command", choices=["make", "review", "agreement"])
     p.add_argument("--force", action="store_true")
+    p.add_argument("--report", default="eval_report", help="which run to use: reports/<name>.json")
     a = p.parse_args(argv)
-    return make(a.force) if a.command == "make" else agreement()
+    global REPORT
+    REPORT = config.REPO_ROOT / "reports" / f"{a.report}.json"
+    if a.command == "make":
+        return make(a.force)
+    return review() if a.command == "review" else agreement()
 
 
 if __name__ == "__main__":

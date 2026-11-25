@@ -12,6 +12,16 @@ const DStr = DynamicStringSchema;
 const DOptStr = DynamicStringSchema.nullable().optional();
 
 // ---------- Resolved shapes (what renderers draw; mirrors the Pydantic models exactly) ----------
+const TourCardSchema = z.object({
+  accent: Accent, tour_id: z.string(), title: z.string(), category: z.string(), duration: z.string(),
+  places: z.array(z.string()).max(10), summary: z.string(), priceable: z.boolean(),
+  image: z.literal("placeholder"), source_ref: z.string(), included: z.array(z.string()).max(12).optional(),
+  details: z.object({ about: z.string(), start: z.string(), route: z.array(z.string()).max(10),
+    good_to_know: z.array(z.string()).max(10), included: z.array(z.string()).max(12),
+    days: z.array(z.object({ day: z.number().int(), title: z.string(), description: z.string(), meals: z.array(z.string()).max(4), stay: z.string() }).strict()).max(14).optional() }).strict().optional(),
+  expanded: z.boolean().optional(),
+}).strict();
+
 export const resolved = {
   PriceBreakdown: z.object({
     accent: Accent, quote_ref: z.string(), tour_id: z.string(), tour_title: z.string(),
@@ -32,11 +42,7 @@ export const resolved = {
   EnquiryConfirmation: z.object({
     accent: Accent, enquiry_ref: z.string(), summary: z.string(), next_steps: z.array(z.string()).max(5),
   }).strict(),
-  TourCard: z.object({
-    accent: Accent, tour_id: z.string(), title: z.string(), category: z.string(), duration: z.string(),
-    places: z.array(z.string()).max(10), summary: z.string(), priceable: z.boolean(),
-    image: z.literal("placeholder"), source_ref: z.string(),
-  }).strict(),
+  TourCard: TourCardSchema,
   ItineraryDay: z.object({
     accent: Accent, tour_id: z.string(), day_number: z.number().int().min(1).max(30), title: z.string(),
     description: z.string(), meals: z.array(z.string()).max(4), accommodation: z.string().nullable().optional(),
@@ -45,10 +51,15 @@ export const resolved = {
   TravellerPicker: z.object({
     accent: Accent, prompt: z.string(), adults_default: z.number().int().min(1).max(20),
     child_ages_default: z.array(z.number().int().min(0).max(17)).max(19), max_group: z.number().int().min(1).max(20),
+    ask_date: z.boolean().optional(), date_min: z.string().optional(), date_max: z.string().optional(),
+  }).strict(),
+  TourShelf: z.object({
+    title: z.string(),
+    tours: z.array(TourCardSchema).min(2).max(4),
   }).strict(),
   SourceCitation: z.object({
     accent: Accent,
-    sources: z.array(z.object({ passage_id: z.string(), doc_id: z.string(), title: z.string(), section: z.string() }).strict())
+    sources: z.array(z.object({ passage_id: z.string(), doc_id: z.string(), title: z.string(), section: z.string(), note: z.string().optional() }).strict())
       .min(1).max(8),
   }).strict(),
 };
@@ -86,6 +97,7 @@ export const definitions = {
   ItineraryDay: { description: "Dynamic. One day of a tour itinerary from content.", props: resolved.ItineraryDay },
   TravellerPicker: { description: "Dynamic. Pick adults and children's ages.", props: resolved.TravellerPicker },
   SourceCitation: { description: "Dynamic. The content sources an answer used.", props: resolved.SourceCitation },
+  TourShelf: { description: "Dynamic. Two to four tour cards in one row.", props: resolved.TourShelf },
 };
 
 export type ComponentName = keyof typeof resolved;

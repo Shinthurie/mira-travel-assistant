@@ -19,7 +19,11 @@ from typing import Any, Iterable
 
 SPECIALIST_LINE = "I can't confirm that figure here. A specialist from our team will confirm it for you."
 
-_CUR_BEFORE = r"(US\$|USD|U\.S\.\s?dollars?|\$|LKR|Rs\.?|EUR|€|£|GBP|AUD|A\$|INR|₹|CAD|C\$|SGD|JPY|¥)"
+# Letter codes must start a word: inside a reference like "Q-6CAD79F1", "CAD79" is not 79 Canadian dollars
+# (that false match hid the price card of about 1 quote in 100; see FIXED_PROBLEM.md, round 3).
+# Symbols match anywhere, so "costs$40" is still caught.
+_CUR_BEFORE = (r"((?<![A-Za-z0-9])(?<![A-Za-z]-)(?:US\$|USD|U\.S\.\s?dollars?|LKR|Rs\.?|EUR|GBP|AUD|A\$|INR|CAD|C\$|SGD|JPY)"
+               r"|\$|€|£|₹|¥)")
 _NUMBER = r"(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)(\s?k\b)?"
 _CUR_AFTER = r"(USD|US dollars?|dollars?|bucks|LKR|rupees?|EUR|euros?|pounds?|GBP|AUD|INR|yen)\b"
 

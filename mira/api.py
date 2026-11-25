@@ -39,9 +39,9 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http
 # ---------------------------------------------------------------------------
 try:
     from ag_ui_langgraph import add_langgraph_fastapi_endpoint
-    from copilotkit import LangGraphAGUIAgent
+    from mira.agui import MiraAGUIAgent
 
-    add_langgraph_fastapi_endpoint(app, LangGraphAGUIAgent(
+    add_langgraph_fastapi_endpoint(app, MiraAGUIAgent(
         name="mira", description="Mira, the Ceylon Compass Holidays booking assistant", graph=get_graph()),
         path="/agent")
 except Exception as exc:  # pragma: no cover - keeps REST usable if the AG-UI SDK breaks
@@ -68,6 +68,21 @@ def health() -> dict:
 def brand() -> dict:
     """The brand pack, read from the dataset (the frontend turns it into CSS variables)."""
     return json.loads(config.BRAND_PACK_PATH.read_text(encoding="utf-8"))
+
+
+@app.get("/api/tours")
+def tours() -> list[dict]:
+    """Published tours Mira can price, for the side panel: id, title and length only. Never prices, never
+    drafts, and never stale or rate-less tours (T14's 2023/24 promotion, T10, T16)."""
+    ctx = get_context()
+    out = []
+    for doc in ctx.resolver.tours:  # published only
+        if not ctx.resolver.priceable(doc.id):
+            continue
+        decision = ctx.catalog.decisions.for_tour(doc.id)
+        duration = decision.display_duration if decision and decision.display_duration else (doc.duration or "")
+        out.append({"id": doc.id, "title": doc.title, "duration": duration})
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -142,10 +157,14 @@ def book(body: BookingIn) -> dict:
                 "message": "Your payment didn't go through, and you haven't been charged. We've saved your booking "
                            "request, so nothing is lost.",
                 "next_steps": ["Try the payment again", "Or wait for a specialist to contact you to finish the booking"]}
-    ctx.store.update_enquiry(enquiry.id, status="contacted")
-    ctx.store.add_note(enquiry.id, "system", "Mock payment succeeded.")
+    # Mocked payment (brief): the button says "(demo)"; the copy reads like the real product would.
+    # The enquiry stays "new" for staff to follow up; the amount is the engine's stored quote value.
+    ctx.store.add_note(enquiry.id, "system", "Mock payment succeeded (demo: nothing charged, no email sent).")
+    in_full = Decimal(quote.deposit_usd) == Decimal(quote.price_usd)
     return {"ok": True, "enquiry_ref": enquiry.ref, "summary": f"Booking request {enquiry.ref} received",
-            "next_steps": ["We email your confirmation", f"Your deposit of USD {Decimal(quote.deposit_usd):,.0f} is taken by our secure payment link"]}
+            "next_steps": ["We email your confirmation",
+                           f"Your {'payment' if in_full else 'deposit'} of USD {Decimal(quote.deposit_usd):,.0f} "
+                           "is taken by our secure payment link"]}
 
 
 # ---------------------------------------------------------------------------

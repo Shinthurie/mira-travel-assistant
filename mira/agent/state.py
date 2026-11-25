@@ -103,6 +103,7 @@ class MiraSession(BaseModel):
     slots: Slots = Field(default_factory=Slots)
     questions_asked: int = 0
     asked: list[str] = Field(default_factory=list)       # slot names Mira already asked about
+    shown_tours: list[str] = Field(default_factory=list)  # tour cards already shown in this conversation
     quotes: list[QuoteRef] = Field(default_factory=list)
     allowed_amounts: list[str] = Field(default_factory=list)  # every USD amount the guard may let through
     flags: list[str] = Field(default_factory=list)        # flag refs raised in this conversation
@@ -127,6 +128,7 @@ class TurnState(BaseModel):
     route: list[str] = Field(default_factory=list)
     reply_parts: list[str] = Field(default_factory=list)
     components: list[UIComponent] = Field(default_factory=list)
+    shelf_title: str = "Tours that match"   # "Picked for you" for consented personalisation
     citations: list[dict[str, str]] = Field(default_factory=list)
     retrieved_ids: list[str] = Field(default_factory=list)
     pricing: Optional[dict[str, Any]] = None              # {"kind": "quote"|"no_quote", ...} for traces/evals

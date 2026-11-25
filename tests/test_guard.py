@@ -63,3 +63,32 @@ def test_payload_scan():
     assert guard_payload({"title": "Kandy", "summary": "Lovely, 2 nights"}, ALLOWED) == []
     bad = guard_payload({"title": "Kandy", "summary": "Only USD 99 this week"}, ALLOWED)
     assert bad and bad[0].value == Decimal("99")
+
+
+def test_quote_reference_is_not_mistaken_for_money():
+    """Eval M32/M16 (intermittent): ref 'Q-6CAD79F1' was read as CAD 79 and the price card was removed."""
+    from mira.agent.guard import find_money
+    for ref in ("Q-6CAD79F1", "Q-ACAD1234", "E-CAD90000", "Q-1CAD5A2B"):
+        assert find_money(f"Quote {ref}") == [], ref
+
+
+def test_money_is_still_found_next_to_letters_and_symbols():
+    from mira.agent.guard import find_money
+    for text in ("It costs$40", "CAD 79 please", "(USD 275)", "price:USD275", "US$2,125", "Rs. 5000", "€30 each"):
+        assert find_money(text), text
+
+
+def test_every_random_reference_shape_is_money_free():
+    """Refs are 8 hex characters: no letter code can hide in one any more."""
+    import itertools
+    from mira.agent.guard import find_money
+    for a, b in itertools.product("0123456789ABCDEF", repeat=2):
+        assert find_money(f"Q-{a}CAD{b}9F1") == []
+
+
+def test_references_starting_with_a_code_are_money_free():
+    from mira.agent.guard import find_money
+    import itertools
+    for a, b in itertools.product("0123456789ABCDEF", repeat=2):
+        for prefix in ("Q", "E"):
+            assert find_money(f"{prefix}-CAD{a}{b}123") == []

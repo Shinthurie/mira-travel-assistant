@@ -148,6 +148,26 @@ class TourResolver:
         scored = [(len(places & set(d.destinations)), d.id) for d in self.tours]
         return [tid for score, tid in sorted(scored, key=lambda x: (-x[0], x[1])) if score > 0]
 
+    def similar_to(self, tour_ids: list[str], interests: list[str], limit: int = 3) -> list[str]:
+        """Personalisation (bonus, consent only): published tours like the ones a visitor looked at.
+
+        Score = 2 per shared destination + 1 for the same category + 1 per stored interest found in
+        the title, category or places. Tours already seen are left out; priceable tours win ties."""
+        seen = [self.content.get(t) for t in tour_ids if self.content.get(t)]
+        places = {p for d in seen for p in d.destinations}
+        categories = {d.category for d in seen if d.category}
+        wanted = [i.lower() for i in interests if i]
+        scored = []
+        for d in self.tours:
+            if d.id in tour_ids:
+                continue
+            text = f"{d.title} {d.category or ''} {' '.join(d.destinations)}".lower()
+            score = (2 * len(places & set(d.destinations)) + (1 if d.category in categories else 0)
+                     + sum(1 for i in wanted if i in text))
+            if score > 0:
+                scored.append((-score, not self.priceable(d.id), d.id))
+        return [tid for *_, tid in sorted(scored)[:limit]]
+
     def is_published_tour(self, tour_id: str | None) -> bool:
         return bool(tour_id) and any(d.id == tour_id for d in self.tours)
 

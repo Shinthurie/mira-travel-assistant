@@ -74,6 +74,30 @@ class EnquiryConfirmationProps(_Props):
 # --- Dynamic-schema components (content, never money) -----------------------------
 
 
+class TourDetails(BaseModel):
+    """The card's "Details" box. Every field comes from the cleaned, published tour page. No prices."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    about: str = ""
+    start: str = ""
+    route: list[str] = Field(default_factory=list, max_length=10)
+    good_to_know: list[str] = Field(default_factory=list, max_length=10)
+    included: list[str] = Field(default_factory=list, max_length=12)
+    days: list["TourDay"] = Field(default_factory=list, max_length=14)
+
+
+class TourDay(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    day: int
+    title: str
+    description: str = ""
+    meals: list[str] = Field(default_factory=list, max_length=4)
+    stay: str = ""
+
+
+TourDetails.model_rebuild()
+
+
 class TourCardProps(_Props):
     """No price field on purpose: prices only appear in PriceBreakdown."""
 
@@ -86,6 +110,9 @@ class TourCardProps(_Props):
     priceable: bool
     image: Literal["placeholder"] = "placeholder"   # the dataset has no photos
     source_ref: str
+    included: list[str] = Field(default_factory=list, max_length=12)  # from the page's Inclusions section
+    details: TourDetails = Field(default_factory=TourDetails)
+    expanded: bool = False  # open the Details box straight away (overview questions)
 
 
 class ItineraryDayProps(_Props):
@@ -104,6 +131,9 @@ class TravellerPickerProps(_Props):
     adults_default: int = Field(ge=1, le=20)
     child_ages_default: list[int] = Field(default_factory=list, max_length=19)
     max_group: int = Field(20, ge=1, le=20)
+    ask_date: bool = False   # also ask the start date on the same card
+    date_min: str = ""       # first bookable start (today), ISO
+    date_max: str = ""       # last start the rates cover, ISO
 
 
 class Source(BaseModel):
@@ -112,13 +142,22 @@ class Source(BaseModel):
     doc_id: str
     title: str
     section: str
+    note: str = ""  # e.g. "Older page: terms replaced by P02"
 
 
 class SourceCitationProps(_Props):
     sources: list[Source] = Field(min_length=1, max_length=8)
 
 
-CATALOG: dict[str, type[_Props]] = {
+class TourShelfProps(BaseModel):
+    """Dynamic. Several tour cards in one row (swipeable on mobile). Each card keeps its own single accent."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    title: str
+    tours: list[TourCardProps] = Field(min_length=2, max_length=4)
+
+
+CATALOG: dict[str, type[BaseModel]] = {
     "PriceBreakdown": PriceBreakdownProps,
     "BookingForm": BookingFormProps,
     "SpecialistHandoff": SpecialistHandoffProps,
@@ -127,6 +166,7 @@ CATALOG: dict[str, type[_Props]] = {
     "ItineraryDay": ItineraryDayProps,
     "TravellerPicker": TravellerPickerProps,
     "SourceCitation": SourceCitationProps,
+    "TourShelf": TourShelfProps,
 }
 FIXED_SCHEMA = {"PriceBreakdown", "BookingForm", "SpecialistHandoff", "EnquiryConfirmation"}
 DYNAMIC_SCHEMA = set(CATALOG) - FIXED_SCHEMA

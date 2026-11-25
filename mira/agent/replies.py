@@ -15,6 +15,9 @@ INTRO = ("Hello, I'm Mira from Ceylon Compass Holidays. I can suggest tours, ans
          "pages, and give you a confirmed price. What kind of trip are you thinking of: a day tour, a few days, "
          "or a longer custom trip?")
 
+GREETING_AGAIN = ("Hello again. Tell me where you'd like to go, your dates or who's travelling, "
+                  "and I'll find the right tour and a confirmed price.")
+
 OFF_TOPIC = ("I can only help with travel in Sri Lanka with Ceylon Compass Holidays, so I'll leave that one. "
              "Shall we look at a trip? Tell me where you'd like to go or what you'd like to see.")
 
@@ -34,6 +37,9 @@ TEASER = ("The \"from\" prices on older pages are not quotes. I'll only show you
           "our current rates for your exact dates and group.")
 
 FORGOT = "Done. I've deleted what I remembered about you. Future chats start fresh."
+
+PLACES_QUESTION = ("Here are a few tours that could suit. Is there a place you'd love to see, or something you'd "
+                   "like to do, such as beaches, wildlife, tea country or temples? I'll narrow it down.")
 
 QUESTIONS = {
     "tour": "Which trip would you like: a day tour, a few days away, or a longer round trip? If you have a place "
