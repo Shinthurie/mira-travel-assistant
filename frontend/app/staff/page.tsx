@@ -197,12 +197,12 @@ export default function StaffPage() {
         <section className="tiles" aria-label="Summary">
           <div className="tile"><b>{newEnquiries}</b><span>New enquiries</span></div>
           <div className="tile"><b>{quotes}</b><span>Quotes sent</span></div>
-          <div className="tile"><b>{openFlags}</b><span>Flags to check</span></div>
+          <div className="tile"><b>{openFlags}</b><span>Flags needing action</span></div>
           <div className="tile"><b>{awaiting}</b><span>Drafts awaiting approval</span></div>
         </section>
 
         <nav className="tabs" role="tablist">
-          {([["enquiries", `Enquiries (${enquiries.length})`], ["flags", `Flags (${flags.length})`], ["content", `Content (${drafts.length})`]] as const).map(([key, label]) => (
+          {([["enquiries", `Enquiries (${enquiries.length})`], ["flags", `Flags (${openFlags} need action, ${flags.length} total)`], ["content", `Content (${drafts.length})`]] as const).map(([key, label]) => (
             <button key={key} role="tab" aria-selected={tab === key} className="tab" onClick={() => setTab(key)}>{label}</button>
           ))}
         </nav>

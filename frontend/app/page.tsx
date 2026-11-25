@@ -92,6 +92,7 @@ function Welcome({ input }: { input: ReactElement }) {
         </div>
       </div>
       <div className="welcome-input">{input}</div>
+      <a className="welcome-staff" href="/staff">Staff login</a>
     </div>
   );
 }
