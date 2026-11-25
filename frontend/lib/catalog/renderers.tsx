@@ -119,7 +119,7 @@ function BookingForm({ props }: { props: unknown }) {
 
   if (state.status === "done") {
     return (
-      <Card accent="leaf" testid="booking-done">
+      <Card accent="leaf" testid="booking-done" className="cc-card accent-leaf cc-card-wide">
         <div className="cc-kicker">Booking request {state.ref}</div>
         <h3 className="cc-title">Thank you. Your request is in.</h3>
         <ol className="steps">{state.steps?.map((s) => <li key={s}>{s}</li>)}</ol>
@@ -127,16 +127,18 @@ function BookingForm({ props }: { props: unknown }) {
     );
   }
   return (
-    <form className={`cc-card accent-${p.accent}`} data-testid="booking-form" onSubmit={submit}>
+    <form className={`cc-card accent-${p.accent} cc-card-wide`} data-testid="booking-form" onSubmit={submit}>
       <div className="cc-kicker">Book · {p.quote_ref}</div>
       <div>
         <h3 className="cc-title">{p.tour_title}</h3>
         <p className="cc-sub num">{p.pay_in_full ? "Paid in full today" : "Deposit today"}: USD {usd(p.deposit_usd)}</p>
       </div>
-      <label className="field">Full name<input name="name" required maxLength={120} autoComplete="name" /></label>
-      <label className="field">Email<input name="email" type="email" required autoComplete="email" /></label>
-      <label className="field">Phone <span className="cc-muted">(optional)</span><input name="phone" autoComplete="tel" /></label>
-      <label className="field">Anything we should know? <span className="cc-muted">(optional)</span><textarea name="notes" rows={2} /></label>
+      <div className="form-grid">
+        <label className="field">Full name<input name="name" required maxLength={120} autoComplete="name" /></label>
+        <label className="field">Email<input name="email" type="email" required autoComplete="email" /></label>
+        <label className="field">Phone <span className="cc-muted">(optional)</span><input name="phone" autoComplete="tel" /></label>
+        <label className="field">Anything we should know? <span className="cc-muted">(optional)</span><input name="notes" maxLength={300} /></label>
+      </div>
       <label className="check"><input type="checkbox" name="consent" required /> <span>{p.consent_text}</span></label>
       {state.status === "failed" && (
         <div className="cc-notice" role="alert">
@@ -163,18 +165,23 @@ function SpecialistHandoff({ props }: { props: unknown }) {
   if (!v.success) return <Fallback name="message" />;
   const p = v.data;
   return (
-    <Card accent={p.accent} testid="specialist-handoff">
+    <Card accent={p.accent} testid="specialist-handoff" className={`cc-card accent-${p.accent} cc-card-wide`}>
       <div className="cc-kicker">A specialist will confirm</div>
-      <div>
+      <div className="pkg-cols">
+      <div className="pkg-col">
         <h3 className="cc-title">{p.tour_title || "We'll check this for you"}</h3>
         <p className="cc-sub">{p.reason_text}</p>
       </div>
+      <div className="pkg-col">
+      <p className="pkg-head">What happens next</p>
       <ol className="steps">
         <li>Your request is saved{p.enquiry_ref ? ` as ${p.enquiry_ref}` : ""}.</li>
         <li>A specialist checks the rates with our hotels.</li>
         <li>They get back to you with a confirmed price.</li>
       </ol>
       <button className="btn" onClick={() => say("Please ask a specialist to contact me.")}>{p.cta_label}</button>
+      </div>
+      </div>
     </Card>
   );
 }
@@ -184,10 +191,13 @@ function EnquiryConfirmation({ props }: { props: unknown }) {
   if (!v.success) return <Fallback name="confirmation" />;
   const p = v.data;
   return (
-    <Card accent={p.accent} testid="enquiry-confirmation">
+    <Card accent={p.accent} testid="enquiry-confirmation" className={`cc-card accent-${p.accent} cc-card-wide`}>
       <div className="cc-kicker">Saved · {p.enquiry_ref}</div>
-      <h3 className="cc-title">{p.summary}</h3>
-      <ol className="steps">{p.next_steps.map((s) => <li key={s}>{s}</li>)}</ol>
+      <div className="pkg-cols">
+        <div className="pkg-col"><h3 className="cc-title">{p.summary}</h3></div>
+        <div className="pkg-col"><p className="pkg-head">What happens next</p>
+          <ol className="steps">{p.next_steps.map((s) => <li key={s}>{s}</li>)}</ol></div>
+      </div>
     </Card>
   );
 }
