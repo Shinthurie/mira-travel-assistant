@@ -157,10 +157,15 @@ def book(body: BookingIn) -> dict:
                 "message": "Your payment didn't go through, and you haven't been charged. We've saved your booking "
                            "request, so nothing is lost.",
                 "next_steps": ["Try the payment again", "Or wait for a specialist to contact you to finish the booking"]}
-    ctx.store.update_enquiry(enquiry.id, status="contacted")
-    ctx.store.add_note(enquiry.id, "system", "Mock payment succeeded.")
+    # Mocked payment (brief): nothing is charged and no email is sent, so the traveller is told exactly that.
+    # The enquiry stays "new" for staff to follow up; the amount is the engine's stored quote value.
+    ctx.store.add_note(enquiry.id, "system", "Mock payment succeeded (demo: nothing charged, no email sent).")
+    in_full = Decimal(quote.deposit_usd) == Decimal(quote.price_usd)
     return {"ok": True, "enquiry_ref": enquiry.ref, "summary": f"Booking request {enquiry.ref} received",
-            "next_steps": ["We email your confirmation", f"Your deposit of USD {Decimal(quote.deposit_usd):,.0f} is taken by our secure payment link"]}
+            "next_steps": ["Demo booking: no payment was taken and no email was sent.",
+                           f"Amount due when you pay: USD {Decimal(quote.deposit_usd):,.0f} "
+                           f"({'paid in full' if in_full else 'deposit'}).",
+                           "A specialist sees your request on our staff page and contacts you to finish the booking."]}
 
 
 # ---------------------------------------------------------------------------
