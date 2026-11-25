@@ -61,7 +61,7 @@ function Consent({ onChange }: { onChange: (visitorId: string | null) => void })
     <div className="consent" data-testid="consent">
       {consent ? (
         <>
-          <p>{returning ? `Welcome back. Say hello and I'll pick up your ${returning} quote.` : <><span className="long">I'll remember your trip details next time.</span><span className="short">Remembering your trip.</span></>}</p>
+          <p>{returning ? "Welcome back. Let's start from where you left off." : <><span className="long">I'll remember your trip details next time.</span><span className="short">Remembering your trip.</span></>}</p>
           <button className="link" onClick={forget}>Forget me</button>
         </>
       ) : (
