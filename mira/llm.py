@@ -71,16 +71,18 @@ def _report(call: LLMCall) -> None:
 class GeminiLLM:
     """Google Gemini via the official ``google-genai`` SDK."""
 
-    def __init__(self, model: str, api_key: str, attempts: int = 5):
+    def __init__(self, model: str, api_key: str, attempts: int = 3, fallbacks: list[str] | None = None):
         from google import genai
         from google.genai import types
 
         self.model = model
+        # Tried in order when the main model is overloaded or out of quota (503/429).
+        self.fallbacks = [m for m in (fallbacks or []) if m and m != model]
         self._types = types
         self._client = genai.Client(
             api_key=api_key,
             http_options=types.HttpOptions(retry_options=types.HttpRetryOptions(
-                attempts=attempts, initial_delay=2.0, max_delay=30.0, exp_base=2.0,
+                attempts=attempts, initial_delay=2.0, max_delay=10.0, exp_base=2.0,
                 http_status_codes=[429, 500, 502, 503, 504])),
         )
 
@@ -89,18 +91,23 @@ class GeminiLLM:
         if schema is not None:
             cfg.update(response_mime_type="application/json", response_schema=schema)
         start = time.perf_counter()
-        try:
-            response = self._client.models.generate_content(
-                model=self.model, contents=user, config=self._types.GenerateContentConfig(**cfg))
-        except Exception as exc:  # network, quota, safety...
-            raise LLMError(f"{self.model}: {type(exc).__name__}: {exc}") from exc
+        response, used, errors = None, self.model, []
+        for used in [self.model, *self.fallbacks]:
+            try:
+                response = self._client.models.generate_content(
+                    model=used, contents=user, config=self._types.GenerateContentConfig(**cfg))
+                break
+            except Exception as exc:  # network, quota, safety...
+                errors.append(f"{used}: {type(exc).__name__}: {str(exc)[:120]}")
+        if response is None:
+            raise LLMError("; ".join(errors))
         text = response.text or ""
         meta = getattr(response, "usage_metadata", None)
         usage = {}
         if meta is not None:
             usage = {"input": getattr(meta, "prompt_token_count", 0) or 0,
                      "output": getattr(meta, "candidates_token_count", 0) or 0}
-        _report(LLMCall(model=self.model, purpose=purpose, system=system, user=user, output=text,
+        _report(LLMCall(model=used, purpose=purpose, system=system, user=user, output=text,
                         latency_ms=int((time.perf_counter() - start) * 1000), usage=usage))
         return text
 
@@ -115,6 +122,51 @@ class GeminiLLM:
         return self._generate(system, user, purpose, None).strip()
 
 
+ROUTE_COMPLEX_WORDS = ("plan", "custom", "itinerary", "compare", "instead", "change", "and also")
+
+
+def is_simple_message(text: str) -> bool:
+    """A short, single-request message (e.g. "2 adults on 12 April") that a small model can extract."""
+    lowered = text.lower()
+    sentences = [s for s in lowered.replace("?", ".").replace("!", ".").split(".") if s.strip()]
+    return len(text) <= 160 and len(sentences) <= 2 and not any(w in lowered for w in ROUTE_COMPLEX_WORDS)
+
+
+class RoutedLLM:
+    """Model routing (bonus). Simple extraction turns go to a small, fast model; grounded answers,
+    content drafts and longer or multi-part messages go to the main model. If the small model fails,
+    the main model is tried. Every routing decision is counted in ``routes`` for the eval report."""
+
+    def __init__(self, main: LLM, small: LLM):
+        self.main, self.small = main, small
+        self.model = main.model
+        self.routes: dict[str, int] = {}
+
+    def pick(self, purpose: str, user: str) -> LLM:
+        message = user.rsplit("<message>", 1)[-1].split("</message>", 1)[0]
+        chosen = self.small if purpose == "extract" and is_simple_message(message) else self.main
+        self.routes[chosen.model] = self.routes.get(chosen.model, 0) + 1
+        return chosen
+
+    def structured(self, system: str, user: str, schema: type[T], purpose: str = "") -> T:
+        chosen = self.pick(purpose, user)
+        try:
+            return chosen.structured(system, user, schema, purpose)
+        except LLMError:
+            if chosen is self.main:
+                raise
+            return self.main.structured(system, user, schema, purpose)
+
+    def text(self, system: str, user: str, purpose: str = "") -> str:
+        chosen = self.pick(purpose, user)
+        try:
+            return chosen.text(system, user, purpose)
+        except LLMError:
+            if chosen is self.main:
+                raise
+            return self.main.text(system, user, purpose)
+
+
 def _api_key() -> str:
     return (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
 
@@ -125,10 +177,16 @@ def get_llm(role: str = "mira") -> LLM | None:
     if not key:
         return None
     if role == "judge":
-        model = os.environ.get("JUDGE_MODEL", "").strip() or "gemini-3.1-pro-preview"
+        model = os.environ.get("JUDGE_MODEL", "").strip() or "gemini-3.6-flash"
+        fallbacks = os.environ.get("JUDGE_FALLBACK_MODELS", "")
     else:
-        model = os.environ.get("MIRA_MODEL", "").strip() or "gemini-3.8-flash"
-    return GeminiLLM(model=model, api_key=key)
+        model = os.environ.get("MIRA_MODEL", "").strip() or "gemini-3.5-flash"
+        fallbacks = os.environ.get("MIRA_FALLBACK_MODELS", "")
+    main = GeminiLLM(model=model, api_key=key, fallbacks=[m.strip() for m in fallbacks.split(",")])
+    small_model = os.environ.get("MIRA_SMALL_MODEL", "").strip()
+    if role == "mira" and small_model and os.environ.get("MIRA_ROUTING", "on").lower() != "off":
+        return RoutedLLM(main, GeminiLLM(model=small_model, api_key=key, attempts=2))
+    return main
 
 
 class FakeLLM:

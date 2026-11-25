@@ -261,3 +261,23 @@ def test_discovery_never_repeats_a_question(agent):
     assert len(asked) == len(set(asked))
     assert any("TourCard" in components(t) for t in turns)
     assert turns[0]["extraction"]["intent"] == "greeting"
+
+
+def test_returning_visitor_gets_personalised_picks(agent):
+    """Bonus: with consent, a returning visitor sees 'Picked for you' tours like the one they quoted."""
+    ctx, graph = agent
+    ctx.store.give_consent("visitor-picks-1")
+    chat(graph, ["Whale watching in Mirissa on 15 March 2027 for 2 adults. Price?"], visitor_id="visitor-picks-1")
+    turn = chat(graph, ["Hello"], visitor_id="visitor-picks-1")[0]
+    shelves = [c for c in turn["components"] if c["component"] == "TourShelf"]
+    assert shelves and shelves[0]["props"]["title"] == "Picked for you"
+    ids = [t["tour_id"] for t in shelves[0]["props"]["tours"]]
+    assert "T05" not in ids and all(ctx.resolver.is_published_tour(t) for t in ids)
+
+
+def test_no_personalised_picks_without_consent(agent):
+    _, graph = agent
+    chat(graph, ["Whale watching in Mirissa on 15 March 2027 for 2 adults. Price?"], visitor_id="visitor-picks-2")
+    turn = chat(graph, ["Hello"], visitor_id="visitor-picks-2")[0]
+    assert not any(c["component"] == "TourShelf" and c["props"]["title"] == "Picked for you"
+                   for c in turn["components"])

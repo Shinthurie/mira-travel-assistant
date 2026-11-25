@@ -316,6 +316,18 @@ def pct(a: int, b: int) -> str:
     return f"{100 * a / b:.1f}% ({a}/{b})" if b else "n/a"
 
 
+MODEL_CALLS: list[tuple[str, str, int]] = []  # (model, purpose, latency_ms) for every LLM call in the run
+
+
+def model_call_summary() -> list[dict]:
+    """Calls and latency per (model, purpose): shows how model routing split the work."""
+    groups: dict[tuple[str, str], list[int]] = {}
+    for model, purpose, ms in MODEL_CALLS:
+        groups.setdefault((model, purpose), []).append(ms)
+    return [{"model": m, "purpose": p, "calls": len(v), "median_ms": statistics.median(v), "max_ms": max(v)}
+            for (m, p), v in sorted(groups.items())]
+
+
 def summarise(cases: list[dict], results: dict[str, list[RunResult]], judge_info: dict, args) -> dict:
     from mira.agent.context import get_context
     rows = []
@@ -328,6 +340,7 @@ def summarise(cases: list[dict], results: dict[str, list[RunResult]], judge_info
             "error": worst.error, "checks": [c.__dict__ for c in worst.checks],
             "trace_urls": [t["trace_url"] for t in worst.transcript],
             "latencies_ms": [t["latency_ms"] for r in runs for t in r.transcript],
+            "modes": [t["mode"] for r in runs for t in r.transcript],
             "first_quote_ms": [r.first_quote_ms for r in runs if r.first_quote_ms is not None],
             "transcript": [{k: t[k] for k in ("user", "text", "components", "citations", "pricing")} for t in worst.transcript],
         })
@@ -354,6 +367,7 @@ def summarise(cases: list[dict], results: dict[str, list[RunResult]], judge_info
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "git_sha": git_sha(),
         "mode": "llm" if args.use_llm else "offline-rules", "mira_model": judge_info.get("mira_model"),
+        "routing_small_model": judge_info.get("small_model"),
         "judge_model": judge_info.get("judge_model"), "today": config.today().isoformat(),
         "settings_overridden": list(ctx.catalog.workbook.settings.overridden),
         "margins": {"day_tour": str(ctx.catalog.workbook.settings.margin_day_tour),
@@ -373,6 +387,8 @@ def summarise(cases: list[dict], results: dict[str, list[RunResult]], judge_info
                        "p95": sorted(lat)[int(0.95 * (len(lat) - 1))] if lat else None, "max": max(lat) if lat else None},
         "time_to_first_quote_ms": {"median": statistics.median(fq) if fq else None, "max": max(fq) if fq else None,
                                    "under_60s": sum(1 for x in fq if x < 60000), "total": len(fq)},
+        "model_calls": model_call_summary(),
+        "turn_modes": {m: sum(1 for r in rows for x in r["modes"] if x == m) for m in ("llm", "rules")},
         "judge": {"model": judge_info.get("judge_model"), "available": judge_info.get("available"),
                   "passed": sum(1 for c in judge_checks if c["passed"] is True),
                   "failed": sum(1 for c in judge_checks if c["passed"] is False),
@@ -388,7 +404,8 @@ def write_report(summary: dict) -> Path:
         "# Mira evaluation report", "",
         f"- Generated: {s['generated_at']} · git `{s['git_sha']}` · today = {s['today']}",
         f"- Mode: **{s['mode']}** · Mira model: {s['mira_model'] or 'none (rule-based extraction)'} · "
-        f"judge: {s['judge_model'] or 'not available (no API key)'}",
+        f"judge: {s['judge_model'] or 'not available (no API key)'} · routing: "
+        f"{('simple turns -> ' + s['routing_small_model']) if s.get('routing_small_model') else 'off'}",
         f"- Margins: day {s['margins']['day_tour']}, multi-day {s['margins']['multi_day']}"
         + (f" · **settings overridden: {', '.join(s['settings_overridden'])}**" if s['settings_overridden'] else ""),
         f"- Cases: {s['totals']['cases']} ({s['totals']['seed_cases']} seed, {s['totals']['multi_turn']} multi-turn) · "
@@ -410,6 +427,14 @@ def write_report(summary: dict) -> Path:
     lines += ["", "## Speed", "",
               f"- Per turn: median {lat['p50']} ms, p95 {lat['p95']} ms, max {lat['max']} ms ({lat['turns']} turns)",
               f"- Time to first quote: median {fq['median']} ms, max {fq['max']} ms; under 60 s: {fq['under_60s']}/{fq['total']}", "",
+              "## How each turn was understood", "",
+              f"- By the LLM: {s['turn_modes']['llm']} turns · by the rule-based fallback: {s['turn_modes']['rules']} turns"
+              + (" (in LLM mode a rules turn means every model call failed, e.g. quota or overload)"
+                 if s['mode'] == 'llm' and s['turn_modes']['rules'] else ""), "",
+              "## Model calls (routing)", "",
+              "| Model | Purpose | Calls | Median ms | Max ms |", "|---|---|---|---|---|",
+              *([f"| {r['model']} | {r['purpose']} | {r['calls']} | {r['median_ms']} | {r['max_ms']} |"
+                 for r in s.get("model_calls", [])] or ["| none (offline mode) | | | | |"]), "",
               "## LLM judge (behaviour cases)", "",
               f"- Judge model: {j['model'] or 'none'} · passed {j['passed']}, failed {j['failed']}, skipped {j['skipped']}",
               "- Behaviour cases without a judge are **skipped, not passed**; their code checks still apply.", ""]
@@ -456,8 +481,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--offline", action="store_true", help="force rule-based mode even if a key is set")
     args = p.parse_args(argv)
 
-    from mira.llm import get_llm
+    from mira.llm import add_call_hook, get_llm
     from evals.judge import Judge
+    add_call_hook(lambda call: MODEL_CALLS.append((call.model, call.purpose, call.latency_ms)))
     args.use_llm = not args.offline and get_llm("mira") is not None
     judge = Judge() if not args.no_judge else Judge(llm=None)
     if judge.available and args.use_llm and judge.model == getattr(get_llm("mira"), "model", None):
@@ -478,7 +504,7 @@ def main(argv: list[str] | None = None) -> int:
             for run in runs[:1]:
                 v = judge.judge(behaviour, run.transcript)
                 run.checks.append(Check("judge_behaviour", None if v is None else v.verdict == "pass",
-                                        "no judge model (no API key)" if v is None else v.reason, kind="judge"))
+                                        (judge.last_error or "no judge model (no API key or --no-judge)") if v is None else v.reason, kind="judge"))
             for run in runs[1:]:
                 run.checks.append(runs[0].checks[-1])
         results[case["id"]] = runs
@@ -488,7 +514,9 @@ def main(argv: list[str] | None = None) -> int:
                   f"{c.name}: {c.detail}" for r in runs for c in r.checks if c.passed is False)[:200]
                  + (f" {runs[0].error}" if runs[0].error else "")))
 
-    summary = summarise(cases, results, {"mira_model": getattr(get_llm("mira"), "model", None) if args.use_llm else None,
+    mira_llm = get_llm("mira") if args.use_llm else None
+    summary = summarise(cases, results, {"mira_model": getattr(mira_llm, "model", None),
+                                         "small_model": getattr(getattr(mira_llm, "small", None), "model", None),
                                          "judge_model": judge.model, "available": judge.available}, args)
     path = write_report(summary)
     t = summary["targets"]

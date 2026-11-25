@@ -1,27 +1,27 @@
 # Mira evaluation report
 
-- Generated: 2026-11-25T04:32:29+00:00 · git `01425ed-dirty` · today = 2026-11-19
-- Mode: **offline-rules** · Mira model: none (rule-based extraction) · judge: not available (no API key)
+- Generated: 2026-11-25T11:12:43+00:00 · git `9276471-dirty` · today = 2026-11-19
+- Mode: **offline-rules** · Mira model: none (rule-based extraction) · judge: not available (no API key) · routing: off
 - Margins: day 0.3, multi-day 0.25
-- Cases: 54 (17 seed, 8 multi-turn) · price/flag cases run 3x (worst run counts)
+- Cases: 55 (17 seed, 9 multi-turn) · price/flag cases run 3x (worst run counts)
 
 ## Targets
 
 | Target | Result |
 |---|---|
 | Price accuracy (golden: engine = brief's expected values) | 100.0% (18/18) |
-| Price consistency (shown price = engine for extracted parameters) | 100.0% (67/67) |
+| Price consistency (shown price = engine for extracted parameters) | 100.0% (69/69) |
 | Invented prices (runs with an amount not from the engine) | **0** |
 | Missing / expired / no-rate handling (no price + staff flag) | 100.0% (10/10) |
-| Overall cases passed | 100.0% (54/54) |
+| Overall cases passed | 100.0% (55/55) |
 
 ## Pass rate per requirement
 
 | Requirement | Passed |
 |---|---|
 | 1 Discover the trip | 100.0% (9/9) |
-| 2 Returning visitors | 100.0% (1/1) |
-| 3 Generated UI | 100.0% (5/5) |
+| 2 Returning visitors | 100.0% (2/2) |
+| 3 Generated UI | 100.0% (6/6) |
 | 4 Content only | 100.0% (13/13) |
 | 5 Correct prices | 100.0% (22/22) |
 | 6 Missing/expired rates | 100.0% (11/11) |
@@ -30,12 +30,22 @@
 
 ## Speed
 
-- Per turn: median 39.0 ms, p95 47 ms, max 122 ms (136 turns)
-- Time to first quote: median 42 ms, max 94 ms; under 60 s: 57/57
+- Per turn: median 23.0 ms, p95 46 ms, max 141 ms (138 turns)
+- Time to first quote: median 23.0 ms, max 141 ms; under 60 s: 58/58
+
+## How each turn was understood
+
+- By the LLM: 0 turns · by the rule-based fallback: 138 turns
+
+## Model calls (routing)
+
+| Model | Purpose | Calls | Median ms | Max ms |
+|---|---|---|---|---|
+| none (offline mode) | | | | |
 
 ## LLM judge (behaviour cases)
 
-- Judge model: none · passed 0, failed 0, skipped 31
+- Judge model: none · passed 0, failed 0, skipped 32
 - Behaviour cases without a judge are **skipped, not passed**; their code checks still apply.
 
 ## Failing cases
@@ -100,3 +110,4 @@ None.
 | M35 | [2] | pass | 8/9 passed, 1 skipped |
 | M36 | [8] | pass | 5/6 passed, 1 skipped |
 | M37 | [8] | pass | 9/10 passed, 1 skipped |
+| M38 | [2, 3] | pass | 9/10 passed, 1 skipped |

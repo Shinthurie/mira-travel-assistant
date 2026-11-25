@@ -127,6 +127,7 @@ class TurnState(BaseModel):
     route: list[str] = Field(default_factory=list)
     reply_parts: list[str] = Field(default_factory=list)
     components: list[UIComponent] = Field(default_factory=list)
+    shelf_title: str = "Tours that match"   # "Picked for you" for consented personalisation
     citations: list[dict[str, str]] = Field(default_factory=list)
     retrieved_ids: list[str] = Field(default_factory=list)
     pricing: Optional[dict[str, Any]] = None              # {"kind": "quote"|"no_quote", ...} for traces/evals

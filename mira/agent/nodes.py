@@ -335,6 +335,13 @@ def intake(state: dict, config: RunnableConfig | None = None) -> dict:
                     title = ctx.catalog.content.get(rec.tour_id).title if ctx.catalog.content.get(rec.tour_id) else rec.tour_id
                     turn.reply_parts.append(f"Welcome back. Last time you looked at {title}.")
                     session.slots.tour_id = rec.tour_id
+                    # Personalisation (bonus): only here, i.e. only with consent and stored history.
+                    picks = ctx.resolver.similar_to([rec.tour_id], session.slots.interests)
+                    cards = [c for c in (tour_card(ctx, t, accent) for t, accent in zip(picks, ("teal", "leaf", "sky"))) if c]
+                    if len(cards) >= 2:
+                        turn.reply_parts.append("Based on what you looked at, you might also like these.")
+                        turn.components.extend(cards)
+                        turn.shelf_title = "Picked for you"
 
     with trace.span("intake", as_type="chain", input={"message": text, "known": session.slots}) as span:
         ex, mode = extract(ctx, text, session)
@@ -694,13 +701,13 @@ def enquiry(state: dict, config: RunnableConfig | None = None) -> dict:
     return _out(session, turn)
 
 
-def group_tour_cards(components: list[UIComponent]) -> list[UIComponent]:
+def group_tour_cards(components: list[UIComponent], title: str = "Tours that match") -> list[UIComponent]:
     """Two or more tour cards in one turn become one TourShelf (a swipeable row), placed where the first was."""
     cards = [c for c in components if c.component == "TourCard"]
     if len(cards) < 2:
         return components
     shelf = UIComponent(component="TourShelf", props={
-        "title": "Tours that match", "tours": [c.props for c in cards[:4]]})
+        "title": title, "tours": [c.props for c in cards[:4]]})
     shelf = UIComponent(component="TourShelf", props=validate_component("TourShelf", shelf.props))
     out: list[UIComponent] = []
     for c in components:
@@ -726,7 +733,7 @@ def compose(state: dict, config: RunnableConfig | None = None) -> dict:
                 trace = ctx.trace(_thread_id(config))
                 if trace:
                     trace.event("ui_payload_invalid", {"component": c.component, "error": str(exc)}, level="ERROR")
-        valid = group_tour_cards(valid)
+        valid = group_tour_cards(valid, turn.shelf_title)
         span.output = {"valid": [c.component for c in valid], "fallbacks": turn.ui_fallbacks}
     turn.components = valid
     turn.final_text = "\n\n".join(p for p in turn.reply_parts if p.strip()) or replies.QUESTIONS["tour"]

@@ -11,6 +11,9 @@ import pytest
 # whatever is in the developer's .env.
 os.environ["TODAY"] = "2026-11-19"
 os.environ["PRICING_OVERRIDES_FILE"] = ""
+# Never call a real model from tests, even if the developer's .env has a key (dotenv does not override).
+os.environ["GEMINI_API_KEY"] = ""
+os.environ["GOOGLE_API_KEY"] = ""
 
 from mira.data import load_content, load_decisions, load_workbook  # noqa: E402
 
