@@ -32,4 +32,4 @@
 
 ### Open questions
 - H03 overlapping Peak row: waiting for Senura (currently `conflicting_rate` for 1 Jan to 31 Mar 2027).
-- T06 decision (priced as a 1-day tour + staff flag): Shinthurie to confirm.
+- T06: decided (priced as the 1-day tour the rates define, traveller told "no overnight stay", staff flag on every quote). See DATA_AUDIT A13.

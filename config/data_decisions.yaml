@@ -15,8 +15,13 @@ tours:
     # Front matter says "1 night / 2 days", but the category ("Day tour"), the title, the body
     # ("full day ... drive back to Kandy for a late dinner") and the rates (Day tour, 1 day,
     # 0 nights, no hotel) all describe a one-day tour. Four sources against one.
+    # FINAL (25 Nov, no answer from Sales): price ONLY what the rates define (a 1-day tour, no hotel),
+    # tell the traveller plainly there is no overnight stay, and flag every quote for staff.
+    # The price is never wrong for what is sold: it comes from the workbook's own day-tour rates.
+    # To stop quoting T06 instead, set quotable: false and reason: duration_conflict.
     quotable: true
     display_duration: "1 day"
+    traveller_note: "Please note this is a one-day tour with no overnight stay: you return to Kandy the same evening."
     staff_note: "T06 page says '1 night / 2 days' but the rates and itinerary are a 1-day tour. Please fix the page."
 
 # Hotel rate conflicts (e.g. H03's second Peak row, 1 Jan to 31 Mar 2027) are detected by code

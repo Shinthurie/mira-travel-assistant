@@ -35,6 +35,9 @@ TEASER = ("The \"from\" prices on older pages are not quotes. I'll only show you
 
 FORGOT = "Done. I've deleted what I remembered about you. Future chats start fresh."
 
+PLACES_QUESTION = ("Here are a few tours that could suit. Is there a place you'd love to see, or something you'd "
+                   "like to do, such as beaches, wildlife, tea country or temples? I'll narrow it down.")
+
 QUESTIONS = {
     "tour": "Which trip would you like: a day tour, a few days away, or a longer round trip? If you have a place "
             "in mind, tell me and I'll find the closest tours.",

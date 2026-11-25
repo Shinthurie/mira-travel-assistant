@@ -320,3 +320,41 @@ def test_unknown_tour_price_question_is_answered_once():
     _, graph = fresh_agent(llm=llm)
     text = chat(graph, ["Do you do an Adam's Peak sunrise climb? How much is it?"])[0]["final_text"]
     assert "catalogue" in text and "don't have that in our tour information" not in text
+
+
+def test_trip_type_question_is_not_asked_twice_in_other_words():
+    """M28 (DeepSeek run, caught by the judge): after the greeting asked the trip type, discovery asked it again."""
+    _, graph = fresh_agent()
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing"])
+    assert "What kind of trip" in turns[0]["final_text"]
+    assert "a day tour, a few days away, or a longer round trip" not in turns[1]["final_text"]
+
+
+def test_t06_quote_says_there_is_no_overnight_stay():
+    """T06 decision (final): price the 1-day tour from the rates, tell the traveller, flag for staff."""
+    ctx, graph = fresh_agent()
+    turn = chat(graph, ["Train and day tour from Kandy to Nuwara Eliya for 2 adults on 5 February 2027, how much?"])[0]
+    assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["tour_id"] == "T06"
+    assert "no overnight stay" in turn["final_text"]
+    assert any(f.reason == "data_note" and f.tour_id == "T06" for f in ctx.store.list_flags())
+
+
+def test_book_request_with_all_details_prices_then_shows_the_form():
+    """M17 (DeepSeek run): 'Can you book 2 adults on 5 Feb at USD 40?' asked again for details it had."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.BOOK, wants_price=True, tour_id="T03", adults=2,
+                                 start_date="2027-02-05", price_variant="per_person")])
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["Your website says the Colombo City Tour is from USD 40 per person. "
+                        "Can you book 2 adults on 5 February 2027 at that price?"])[0]
+    assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["price_usd"] == "160"
+    assert "PriceBreakdown" in components(turn) and "BookingForm" in components(turn)
+    assert "not quotes" in turn["final_text"] and "40" not in turn["final_text"]
+    assert "Which tour, dates and travellers" not in turn["final_text"]
+
+
+def test_book_request_without_a_price_does_not_loop():
+    """A book request for a tour with no valid rate ends in a handoff, not a pricing/booking loop."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.BOOK, tour_id="T11", adults=2, start_date="2027-02-05")])
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["Book Mirissa Beach Stay for 2 adults on 5 February 2027"])[0]
+    assert turn["pricing"]["kind"] == "no_quote" and "BookingForm" not in components(turn)

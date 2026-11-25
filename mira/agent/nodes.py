@@ -27,7 +27,7 @@ from pydantic import BaseModel, Field
 
 from mira.agent import replies
 from mira.agent.context import AgentContext, get_context
-from mira.agent.guard import amounts_in, guard_payload, guard_text
+from mira.agent.guard import amounts_in, find_money, guard_payload, guard_text
 from mira.agent.rules import rule_extract
 from mira.agent.state import (
     Extraction,
@@ -509,6 +509,9 @@ def pricing(state: dict, config: RunnableConfig | None = None) -> dict:
             if str(amount) not in session.allowed_amounts:
                 session.allowed_amounts.append(str(amount))
         turn.reply_parts.append(replies.quote_text(t))
+        decision = ctx.catalog.decisions.for_tour(t.tour_id)
+        if decision and decision.traveller_note:
+            turn.reply_parts.append(decision.traveller_note)
         turn.components.append(UIComponent(component="PriceBreakdown", props={
             "quote_ref": record.ref, "tour_id": t.tour_id, "tour_title": t.tour_title,
             "start_date": t.start_date.isoformat(), "end_date": t.end_date.isoformat(), "duration": t.duration,
@@ -617,6 +620,9 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
             slot = unasked[0]
             if slot == "travellers" and s.adults and not s.children_known:
                 question = "Will any children be travelling? If so, how old are they?"
+            elif slot == "tour" and ("trip_type" in session.asked or s.trip_type or s.duration_days):
+                # The greeting already asked what kind of trip (eval M28, found by the judge): ask about places instead.
+                question = replies.PLACES_QUESTION
             else:
                 question = replies.QUESTIONS[slot]
             if slot == "tour":
@@ -694,9 +700,18 @@ def booking(state: dict, config: RunnableConfig | None = None) -> dict:
     ctx = get_context()
     session, turn = load_session(state), load_turn(state)
     _pop(turn, "booking")
+    if not session.quotes and turn.pricing is not None:
+        return _out(session, turn)  # pricing already ran this turn and gave no price: the handoff explains why
     if not session.quotes:
-        turn.reply_parts.append("Let's get you a confirmed price first. Which tour, dates and travellers?")
-        turn.route = ["discovery"] + turn.route
+        # "Can you book 2 adults on 5 Feb at USD 40?" (eval M17, DeepSeek run): price first with the engine,
+        # then come back here for the form. Never ask again for details we already have.
+        if find_money(turn.user_text):
+            turn.reply_parts.append(replies.TEASER)  # an amount the traveller quoted is never a quote
+        if _ready_to_price(session):
+            turn.route = ["pricing", "booking"] + turn.route
+        else:
+            turn.reply_parts.append("Let's get you a confirmed price first.")
+            turn.route = ["discovery"] + turn.route
         return _out(session, turn)
     q = session.quotes[-1]
     turn.reply_parts.append(f"Great choice. Fill in your details to book {q.tour_title}.")

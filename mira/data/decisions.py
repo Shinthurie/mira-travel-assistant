@@ -20,6 +20,7 @@ class TourDecision(BaseModel):
     reason: str | None = None            # NoQuote detail when quotable is False
     display_duration: str | None = None  # replaces a wrong duration from the content page
     staff_note: str                      # always shown to staff (raised as an info flag)
+    traveller_note: str | None = None    # said with every quote, e.g. to correct what a page suggests
 
 
 class DataDecisions(BaseModel):

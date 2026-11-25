@@ -89,7 +89,7 @@ The problem found and fixed through the evals: [docs/FIXED_PROBLEM.md](docs/FIXE
 
 ## Data issues
 
-The dataset is loaded as-is and never modified (a SHA-256 test checks every file). 45 issues are recorded with their handling in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md). The key ones: H02 text rate (parsed), H08 text date (parsed), H10 rates in USD, H04 no single room → no price for solo travellers on T12, H07 expired → no price for T11, H03 overlapping Peak rows → no price for 1 Jan to 31 Mar 2027 (awaiting Sales), T10/T16 no rates, T15 draft, T14 stale promotion (not quotable), T06 duration conflict (priced as a 1-day tour + staff flag), newer policies override older page terms (P02, P03), no photos (placeholder), rates end 31 Oct 2027.
+The dataset is loaded as-is and never modified (a SHA-256 test checks every file). 45 issues are recorded with their handling in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md). The key ones: H02 text rate (parsed), H08 text date (parsed), H10 rates in USD, H04 no single room → no price for solo travellers on T12, H07 expired → no price for T11, H03 overlapping Peak rows → no price for 1 Jan to 31 Mar 2027 (awaiting Sales), T10/T16 no rates, T15 draft, T14 stale promotion (not quotable), T06 duration conflict (priced as the 1-day tour the rates define, traveller told there is no overnight stay, staff flag), newer policies override older page terms (P02, P03), no photos (placeholder), rates end 31 Oct 2027.
 
 Screenshots (desktop and 375px mobile): [docs/screenshots/](docs/screenshots/). Full requirement-by-requirement review: [docs/SYSTEM_REVIEW.md](docs/SYSTEM_REVIEW.md).
 
@@ -100,7 +100,7 @@ Screenshots (desktop and 375px mobile): [docs/screenshots/](docs/screenshots/). 
 - Search is BM25 without synonyms; tour resolution adds a small synonym list, and ambiguous requests fall back to discovery questions.
 - Mira replies arrive as one message (no token streaming), because replies are composed and guarded in code before they are sent.
 - Staff auth is a demo (two seeded users, HMAC tokens); A2UI uses v0.9 because that is what the pinned CopilotKit renderer speaks (the spec's v1.0 is newer).
-- The H03 conflict and the T06 duration decision are judgement calls pending Sales confirmation.
+- The H03 conflict is a judgement call pending Sales confirmation; T06 is decided and documented (DATA_AUDIT A13).
 
 ## AI tools used
 
