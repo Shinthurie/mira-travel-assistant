@@ -16,7 +16,7 @@ import sys
 from mira import config
 
 TEMPLATE = config.REPO_ROOT / "evals" / "human_labels_template.jsonl"
-REPORT = config.REPO_ROOT / "reports" / "eval_report.json"
+REPORT = config.REPO_ROOT / "reports" / "eval_report.json"  # --report picks another run, e.g. the LLM subset
 AGREEMENT = config.REPO_ROOT / "reports" / "judge_agreement.md"
 LABEL_CASES = ["S01", "S07", "S08", "S09", "S12", "S14", "S16", "S17", "M23", "M28"]
 
@@ -93,7 +93,10 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="python -m evals.labels")
     p.add_argument("command", choices=["make", "agreement"])
     p.add_argument("--force", action="store_true")
+    p.add_argument("--report", default="eval_report", help="which run to use: reports/<name>.json")
     a = p.parse_args(argv)
+    global REPORT
+    REPORT = config.REPO_ROOT / "reports" / f"{a.report}.json"
     return make(a.force) if a.command == "make" else agreement()
 
 

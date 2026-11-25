@@ -1,6 +1,6 @@
 # Mira evaluation report
 
-- Generated: 2026-11-25T11:12:43+00:00 · git `9276471-dirty` · today = 2026-11-19
+- Generated: 2026-11-25T11:39:31+00:00 · git `b7d90b2-dirty` · today = 2026-11-19
 - Mode: **offline-rules** · Mira model: none (rule-based extraction) · judge: not available (no API key) · routing: off
 - Margins: day 0.3, multi-day 0.25
 - Cases: 55 (17 seed, 9 multi-turn) · price/flag cases run 3x (worst run counts)
@@ -30,8 +30,8 @@
 
 ## Speed
 
-- Per turn: median 23.0 ms, p95 46 ms, max 141 ms (138 turns)
-- Time to first quote: median 23.0 ms, max 141 ms; under 60 s: 58/58
+- Per turn: median 40.0 ms, p95 49 ms, max 196 ms (138 turns)
+- Time to first quote: median 43.5 ms, max 196 ms; under 60 s: 58/58
 
 ## How each turn was understood
 

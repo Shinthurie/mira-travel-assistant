@@ -80,3 +80,88 @@ def test_all_models_failing_raises_llm_error():
     llm, _ = _gemini({"busy-model", "backup-model"}, ["backup-model"])
     with pytest.raises(LLMError):
         llm.text("sys", "msg")
+
+
+class _NoSystemModels:
+    """Like gemini-2.5-flash on API v1: rejects a separate system instruction."""
+
+    def __init__(self):
+        self.contents = []
+
+    def generate_content(self, model, contents, config):
+        if getattr(config, "system_instruction", None):
+            raise RuntimeError("400 INVALID_ARGUMENT. Developer instruction is not enabled for api version v1.")
+        self.contents.append(contents)
+        return SimpleNamespace(text='{"ok": true}', usage_metadata=None)
+
+
+def test_system_instruction_is_inlined_when_the_model_rejects_it():
+    llm = GeminiLLM(model="no-system-model", api_key="test-key")
+    models = _NoSystemModels()
+    llm._client = SimpleNamespace(models=models)
+    assert llm.structured("JUDGE RULES", "conversation", Out).ok
+    assert models.contents[0].startswith("JUDGE RULES") and models.contents[0].endswith("conversation")
+
+
+# --- DeepSeek provider (no network: a fake HTTP client) -----------------------------------
+
+
+class _FakeHTTP:
+    def __init__(self, replies: list[tuple[int, str]]):
+        self.replies, self.bodies = list(replies), []
+
+    def post(self, url, json):
+        self.bodies.append(json)
+        status, content = self.replies.pop(0)
+        return SimpleNamespace(status_code=status, text=content, json=lambda: {
+            "choices": [{"message": {"content": content}}], "usage": {"prompt_tokens": 10, "completion_tokens": 3}})
+
+
+def _deepseek(replies, reasoning="none"):
+    from mira.llm import DeepSeekLLM
+    llm = DeepSeekLLM("deepseek-flash", "test-key", reasoning=reasoning)
+    llm._http = _FakeHTTP(replies)
+    return llm
+
+
+def test_deepseek_structured_output_puts_the_schema_in_the_prompt(monkeypatch):
+    monkeypatch.setattr("mira.llm.time.sleep", lambda s: None)
+    llm = _deepseek([(200, '{"ok": true}')])
+    assert llm.structured("RULES", "msg", Out).ok
+    body = llm._http.bodies[0]
+    assert body["response_format"] == {"type": "json_object"}
+    assert "json" in body["messages"][0]["content"] and '"ok"' in body["messages"][0]["content"]
+    assert body["temperature"] == 0.0 and body["reasoning_effort"] == "none"
+
+
+def test_deepseek_retries_blank_content_and_overload(monkeypatch):
+    monkeypatch.setattr("mira.llm.time.sleep", lambda s: None)
+    llm = _deepseek([(503, ""), (200, "   "), (200, '{"ok": true}')])
+    assert llm.structured("RULES", "msg", Out).ok
+    assert len(llm._http.bodies) == 3
+
+
+def test_deepseek_gives_up_with_llm_error(monkeypatch):
+    monkeypatch.setattr("mira.llm.time.sleep", lambda s: None)
+    llm = _deepseek([(429, ""), (429, ""), (429, "")])
+    with pytest.raises(LLMError):
+        llm.text("RULES", "msg")
+
+
+def test_judge_uses_a_different_deepseek_model(monkeypatch):
+    from mira.llm import get_llm
+    monkeypatch.setenv("MIRA_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("JUDGE_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
+    monkeypatch.setenv("MIRA_MODEL", "")
+    monkeypatch.setenv("JUDGE_MODEL", "")
+    mira, judge = get_llm("mira"), get_llm("judge")
+    assert mira.model == "deepseek-flash" and judge.model == "deepseek-v4-pro"
+    assert judge.reasoning == "low"
+
+
+def test_no_deepseek_key_means_offline(monkeypatch):
+    from mira.llm import get_llm
+    monkeypatch.setenv("MIRA_LLM_PROVIDER", "deepseek")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "")
+    assert get_llm("mira") is None

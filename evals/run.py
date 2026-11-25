@@ -397,12 +397,13 @@ def summarise(cases: list[dict], results: dict[str, list[RunResult]], judge_info
     }
 
 
-def write_report(summary: dict) -> Path:
+def write_report(summary: dict, name: str = "eval_report") -> Path:
     s = summary
     t = s["targets"]
     lines = [
         "# Mira evaluation report", "",
-        f"- Generated: {s['generated_at']} · git `{s['git_sha']}` · today = {s['today']}",
+        f"- Generated: {s['generated_at']} · git `{s['git_sha']}` · today = {s['today']}"
+        + (f" · judge re-run on the saved transcripts at {s['rejudged_at']}" if s.get("rejudged_at") else ""),
         f"- Mode: **{s['mode']}** · Mira model: {s['mira_model'] or 'none (rule-based extraction)'} · "
         f"judge: {s['judge_model'] or 'not available (no API key)'} · routing: "
         f"{('simple turns -> ' + s['routing_small_model']) if s.get('routing_small_model') else 'off'}",
@@ -455,17 +456,57 @@ def write_report(summary: dict) -> Path:
     REPORT_DIR.mkdir(exist_ok=True)
     (REPORT_DIR / "history").mkdir(exist_ok=True)
     md, js = "\n".join(lines) + "\n", json.dumps(s, indent=2, default=str)
-    (REPORT_DIR / "eval_report.md").write_text(md, encoding="utf-8")
-    (REPORT_DIR / "eval_report.json").write_text(js, encoding="utf-8")
+    (REPORT_DIR / f"{name}.md").write_text(md, encoding="utf-8")
+    (REPORT_DIR / f"{name}.json").write_text(js, encoding="utf-8")
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     (REPORT_DIR / "history" / f"{stamp}_{s['git_sha']}.md").write_text(md, encoding="utf-8")
     (REPORT_DIR / "history" / f"{stamp}_{s['git_sha']}.json").write_text(js, encoding="utf-8")
-    return REPORT_DIR / "eval_report.md"
+    return REPORT_DIR / f"{name}.md"
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
+
+def rejudge(name: str) -> int:
+    """Re-run ONLY the judge on the transcripts saved in reports/<name>.json (no new Mira calls).
+
+    Used when the judge was unavailable during a run (quota, an API error) but Mira's turns are fine.
+    Code checks are kept exactly as they were; only the judge verdicts and the totals change."""
+    from evals.judge import Judge
+    path = REPORT_DIR / f"{name}.json"
+    s = json.loads(path.read_text(encoding="utf-8"))
+    behaviours = {c["id"]: c["expected"].get("behaviour") for c in load_cases()}
+    judge = Judge()
+    if not judge.available:
+        print("No judge model configured (no API key).")
+        return 1
+    for case in s["cases"]:
+        behaviour = behaviours.get(case["id"])
+        check = next((c for c in case["checks"] if c["name"] == "judge_behaviour"), None)
+        if not behaviour or check is None or case["error"]:
+            continue
+        v = judge.judge(behaviour, case["transcript"])
+        check["passed"] = None if v is None else v.verdict == "pass"
+        check["detail"] = (judge.last_error or "no judge") if v is None else v.reason
+        case["passed"] = all(c["passed"] is not False for c in case["checks"])
+        print(f"{case['id']:4} judge: {'skipped' if v is None else v.verdict}")
+    per_req: dict[str, list[bool]] = {}
+    for case in s["cases"]:
+        for r in case["requirements"]:
+            per_req.setdefault(str(r), []).append(case["passed"])
+    s["per_requirement"] = {k: {"passed": sum(v), "total": len(v)} for k, v in sorted(per_req.items(), key=lambda x: int(x[0]))}
+    s["totals"]["passed"] = sum(c["passed"] for c in s["cases"])
+    judged = [c for case in s["cases"] for c in case["checks"] if c["kind"] == "judge"]
+    s["judge"].update(model=judge.model, passed=sum(c["passed"] is True for c in judged),
+                      failed=sum(c["passed"] is False for c in judged), skipped=sum(c["passed"] is None for c in judged))
+    s["judge_model"] = judge.model
+    s["rejudged_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    write_report(s, name)
+    print(f"\n{s['totals']['passed']}/{s['totals']['cases']} cases passed · judge {s['judge']['passed']} pass, "
+          f"{s['judge']['failed']} fail, {s['judge']['skipped']} skipped")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -479,7 +520,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--repeats", type=int, default=3, help="runs for price/flag cases (worst counts)")
     p.add_argument("--no-judge", action="store_true")
     p.add_argument("--offline", action="store_true", help="force rule-based mode even if a key is set")
+    p.add_argument("--case", action="append", help="only this case id (repeatable), e.g. --case S07")
+    p.add_argument("--report-name", default="eval_report",
+                   help="write reports/<name>.md/.json (e.g. a partial run that must not replace the full report)")
+    p.add_argument("--rejudge", metavar="REPORT_NAME",
+                   help="only re-run the judge on the transcripts saved in reports/<name>.json")
     args = p.parse_args(argv)
+    if args.rejudge:
+        return rejudge(args.rejudge)
 
     from mira.llm import add_call_hook, get_llm
     from evals.judge import Judge
@@ -492,6 +540,8 @@ def main(argv: list[str] | None = None) -> int:
     cases = load_cases()
     if args.tag:
         cases = [c for c in cases if set(args.tag) & set(c["tags"])]
+    if args.case:
+        cases = [c for c in cases if c["id"] in set(args.case)]
     if args.max_cases:
         cases = cases[: args.max_cases]
 
@@ -518,7 +568,7 @@ def main(argv: list[str] | None = None) -> int:
     summary = summarise(cases, results, {"mira_model": getattr(mira_llm, "model", None),
                                          "small_model": getattr(getattr(mira_llm, "small", None), "model", None),
                                          "judge_model": judge.model, "available": judge.available}, args)
-    path = write_report(summary)
+    path = write_report(summary, args.report_name)
     t = summary["targets"]
     print(f"\n{summary['totals']['passed']}/{summary['totals']['cases']} cases passed · golden "
           f"{t['price_accuracy_golden']['passed']}/{t['price_accuracy_golden']['total']} · consistency "

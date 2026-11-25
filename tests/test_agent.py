@@ -8,6 +8,8 @@ from decimal import Decimal
 import pytest
 
 from mira.agent.guard import find_money
+from mira.agent.nodes import LLMExtraction
+from mira.agent.state import Intent
 from mira.llm import FakeLLM
 from mira.ui.a2ui import validate_operations
 from tests.agent_helpers import chat, components, data_models, fresh_agent
@@ -281,3 +283,40 @@ def test_no_personalised_picks_without_consent(agent):
     turn = chat(graph, ["Hello"], visitor_id="visitor-picks-2")[0]
     assert not any(c["component"] == "TourShelf" and c["props"]["title"] == "Picked for you"
                    for c in turn["components"])
+
+
+# --- Regressions found by the free-tier LLM eval run (25 Nov) ---------------------------
+
+
+def test_llm_calling_an_open_trip_custom_is_overruled_by_code():
+    """M28 (LLM): Gemini labelled 'a few days somewhere relaxing' as a custom plan -> specialist handoff."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING),
+                   LLMExtraction(intent=Intent.PLAN_CUSTOM, trip_type="custom", duration_days=3)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "We'd like a few days somewhere relaxing"])
+    assert "planned and priced by our specialists" not in turns[1]["final_text"]
+    assert not any(c == "EnquiryConfirmation" for c in components(turns[1]))
+
+
+def test_explicit_custom_request_still_reaches_the_planner():
+    llm = FakeLLM([LLMExtraction(intent=Intent.PLAN_CUSTOM, trip_type="custom", duration_days=12)])
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["Can you plan a custom 12-day trip with tea country and beaches?"])[0]
+    assert "specialists" in turn["final_text"]
+
+
+def test_not_sure_during_discovery_is_not_sent_to_content_search():
+    """M28 (LLM): 'Not sure yet' was read as a question -> 'I don't have that in our tour information'."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.GREETING), LLMExtraction(intent=Intent.INFO, wants_info=True)])
+    _, graph = fresh_agent(llm=llm)
+    turns = chat(graph, ["Hi there", "Not sure yet"])
+    assert "don't have that in our tour information" not in turns[1]["final_text"]
+    assert any(c == "TourCard" for c in components(turns[1])) or turns[1]["question_slot"]
+
+
+def test_unknown_tour_price_question_is_answered_once():
+    """S16 (LLM): 'not in our information' and 'not in our catalogue' were both said."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True, wants_price=True), "Not found.\nSOURCES:"])
+    _, graph = fresh_agent(llm=llm)
+    text = chat(graph, ["Do you do an Adam's Peak sunrise climb? How much is it?"])[0]["final_text"]
+    assert "catalogue" in text and "don't have that in our tour information" not in text

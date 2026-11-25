@@ -14,6 +14,7 @@ The LLM never sees or writes a price. Prices only come from mira.pricing via the
 
 
 import json
+import re
 import logging
 import uuid
 from datetime import date
@@ -217,6 +218,15 @@ def validate_extraction(ctx: AgentContext, ex: Extraction, text: str) -> Extract
         data["tour_id"] = ctx.resolver.resolve(text, data.get("duration_days"))
     if mentions_service(text):
         data["tour_id"] = None
+    # The model tends to call any open-ended trip "custom" (eval M28, LLM run). A custom plan goes to the
+    # specialists, so it is only accepted when the traveller's words support it (the rule extractor agrees).
+    asks_for_custom = re.search(r"\b(custom|tailor\w*|bespoke|plan\w*|itinerary|design|our own)\b", text, re.I)
+    if not asks_for_custom:
+        rules = rule_extract(text, ctx.today)
+        if data.get("intent") == Intent.PLAN_CUSTOM:
+            data["intent"] = rules.intent
+        if data.get("trip_type") == "custom":
+            data["trip_type"] = rules.trip_type
     return Extraction.model_validate(data)
 
 
@@ -280,6 +290,10 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
     if intent == Intent.PLAN_CUSTOM:
         return ["planner"]
     route: list[str] = []
+    # "Not sure yet" in the middle of discovery is an answer, not a question for the content search
+    # (eval M28, LLM run): keep helping with the trip instead of saying "not in our information".
+    if session.asked and not ex.wants_price and not looks_like_question(text) and not _ready_to_price(session):
+        return ["discovery"]
     if intent == Intent.INFO or ex.wants_info:
         route.append("answer")
     if intent == Intent.QUOTE or ex.wants_price:
@@ -292,6 +306,15 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
         elif "answer" in route:
             route.append("no_tour_handoff")
     return route or ["answer"]
+
+
+QUESTION_START = re.compile(r"^\s*(what|how|when|where|which|who|why|do|does|did|is|are|can|could|should|will|"
+                            r"would|tell me|explain|any)\b", re.I)
+
+
+def looks_like_question(text: str) -> bool:
+    """A question for the content search ("Do infants travel free?"), as opposed to an answer ("Not sure yet")."""
+    return "?" in text or bool(QUESTION_START.search(text))
 
 
 def _ready_to_price(session: MiraSession) -> bool:
@@ -421,12 +444,11 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
                 log.warning("grounded answer failed: %s", exc)
                 result = None
             span.output = result
-        if result is not None:
+        if result is not None and result.supported:
             turn.reply_parts.append(result.text)
-            if result.supported:
-                turn.citations = [c.model_dump() for c in result.citations]
-            else:
-                turn.reply_parts[-1] = NO_ANSWER_TEXT
+            turn.citations = [c.model_dump() for c in result.citations]
+        elif "no_tour_handoff" not in turn.route:  # the handoff already says we don't have it (S16)
+            turn.reply_parts.append(NO_ANSWER_TEXT)
     elif hits and "no_tour_handoff" not in turn.route:
         # Offline mode: quote the most relevant passages verbatim (extractive, so nothing is invented).
         top = [h for h in hits if h.reason == "superseding_policy"][:2] + [h for h in hits if h.reason == "bm25"][:3]
@@ -435,7 +457,7 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
         turn.reply_parts.append("Here's what our pages say:\n" + "\n".join(lines) +
                                 "\nThat's everything our pages cover on this. If you need more, I can ask our team.")
         turn.citations = [citation_for(h).model_dump() for h in top]
-    else:
+    elif "no_tour_handoff" not in turn.route:
         turn.reply_parts.append(NO_ANSWER_TEXT)
 
     if turn.citations:

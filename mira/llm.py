@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import time
 from dataclasses import dataclass, field
@@ -94,8 +95,7 @@ class GeminiLLM:
         response, used, errors = None, self.model, []
         for used in [self.model, *self.fallbacks]:
             try:
-                response = self._client.models.generate_content(
-                    model=used, contents=user, config=self._types.GenerateContentConfig(**cfg))
+                response = self._call(used, system, user, cfg)
                 break
             except Exception as exc:  # network, quota, safety...
                 errors.append(f"{used}: {type(exc).__name__}: {str(exc)[:120]}")
@@ -111,6 +111,20 @@ class GeminiLLM:
                         latency_ms=int((time.perf_counter() - start) * 1000), usage=usage))
         return text
 
+    def _call(self, model: str, system: str, user: str, cfg: dict[str, Any]) -> Any:
+        """One request. Some models reject a separate system instruction ("Developer instruction is not
+        enabled"); for those the instruction is sent at the top of the message instead."""
+        try:
+            return self._client.models.generate_content(
+                model=model, contents=user, config=self._types.GenerateContentConfig(**cfg))
+        except Exception as exc:
+            if "Developer instruction is not enabled" not in str(exc):
+                raise
+            inline = {k: v for k, v in cfg.items() if k != "system_instruction"}
+            return self._client.models.generate_content(
+                model=model, contents=f"{system}\n\n---\n\n{user}",
+                config=self._types.GenerateContentConfig(**inline))
+
     def structured(self, system: str, user: str, schema: type[T], purpose: str = "") -> T:
         raw = self._generate(system, user, purpose, schema)
         try:
@@ -122,7 +136,74 @@ class GeminiLLM:
         return self._generate(system, user, purpose, None).strip()
 
 
-ROUTE_COMPLEX_WORDS = ("plan", "custom", "itinerary", "compare", "instead", "change", "and also")
+class DeepSeekLLM:
+    """DeepSeek via its OpenAI-compatible HTTP API (plain ``httpx``, no extra SDK).
+
+    JSON mode does not enforce a schema, so the Pydantic schema is put in the system prompt and the
+    reply is validated by code. DeepSeek can return blank content when its JSON output fails; that
+    counts as a failed attempt and is retried, like 429/5xx."""
+
+    URL = "https://api.deepseek.com/chat/completions"
+
+    def __init__(self, model: str, api_key: str, reasoning: str = "none", attempts: int = 3):
+        import httpx
+
+        self.model, self.reasoning, self.attempts = model, reasoning, attempts
+        self._http = httpx.Client(timeout=120.0, headers={"Authorization": f"Bearer {api_key}"})
+
+    def _post(self, body: dict[str, Any]) -> dict[str, Any]:
+        last = ""
+        for attempt in range(self.attempts):
+            try:
+                r = self._http.post(self.URL, json=body)
+                if r.status_code in (429, 500, 502, 503, 504):
+                    last = f"HTTP {r.status_code}"
+                elif r.status_code != 200:
+                    raise LLMError(f"{self.model}: HTTP {r.status_code}: {r.text[:200]}")
+                else:
+                    data = r.json()
+                    if (data["choices"][0]["message"].get("content") or "").strip():
+                        return data
+                    last = "blank content"
+            except LLMError:
+                raise
+            except Exception as exc:  # network error, bad JSON body
+                last = f"{type(exc).__name__}: {exc}"
+            time.sleep(2 * (attempt + 1))
+        raise LLMError(f"{self.model}: {last} after {self.attempts} attempts")
+
+    def _generate(self, system: str, user: str, purpose: str, schema: type[BaseModel] | None) -> str:
+        body: dict[str, Any] = {"model": self.model, "messages": [
+            {"role": "system", "content": system}, {"role": "user", "content": user}],
+            "max_tokens": 4000, "reasoning_effort": self.reasoning}
+        if self.reasoning == "none":
+            body["temperature"] = 0.0  # ignored in thinking mode, so only sent without it
+        if schema is not None:
+            body["messages"][0]["content"] = (
+                f"{system}\n\nReply with one json object that matches this JSON schema exactly:\n"
+                f"{json.dumps(schema.model_json_schema())}")
+            body["response_format"] = {"type": "json_object"}
+        start = time.perf_counter()
+        data = self._post(body)
+        text = data["choices"][0]["message"]["content"]
+        u = data.get("usage") or {}
+        _report(LLMCall(model=self.model, purpose=purpose, system=system, user=user, output=text,
+                        latency_ms=int((time.perf_counter() - start) * 1000),
+                        usage={"input": u.get("prompt_tokens", 0), "output": u.get("completion_tokens", 0)}))
+        return text
+
+    def structured(self, system: str, user: str, schema: type[T], purpose: str = "") -> T:
+        raw = self._generate(system, user, purpose, schema)
+        try:
+            return schema.model_validate_json(raw)
+        except Exception as exc:
+            raise LLMError(f"{self.model} returned invalid {schema.__name__}: {raw[:200]!r}") from exc
+
+    def text(self, system: str, user: str, purpose: str = "") -> str:
+        return self._generate(system, user, purpose, None).strip()
+
+
+ROUTE_COMPLEX_WORDS =("plan", "custom", "itinerary", "compare", "instead", "change", "and also")
 
 
 def is_simple_message(text: str) -> bool:
@@ -171,8 +252,25 @@ def _api_key() -> str:
     return (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
 
 
+def _provider(role: str) -> str:
+    """"google" (default) or "deepseek", from MIRA_LLM_PROVIDER / JUDGE_LLM_PROVIDER."""
+    name = "JUDGE_LLM_PROVIDER" if role == "judge" else "MIRA_LLM_PROVIDER"
+    return (os.environ.get(name, "").strip().lower() or "google")
+
+
+def _deepseek(role: str) -> LLM | None:
+    key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    if not key:
+        return None
+    if role == "judge":  # Pro model with light reasoning: a different, stronger model than Mira's
+        return DeepSeekLLM(os.environ.get("JUDGE_MODEL", "").strip() or "deepseek-v4-pro", key, reasoning="low")
+    return DeepSeekLLM(os.environ.get("MIRA_MODEL", "").strip() or "deepseek-flash", key, reasoning="none")
+
+
 def get_llm(role: str = "mira") -> LLM | None:
     """The configured model for ``role`` ("mira" or "judge"), or None if there's no API key."""
+    if _provider(role) == "deepseek":
+        return _deepseek(role)
     key = _api_key()
     if not key:
         return None

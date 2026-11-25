@@ -40,7 +40,7 @@ The parts that decide the score are strong and proven: prices only ever come fro
 
 | Requirement | Status | Evidence / gap |
 |---|---|---|
-| ≥40 cases incl. 17 seeds, ≥5 multi-turn, every requirement, off-topic, injection | Met | 54 cases, 8 multi-turn, tagged by requirement |
+| ≥40 cases incl. 17 seeds, ≥5 multi-turn, every requirement, off-topic, injection | Met | 55 cases, 9 multi-turn, tagged by requirement |
 | Code checks where there is an exact answer | Met | Golden, consistency, invented amounts, flags, UI validity, drafts never used, leaks, PII in traces |
 | LLM judge checked against 10 hand-labelled cases, agreement reported | **Not yet** | Judge and `evals/labels.py` are built; **needs the key and your 10 labels**. By design the labels can only come from you. |
 | One command, report with pass rates per requirement and trace links | Met | `python -m evals.run` → `reports/eval_report.md` + JSON + history |
@@ -63,7 +63,7 @@ The parts that decide the score are strong and proven: prices only ever come fro
 | Free-form LLM tool-calling agent (ReAct) | Rules must live in code; a deterministic router makes every decision testable and traceable | Not recommended for pricing; could be used for small talk only |
 | Token streaming of replies | Replies are composed and price-guarded in code *before* sending; streaming would show unguarded text | Stream only after the guard (sentence by sentence) |
 | Prompt management/versioning in Langfuse | No Langfuse keys during the build | Move the 3 system prompts to Langfuse prompts |
-| Langfuse datasets/experiments for evals | Same | Push the 54 cases as a dataset and log runs as experiments |
+| Langfuse datasets/experiments for evals | Same | Push the 55 cases as a dataset and log runs as experiments |
 | Property-based tests for pricing (Hypothesis) | Time; golden + boundary tests cover the rules | ~1 hour: random travellers/dates, check invariants (multiple of 5, deposit ≤ price) |
 | Browser tests in CI (Playwright) | Playwright is used locally for screenshots; CI runs Python only to stay fast and keyless | Add a CI job that starts offline mode and runs 3 browser flows |
 | Production auth (OAuth/SSO), rate limiting, CSP headers | Out of scope for a take-home demo | An identity provider, a rate limiter on `/agent`, security headers in Next.js |
@@ -78,7 +78,7 @@ The parts that decide the score are strong and proven: prices only ever come fro
 | Working system (core 25, extended 10) | 35 | Strong. Every requirement works end to end in the browser and is tested. Risk: a live question in LLM mode that the rules never met; mitigated by the guard, which cannot be bypassed. |
 | Agent design and generative UI | 25 | Strong. Clear node responsibilities, typed state, A2UI fixed and dynamic surfaces, validation on both sides. Found and worked around a real CopilotKit SDK bug (`mira/agui.py`). |
 | Evaluation and tracing | 25 | Good, **not yet complete**: the judge, agreement and Langfuse traces need the keys and your labels. The code-check side is unusually thorough (consistency vs golden, worst of 3 runs, history). |
-| Code quality and demo | 15 | Good. Small modules with docstrings, 246 tests, CI green, demo script and video plan written. |
+| Code quality and demo | 15 | Good. Small modules with docstrings, 255 tests, CI green, demo script and video plan written. |
 | Bonus | +10 | MCP done; routing and personalization not done. |
 
 The hard cap ("an invented or wrong price caps the score at 50") is the main risk in any demo. Here it is defended three times: the model never sees prices, the engine is golden-tested, and the guard removes any amount that isn't an engine value from the same conversation (red-teamed with 20 attacks).

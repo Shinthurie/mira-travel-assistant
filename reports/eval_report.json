@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-25T11:12:43+00:00",
-  "git_sha": "9276471-dirty",
+  "generated_at": "2026-11-25T11:39:31+00:00",
+  "git_sha": "b7d90b2-dirty",
   "mode": "offline-rules",
   "mira_model": null,
   "routing_small_model": null,
@@ -73,13 +73,13 @@
   },
   "latency_ms": {
     "turns": 138,
-    "p50": 23.0,
-    "p95": 46,
-    "max": 141
+    "p50": 40.0,
+    "p95": 49,
+    "max": 196
   },
   "time_to_first_quote_ms": {
-    "median": 23.0,
-    "max": 141,
+    "median": 43.5,
+    "max": 196,
     "under_60s": 58,
     "total": 58
   },
@@ -143,10 +143,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/67699d454a5a4c5a9e7ac477b0bdd09e.json"
+        "local://traces/eff0b7e4a3f24e7a9a8ee188cd064bdd.json"
       ],
       "latencies_ms": [
-        53
+        51
       ],
       "modes": [
         "rules"
@@ -217,12 +217,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/6115199e6d444bcda9bcfd7812e343f7.json"
+        "local://traces/f421f3ee445f4592a9debbd45f3bf13b.json"
       ],
       "latencies_ms": [
-        50,
-        32,
-        44
+        53,
+        44,
+        43
       ],
       "modes": [
         "rules",
@@ -230,9 +230,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        50,
-        32,
-        44
+        53,
+        44,
+        43
       ],
       "transcript": [
         {
@@ -253,7 +253,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-F6E24327"
+            "quote_ref": "Q-4B09C130"
           }
         }
       ]
@@ -315,15 +315,15 @@
         }
       ],
       "trace_urls": [
-        "local://traces/b83a03cff2504095a13c53c3baeec3cb.json",
-        "local://traces/e80fdec3b0554939a0de86c86cd87f0a.json"
+        "local://traces/f8ab18c5d71d402981c84a331eb99942.json",
+        "local://traces/5f095163772941a3aa24e60c87a7339d.json"
       ],
       "latencies_ms": [
-        31,
-        48,
+        30,
+        43,
+        26,
+        43,
         27,
-        47,
-        29,
         40
       ],
       "modes": [
@@ -335,9 +335,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        79,
-        75,
-        70
+        74,
+        69,
+        68
       ],
       "transcript": [
         {
@@ -373,7 +373,7 @@
                 10
               ]
             },
-            "quote_ref": "Q-01C551FF"
+            "quote_ref": "Q-9CC07AEB"
           }
         }
       ]
@@ -444,12 +444,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/942bae86084d483fbe7ab55ef57e0c5d.json"
+        "local://traces/da0ce0a4556f49e7bbb5614e3c33317f.json"
       ],
       "latencies_ms": [
-        40,
-        38,
-        40
+        41,
+        41,
+        39
       ],
       "modes": [
         "rules",
@@ -539,12 +539,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/0f349851bfea493c8e2e697d9dd9c3b7.json"
+        "local://traces/2bb51d143eb04d379115ed50d3113cd1.json"
       ],
       "latencies_ms": [
-        34,
+        40,
         41,
-        43
+        45
       ],
       "modes": [
         "rules",
@@ -642,12 +642,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/3184bf0a4cd34f5f9befd07b042903f5.json"
+        "local://traces/5bf43b48340b41f497c600e6aecac176.json"
       ],
       "latencies_ms": [
-        45,
-        51,
-        46
+        47,
+        46,
+        45
       ],
       "modes": [
         "rules",
@@ -745,10 +745,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/ea6b9f23a8da4e5fa33f279281714095.json"
+        "local://traces/c151a054f0bc45b9927e95130316a374.json"
       ],
       "latencies_ms": [
-        27
+        33
       ],
       "modes": [
         "rules"
@@ -836,10 +836,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a85a2e6bc4eb4c0bb96bcde4891ba84c.json"
+        "local://traces/3c6d262ba9f24420ba026a6aba361da2.json"
       ],
       "latencies_ms": [
-        27
+        26
       ],
       "modes": [
         "rules"
@@ -924,10 +924,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/c2438da30e134ef5a71bada036b13aa1.json"
+        "local://traces/8e6c2251b77a4e13a4975088f549dc96.json"
       ],
       "latencies_ms": [
-        28
+        29
       ],
       "modes": [
         "rules"
@@ -1011,10 +1011,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/4ba899c2dd734207b67ff6746c9cf00d.json"
+        "local://traces/0855f2037ba64851b29f93ce6a9a9d8a.json"
       ],
       "latencies_ms": [
-        19
+        21
       ],
       "modes": [
         "rules"
@@ -1090,12 +1090,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7996af3b4eef416fa8069d44efeab3ad.json"
+        "local://traces/70a855123fbf490c9491f881f1e292ed.json"
       ],
       "latencies_ms": [
-        36,
         39,
-        34
+        38,
+        37
       ],
       "modes": [
         "rules",
@@ -1166,10 +1166,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/23ca1cf609fa4759903920047d40f9e3.json"
+        "local://traces/81d70ef50d8444ac8f517d9e84fbf27a.json"
       ],
       "latencies_ms": [
-        26
+        30
       ],
       "modes": [
         "rules"
@@ -1250,20 +1250,20 @@
         }
       ],
       "trace_urls": [
-        "local://traces/48b8f2b398df4544bd2fe591a2233d81.json",
-        "local://traces/52dea51b940c4b939ccbde9d04b0121f.json",
-        "local://traces/ecb6d7063c724f9caef8e8af6adee001.json"
+        "local://traces/05cef95409964bcf951c300a482809c3.json",
+        "local://traces/d2714570bdd74b558f41c814cb81cc69.json",
+        "local://traces/794cd5ab0f274934acc7a4918f9ee97c.json"
       ],
       "latencies_ms": [
-        26,
-        43,
-        34,
-        28,
-        42,
+        25,
+        41,
+        32,
+        24,
         44,
-        26,
-        43,
-        41
+        35,
+        23,
+        41,
+        34
       ],
       "modes": [
         "rules",
@@ -1277,9 +1277,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        70,
-        70,
-        70
+        66,
+        69,
+        65
       ],
       "transcript": [
         {
@@ -1310,7 +1310,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-6657DF09"
+            "quote_ref": "Q-35CB11EA"
           }
         },
         {
@@ -1331,7 +1331,7 @@
               "adults": 4,
               "child_ages": []
             },
-            "quote_ref": "Q-BFAF860E"
+            "quote_ref": "Q-BEEC8E78"
           }
         }
       ]
@@ -1383,10 +1383,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7eeccc984ef04719963de158cb628c07.json"
+        "local://traces/bad3b9185211482a92e864a8b19ce0c3.json"
       ],
       "latencies_ms": [
-        19
+        18
       ],
       "modes": [
         "rules"
@@ -1456,12 +1456,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/1dfd939f846d483baa79032f0314c50b.json"
+        "local://traces/8264e582f99a45478817a2151b5bb94e.json"
       ],
       "latencies_ms": [
-        48,
-        41,
-        46
+        46,
+        45,
+        39
       ],
       "modes": [
         "rules",
@@ -1469,9 +1469,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        48,
-        41,
-        46
+        46,
+        45,
+        39
       ],
       "transcript": [
         {
@@ -1494,7 +1494,7 @@
                 1
               ]
             },
-            "quote_ref": "Q-AF01714A"
+            "quote_ref": "Q-D85CB017"
           }
         }
       ]
@@ -1547,10 +1547,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/5f54a5909dc64f7b825d791d51a819b3.json"
+        "local://traces/0a95c78cbf2742d2ab77c4fa94fbde15.json"
       ],
       "latencies_ms": [
-        42
+        43
       ],
       "modes": [
         "rules"
@@ -1559,7 +1559,7 @@
       "transcript": [
         {
           "user": "Do you do an Adam's Peak sunrise climb? How much is it?",
-          "text": "I don't have that in our tour information, so I won't guess. I can pass your question to our team as an enquiry, and a specialist will get back to you.\n\nWe don't have that as a tour in our catalogue, so I can't give you a price. I can pass the request to our team as a custom enquiry.",
+          "text": "We don't have that as a tour in our catalogue, so I can't give you a price. I can pass the request to our team as a custom enquiry.",
           "components": [
             "SpecialistHandoff"
           ],
@@ -1619,10 +1619,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/92027721206149c8aff60af1ccbaecd2.json"
+        "local://traces/81c89e6f93d849cc9c44e15e3864a81c.json"
       ],
       "latencies_ms": [
-        30
+        28
       ],
       "modes": [
         "rules"
@@ -1714,12 +1714,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/015996dd034e4e1abe339947224eb865.json"
+        "local://traces/813fa63a956a4262829c5d4b221a68c4.json"
       ],
       "latencies_ms": [
-        46,
-        42,
-        39
+        41,
+        50,
+        49
       ],
       "modes": [
         "rules",
@@ -1727,9 +1727,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        46,
         42,
-        39
+        51,
+        49
       ],
       "transcript": [
         {
@@ -1750,7 +1750,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-29074928"
+            "quote_ref": "Q-71ED192B"
           }
         }
       ]
@@ -1809,12 +1809,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/2707c02690574ac6aa64938eb4014104.json"
+        "local://traces/8a6f0fef33404eb4a0ebc712d4393ae4.json"
       ],
       "latencies_ms": [
-        20,
-        21,
-        24
+        44,
+        40,
+        38
       ],
       "modes": [
         "rules",
@@ -1822,9 +1822,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        20,
-        21,
-        24
+        45,
+        40,
+        38
       ],
       "transcript": [
         {
@@ -1845,7 +1845,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-7FCD8A1B"
+            "quote_ref": "Q-E1BF7E41"
           }
         }
       ]
@@ -1903,12 +1903,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/1bf8d0506498404ba264a1e9e98bba9a.json"
+        "local://traces/b853fe487d81491fa042897e12e08095.json"
       ],
       "latencies_ms": [
-        20,
-        21,
-        23
+        42,
+        39,
+        42
       ],
       "modes": [
         "rules",
@@ -1916,9 +1916,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        20,
-        21,
-        23
+        42,
+        39,
+        42
       ],
       "transcript": [
         {
@@ -1939,7 +1939,7 @@
               "adults": 4,
               "child_ages": []
             },
-            "quote_ref": "Q-EEAF0370"
+            "quote_ref": "Q-F48D69B1"
           }
         }
       ]
@@ -2010,12 +2010,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/91c7a6c0efab4c158fcf259677bb34cc.json"
+        "local://traces/5691f6040fb34b7f9d8d38e9aae1eb97.json"
       ],
       "latencies_ms": [
-        23,
-        20,
-        19
+        41,
+        42,
+        39
       ],
       "modes": [
         "rules",
@@ -2098,12 +2098,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/db17abc13f5b4ae6ac45eb8b05d787e5.json"
+        "local://traces/64180e06abf54cde9b9fbce47826383a.json"
       ],
       "latencies_ms": [
-        11,
-        9,
-        12
+        20,
+        20,
+        20
       ],
       "modes": [
         "rules",
@@ -2197,12 +2197,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/18a4630c19cb4aa7848781a86e55aa6d.json"
+        "local://traces/3860bff57eaa446dbf3db39b23d1bd96.json"
       ],
       "latencies_ms": [
-        21,
-        24,
-        20
+        37,
+        94,
+        37
       ],
       "modes": [
         "rules",
@@ -2285,12 +2285,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a8956892d06641d59b3efc252a36119f.json"
+        "local://traces/2c96066fe9994760a022f27d0f9cd239.json"
       ],
       "latencies_ms": [
-        23,
-        23,
-        25
+        42,
+        35,
+        41
       ],
       "modes": [
         "rules",
@@ -2298,9 +2298,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        23,
-        23,
-        25
+        42,
+        35,
+        41
       ],
       "transcript": [
         {
@@ -2321,7 +2321,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-F0506C3F"
+            "quote_ref": "Q-2D47BA48"
           }
         }
       ]
@@ -2379,12 +2379,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/5991c96a70ea42008fd3e514e5566104.json"
+        "local://traces/69a8f7f35c674a749472d966b8f6fc35.json"
       ],
       "latencies_ms": [
-        19,
-        22,
-        20
+        39,
+        46,
+        40
       ],
       "modes": [
         "rules",
@@ -2392,9 +2392,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        19,
-        22,
-        20
+        39,
+        46,
+        40
       ],
       "transcript": [
         {
@@ -2415,7 +2415,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-FECDF09C"
+            "quote_ref": "Q-912E0517"
           }
         }
       ]
@@ -2486,12 +2486,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/c9ca5ea0a32348b7a0905404439c8f54.json"
+        "local://traces/49cd885166c945af903957b64a3a0216.json"
       ],
       "latencies_ms": [
-        20,
-        22,
-        20
+        42,
+        38,
+        36
       ],
       "modes": [
         "rules",
@@ -2587,12 +2587,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/db1b60f56c034a65a7c404155842f4ce.json"
+        "local://traces/6fc0de7a39c44af8b96dc13b27012a9a.json"
       ],
       "latencies_ms": [
-        22,
-        24,
-        24
+        37,
+        42,
+        45
       ],
       "modes": [
         "rules",
@@ -2688,12 +2688,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/dd3910e79a434ec4aa2e17c11bfb939f.json"
+        "local://traces/f482ffaa71b94c1eb6ab22b9038dcc79.json"
       ],
       "latencies_ms": [
-        23,
-        21,
-        20
+        36,
+        42,
+        38
       ],
       "modes": [
         "rules",
@@ -2776,12 +2776,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/3b68295bcb9b43b7b7a9db91886ea6a7.json"
+        "local://traces/3e1852f58b0e460785ed10194120d962.json"
       ],
       "latencies_ms": [
-        24,
-        24,
-        26
+        51,
+        49,
+        44
       ],
       "modes": [
         "rules",
@@ -2789,9 +2789,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        24,
-        24,
-        26
+        51,
+        49,
+        44
       ],
       "transcript": [
         {
@@ -2812,7 +2812,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-C5B5D286"
+            "quote_ref": "Q-ED1E243F"
           }
         }
       ]
@@ -2870,12 +2870,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7bf31ea3d62f4be2b7faa8794768ef57.json"
+        "local://traces/f1cb170daf71432e8252569197da6e1d.json"
       ],
       "latencies_ms": [
-        21,
-        21,
-        21
+        46,
+        42,
+        46
       ],
       "modes": [
         "rules",
@@ -2883,9 +2883,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        21,
-        21,
-        21
+        46,
+        42,
+        46
       ],
       "transcript": [
         {
@@ -2906,7 +2906,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-A13BE4C7"
+            "quote_ref": "Q-944909C6"
           }
         }
       ]
@@ -2972,16 +2972,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/0e50a9dd9b78409a9098a92aed24527b.json",
-        "local://traces/e3e5ea6b5625455abbbf3eb49ebdc279.json"
+        "local://traces/d52955a8c3e64e3a9ebe8341304db8b0.json",
+        "local://traces/0af9dd6620e54c35b52539e44d3e77b9.json"
       ],
       "latencies_ms": [
-        23,
-        11,
-        141,
-        9,
-        22,
-        10
+        39,
+        19,
+        196,
+        21,
+        49,
+        21
       ],
       "modes": [
         "rules",
@@ -2992,9 +2992,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        23,
-        141,
-        22
+        40,
+        196,
+        49
       ],
       "transcript": [
         {
@@ -3018,7 +3018,7 @@
                 10
               ]
             },
-            "quote_ref": "Q-2CE5654C"
+            "quote_ref": "Q-65B6CAB3"
           }
         },
         {
@@ -3091,16 +3091,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/c0f6dfbc5dc84a6699efa82fb7130411.json",
-        "local://traces/438e09643612478ebe4b9743b49c4139.json"
+        "local://traces/0c42bccc791c40338eee7fbadb99053d.json",
+        "local://traces/3981bdd2039647ee85e05ff5514b4dc1.json"
       ],
       "latencies_ms": [
-        22,
-        12,
-        23,
-        12,
-        21,
-        9
+        43,
+        19,
+        42,
+        18,
+        43,
+        19
       ],
       "modes": [
         "rules",
@@ -3111,9 +3111,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        22,
-        23,
-        21
+        43,
+        42,
+        43
       ],
       "transcript": [
         {
@@ -3134,7 +3134,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-72E642D9"
+            "quote_ref": "Q-C0B6535A"
           }
         },
         {
@@ -3213,16 +3213,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/6044c87adf064c4889b53321574b56f6.json",
-        "local://traces/489d21f07afa42b982fc431b7ac743cd.json"
+        "local://traces/83ad8ece91ce42d7877cce676540e0e7.json",
+        "local://traces/926924cb289c4ea0974bac8efc8db439.json"
       ],
       "latencies_ms": [
-        22,
-        18,
-        22,
-        21,
-        20,
-        21
+        42,
+        35,
+        44,
+        34,
+        42,
+        33
       ],
       "modes": [
         "rules",
@@ -3233,9 +3233,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        22,
-        22,
-        20
+        42,
+        44,
+        42
       ],
       "transcript": [
         {
@@ -3256,7 +3256,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-BBA3327E"
+            "quote_ref": "Q-CC49D593"
           }
         },
         {
@@ -3277,7 +3277,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-6EF1A1B0"
+            "quote_ref": "Q-EE701D6C"
           }
         }
       ]
@@ -3342,12 +3342,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/916dbb1e961f403f8a190563007b6bda.json"
+        "local://traces/c65f425520c14ddb9d9eecfb3976f7a3.json"
       ],
       "latencies_ms": [
-        22,
-        23,
-        20
+        41,
+        42,
+        47
       ],
       "modes": [
         "rules",
@@ -3355,9 +3355,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        22,
-        23,
-        20
+        41,
+        42,
+        47
       ],
       "transcript": [
         {
@@ -3378,7 +3378,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-95555B16"
+            "quote_ref": "Q-6C2D040B"
           }
         }
       ]
@@ -3437,12 +3437,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7c2b29d54bfd48cba874489a8d138286.json"
+        "local://traces/d9c0caa057d948ba8c7aaa063a0dfe16.json"
       ],
       "latencies_ms": [
-        21,
-        24,
-        21
+        40,
+        45,
+        41
       ],
       "modes": [
         "rules",
@@ -3450,9 +3450,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        21,
-        24,
-        21
+        40,
+        45,
+        41
       ],
       "transcript": [
         {
@@ -3473,7 +3473,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-17CFBD94"
+            "quote_ref": "Q-66DF8177"
           }
         }
       ]
@@ -3538,16 +3538,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/d005dafa09994cc1988bd40c705d7c29.json",
-        "local://traces/ad9fe1cb2bae4b12bed1b13f905f7728.json"
+        "local://traces/620584b185d844a5b5a154c2022f469b.json",
+        "local://traces/93d0ac5261b04773a5b745300102297f.json"
       ],
       "latencies_ms": [
-        24,
-        17,
-        23,
-        19,
-        24,
-        18
+        44,
+        31,
+        44,
+        35,
+        44,
+        32
       ],
       "modes": [
         "rules",
@@ -3558,9 +3558,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        24,
-        23,
-        24
+        44,
+        44,
+        44
       ],
       "transcript": [
         {
@@ -3581,7 +3581,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-1D370D4C"
+            "quote_ref": "Q-3A0A10AE"
           }
         },
         {
@@ -3604,7 +3604,7 @@
                 5
               ]
             },
-            "quote_ref": "Q-DFBA833B"
+            "quote_ref": "Q-5733E1E7"
           }
         }
       ]
@@ -3662,10 +3662,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/91ef4f1fc43344d4ac4c6eb705a2dfe6.json"
+        "local://traces/c056b39430664d19b1c151efdcce755f.json"
       ],
       "latencies_ms": [
-        10
+        18
       ],
       "modes": [
         "rules"
@@ -3734,10 +3734,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/90a505cd7ecc4a32bb825164070e67f6.json"
+        "local://traces/c3b69e82e272480f95e4ed88bd8e324e.json"
       ],
       "latencies_ms": [
-        9
+        17
       ],
       "modes": [
         "rules"
@@ -3806,10 +3806,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/0d9fdd2db78a40739c7129b04e53eedd.json"
+        "local://traces/35441ee4a06e42d5b7d21bcd3bf309bb.json"
       ],
       "latencies_ms": [
-        8
+        18
       ],
       "modes": [
         "rules"
@@ -3878,10 +3878,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/39df1a86e27b4e8b9fca27d8f4180a7e.json"
+        "local://traces/90dce0845873474a9858a05df1f1280c.json"
       ],
       "latencies_ms": [
-        16
+        26
       ],
       "modes": [
         "rules"
@@ -3972,10 +3972,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7a53b091d70847f3bebe9fffe9d925b9.json"
+        "local://traces/4bf7fe591d674659bde79ef8cd0471c4.json"
       ],
       "latencies_ms": [
-        14
+        28
       ],
       "modes": [
         "rules"
@@ -4066,10 +4066,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/5836617ea2eb45f2a6ebca5dbe4a7451.json"
+        "local://traces/4ff1a30993794c10977bc0b8bc8b20ea.json"
       ],
       "latencies_ms": [
-        13
+        25
       ],
       "modes": [
         "rules"
@@ -4159,10 +4159,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/2e511245eacb49d7a236455eaefc8ed4.json"
+        "local://traces/50d2a36736d04c0f91be28db9f627e8e.json"
       ],
       "latencies_ms": [
-        16
+        29
       ],
       "modes": [
         "rules"
@@ -4246,10 +4246,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/eaf5f301d1d44c40871332df9e200b73.json"
+        "local://traces/a64f9e6e9b454b7bb25c1b5499410242.json"
       ],
       "latencies_ms": [
-        15
+        28
       ],
       "modes": [
         "rules"
@@ -4347,14 +4347,14 @@
         }
       ],
       "trace_urls": [
-        "local://traces/878a8a0a278448aa897fbbd76ea7edf6.json",
-        "local://traces/e0e9e3650ede478da52755012142521d.json",
-        "local://traces/fa8c666fa26a463989a420c544d1d3c7.json"
+        "local://traces/2955601a1dda43aaa9c015fad1e0dcd5.json",
+        "local://traces/2fa2f267ba7b497ebb87ecaa9e72a4e8.json",
+        "local://traces/d78a5ed06ddd4dd48020a3cb9be6dfbf.json"
       ],
       "latencies_ms": [
-        11,
-        14,
-        11
+        17,
+        30,
+        22
       ],
       "modes": [
         "rules",
@@ -4448,12 +4448,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/5dac3fca1a104110be3d2563f18d8d0c.json"
+        "local://traces/314b617ecef14696b52c64e8613569d5.json"
       ],
       "latencies_ms": [
-        21,
-        21,
-        22
+        38,
+        38,
+        41
       ],
       "modes": [
         "rules",
@@ -4461,9 +4461,9 @@
         "rules"
       ],
       "first_quote_ms": [
-        21,
-        21,
-        22
+        38,
+        38,
+        41
       ],
       "transcript": [
         {
@@ -4484,7 +4484,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-94F96363"
+            "quote_ref": "Q-01C60CC5"
           }
         }
       ]
@@ -4557,12 +4557,12 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a672504f359a40918efb6c5c4f77a8c5.json"
+        "local://traces/d95182a4255b43cf8b40c7db8a4f2c0c.json"
       ],
       "latencies_ms": [
-        20,
-        23,
-        21
+        42,
+        50,
+        35
       ],
       "modes": [
         "rules",
@@ -4637,10 +4637,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/7d9f7f3a4cf0453f88963f55c3cf6b7c.json"
+        "local://traces/14853113aaeb476a8787bc110460d0e0.json"
       ],
       "latencies_ms": [
-        10
+        19
       ],
       "modes": [
         "rules"
@@ -4715,16 +4715,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/f502d221710c44c391ef4e515014ae97.json"
+        "local://traces/e49f2e955ad64816916e24f52846febb.json"
       ],
       "latencies_ms": [
-        20
+        40
       ],
       "modes": [
         "rules"
       ],
       "first_quote_ms": [
-        20
+        40
       ],
       "transcript": [
         {
@@ -4745,7 +4745,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-BA80E18D"
+            "quote_ref": "Q-973B2D20"
           }
         }
       ]
@@ -4804,10 +4804,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/58b9efc1b7cc4eccacf620a8c5f22ad2.json"
+        "local://traces/5c976d6d509a41968a0c591ac8958a8b.json"
       ],
       "latencies_ms": [
-        16
+        22
       ],
       "modes": [
         "rules"
@@ -4885,16 +4885,16 @@
         }
       ],
       "trace_urls": [
-        "local://traces/b62ebc54fc2e4925a38998f9ae21f4d8.json"
+        "local://traces/ecb0b23f151c4590a324970c610bc3eb.json"
       ],
       "latencies_ms": [
-        25
+        45
       ],
       "modes": [
         "rules"
       ],
       "first_quote_ms": [
-        25
+        45
       ],
       "transcript": [
         {
@@ -4915,7 +4915,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-2E349896"
+            "quote_ref": "Q-572422CA"
           }
         }
       ]
@@ -4992,19 +4992,19 @@
         }
       ],
       "trace_urls": [
-        "local://traces/a947e182e69b47b5a5a06d268ec0f57f.json",
-        "local://traces/1db276d964654ae7896d85507780811d.json"
+        "local://traces/cd08a2573bb94ea9b0fb296665e274ed.json",
+        "local://traces/bed7e318e7974a3da02c0514ec27fa36.json"
       ],
       "latencies_ms": [
-        24,
-        25
+        46,
+        47
       ],
       "modes": [
         "rules",
         "rules"
       ],
       "first_quote_ms": [
-        24
+        46
       ],
       "transcript": [
         {
@@ -5025,7 +5025,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-1C490B7E"
+            "quote_ref": "Q-CF28A78D"
           }
         },
         {
@@ -5050,7 +5050,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-36E82F24"
+            "quote_ref": "Q-2B0D761A"
           }
         }
       ]
@@ -5108,10 +5108,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/cebc011f893e4b02a9cab7ad83363414.json"
+        "local://traces/1056adee5ab04ddc884f9981a095a4f4.json"
       ],
       "latencies_ms": [
-        14
+        27
       ],
       "modes": [
         "rules"
@@ -5225,10 +5225,10 @@
         }
       ],
       "trace_urls": [
-        "local://traces/3954d72d9c1641ca8a315b4d06c3b9cd.json"
+        "local://traces/f923755d6a2248b392f16f7e02fd0882.json"
       ],
       "latencies_ms": [
-        28
+        43
       ],
       "modes": [
         "rules"
@@ -5358,19 +5358,19 @@
         }
       ],
       "trace_urls": [
-        "local://traces/5cf97a777656488fa8562bff274f0333.json",
-        "local://traces/a18d9b51bc164d21a1ddf8b9b7b405eb.json"
+        "local://traces/b0d96e8f042440f8b59f2c07e65a59f4.json",
+        "local://traces/6512b291f314471e8b73d10d20e17926.json"
       ],
       "latencies_ms": [
-        23,
-        21
+        42,
+        36
       ],
       "modes": [
         "rules",
         "rules"
       ],
       "first_quote_ms": [
-        23
+        42
       ],
       "transcript": [
         {
@@ -5391,7 +5391,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-BBDA919B"
+            "quote_ref": "Q-4BF2498D"
           }
         },
         {
@@ -5416,7 +5416,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-2A596AD8"
+            "quote_ref": "Q-6D174B3D"
           }
         }
       ]

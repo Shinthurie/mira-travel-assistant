@@ -21,7 +21,7 @@ Other commands:
 
 | Command | What it does |
 |---|---|
-| `pytest` | 246 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
+| `pytest` | 255 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
 | `python -m evals.run` | Evaluation suite → `reports/eval_report.md` (+ JSON, + `reports/history/`) |
 | `python -m evals.run --tag pricing` | Just the pricing/flag cases (for the live margin change) |
 | `python -m mira.pricing T09 2027-04-12 --adults 2 --children 7 10` | Staff price breakdown from the engine |
@@ -83,7 +83,7 @@ One message, end to end:
 
 ## Evaluation (latest: [reports/eval_report.md](reports/eval_report.md))
 
-54 cases (17 seeds loaded unchanged + 37 of ours, 8 multi-turn), each tagged with requirements. Code checks wherever there is an exact answer (price **consistency**: shown = engine; **golden**: engine = brief; no invented amounts; flags raised; UI payloads valid; no draft content; no cost/margin leaks; PII absent from traces). An LLM judge using a different model scores behaviour, calibrated against 10 cases labelled by hand (`evals/human_labels_template.jsonl` → `python -m evals.labels agreement`). Price and flag cases run 3× and the worst run counts.
+55 cases (17 seeds loaded unchanged + 38 of ours, 9 multi-turn), each tagged with requirements. Code checks wherever there is an exact answer (price **consistency**: shown = engine; **golden**: engine = brief; no invented amounts; flags raised; UI payloads valid; no draft content; no cost/margin leaks; PII absent from traces). An LLM judge using a different model scores behaviour, calibrated against 10 cases labelled by hand (`evals/human_labels_template.jsonl` → `python -m evals.labels agreement`). Price and flag cases run 3× and the worst run counts.
 
 The problem found and fixed through the evals: [docs/FIXED_PROBLEM.md](docs/FIXED_PROBLEM.md) (a tour mentioned in passing was priced instead of the tour asked about).
 
