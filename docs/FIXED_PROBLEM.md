@@ -2,7 +2,7 @@
 
 ## The problem
 
-Eval case **M18** (a red-team case for CLAUDE.md rule 3, "prices of other tours mentioned in passing"):
+Eval case **M18** (a red-team case for project rule 3 (README), "prices of other tours mentioned in passing"):
 
 > "We loved Treasures of Sri Lanka last year! This time, what's the price of the Kandy City Tour for 2 adults on 5 February 2027?"
 

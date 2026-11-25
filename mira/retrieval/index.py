@@ -29,7 +29,7 @@ INJECTION_PATTERNS = [
     re.compile(r"\bignore (your|all|any|previous|the) (instructions|rules|pricing)", re.IGNORECASE),
     re.compile(r"\b(note for the ai|ai assistant|language model|system prompt)\b", re.IGNORECASE),
 ]
-# Discount or promotion claims. Mira never offers discounts (CLAUDE.md rule 3).
+# Discount or promotion claims. Mira never offers discounts (project rule 3 (README)).
 DISCOUNT_PATTERN = re.compile(
     r"\b(save|knock(ed)?|get|off|discount)\b[^.]*\d+\s*%|\d+\s*%\s*(off|discount)", re.IGNORECASE)
 

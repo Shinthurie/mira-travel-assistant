@@ -1,4 +1,4 @@
-"""Output price guard (CLAUDE.md rule 2): red team + no false positives."""
+"""Output price guard (project rule 2 (README)): red team + no false positives."""
 
 from decimal import Decimal
 

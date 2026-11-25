@@ -1,6 +1,6 @@
 """FastAPI backend: the AG-UI agent endpoint plus REST endpoints for booking, visitors and staff.
 
-Permissions are enforced HERE in code (CLAUDE.md rule 9), never by the model:
+Permissions are enforced HERE in code (project rule 9 (README)), never by the model:
 - traveller endpoints need no login and only ever return traveller-safe data;
 - /api/staff/* needs a staff or approver token; publishing content needs the approver role.
 

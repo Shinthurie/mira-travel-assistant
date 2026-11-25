@@ -43,3 +43,9 @@ evals/.cache/
 *.db-shm
 *.sqlite-wal
 *.sqlite-shm
+
+# Personal working files kept locally, not in the repo
+private/
+CLAUDE.md
+docs/PROMPTS.md
+docs/brief/

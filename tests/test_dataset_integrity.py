@@ -1,4 +1,4 @@
-"""Prove the dataset is exactly as received (CLAUDE.md rule 13)."""
+"""Prove the dataset is exactly as received (project rule 13 (README))."""
 
 from __future__ import annotations
 
