@@ -228,13 +228,26 @@ export default function Page() {
   const [visitorSetter, setVisitorSetter] = useState<((id: string | null) => void) | null>(null);
   const registerSetter = useCallback((fn: (id: string | null) => void) => setVisitorSetter(() => fn), []);
   const onConsent = useCallback((id: string | null) => visitorSetter?.(id), [visitorSetter]);
+  // Small screens: the side panel is hidden behind a menu button and opens below the header.
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <CopilotKitProvider runtimeUrl="/api/copilotkit" a2ui={{ catalog: miraCatalog }} enableInspector={false}>
-      <div className="shell">
+      <div className={`shell${menuOpen ? " side-open" : ""}`}>
         <aside className="side">
+          <button className="menu-btn" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}
+            aria-controls="side-body" onClick={() => setMenuOpen(!menuOpen)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              {menuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
           <a className="brand" href="/"><CompassMark /><span>Ceylon Compass<small>Holidays</small></span></a>
-          <div className="side-body">
+          <div className="side-body" id="side-body">
             <h2>Plan and price your Sri Lanka trip in one conversation.</h2>
             <SidePanel />
           </div>

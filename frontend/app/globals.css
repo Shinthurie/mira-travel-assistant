@@ -459,3 +459,20 @@ h1, h2, h3, p { margin: 0; }
 .shell .steps { list-style: none; padding-left: 0; counter-reset: step; display: grid; gap: var(--cc-space-2); }
 .shell .steps li { counter-increment: step; display: grid; grid-template-columns: 22px 1fr; gap: var(--cc-space-2); align-items: start; }
 .shell .steps li::before { content: counter(step); width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--cc-orange); color: var(--cc-orange); font-size: 11px; font-weight: var(--cc-weight-semibold); display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+
+/* Small screens: menu button (three lines) opens the side panel below the header; the chat shrinks. */
+.menu-btn { display: none; }
+@media (max-width: 960px) {
+  .menu-btn {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--cc-line); background: var(--cc-paper); cursor: pointer;
+    transition: border-color var(--cc-fast);
+  }
+  .menu-btn:hover { border-color: var(--cc-ink); }
+  .menu-btn svg { width: 20px; height: 20px; fill: none; stroke: var(--cc-ink); stroke-width: 1.8; stroke-linecap: round; }
+  .shell.side-open .side { flex-wrap: wrap; align-content: start; max-height: 75dvh; overflow-y: auto; }
+  .shell.side-open .side-body { display: block; flex: 1 1 100%; order: 3; padding-top: var(--cc-space-2); }
+  .shell.side-open .side-foot { display: flex; flex: 1 1 100%; order: 4; }
+  .shell.side-open .side-body h2 { display: none; }
+  .shell.side-open .side-sections { margin-top: 0; }
+}
