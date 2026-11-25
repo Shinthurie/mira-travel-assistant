@@ -364,3 +364,36 @@ h1, h2, h3, p { margin: 0; }
 .side-tours button:hover { background: var(--cc-paper); }
 .side-tours small { color: var(--cc-muted); white-space: nowrap; font-size: var(--cc-text-xs); }
 .side .consent { padding: var(--cc-space-3); gap: var(--cc-space-2); }
+
+/* Sources: one quiet line naming the page(s); the sections open on demand. */
+.sources-pill { max-width: var(--cc-card-max); margin: var(--cc-space-1) 0; font-size: var(--cc-text-sm); }
+.sources-pill summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  padding: 4px 12px; border: 1px solid var(--cc-line); border-radius: var(--cc-radius-button);
+  color: var(--cc-muted); background: var(--cc-paper); transition: border-color var(--cc-fast);
+}
+.sources-pill summary::-webkit-details-marker { display: none; }
+.sources-pill summary::after { content: "▸"; font-size: 10px; margin-left: 2px; }
+.sources-pill[open] summary::after { content: "▾"; }
+.sources-pill summary:hover { border-color: var(--cc-ink); color: var(--cc-ink); }
+.sources-names { color: var(--cc-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sources-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cc-leaf); flex: none; }
+.sources-pill .sources { margin-top: var(--cc-space-2); padding: var(--cc-space-3); border: 1px solid var(--cc-line); border-radius: var(--cc-radius-card); background: var(--cc-paper); }
+
+/* Tour card: what's included, as a checklist in the card's single accent colour. */
+.included { background: var(--accent-soft); border-radius: var(--cc-radius-input); padding: var(--cc-space-3); }
+.included-head { font-size: var(--cc-text-xs); text-transform: uppercase; letter-spacing: 0.07em; font-weight: var(--cc-weight-semibold); color: var(--cc-muted); margin-bottom: var(--cc-space-2); }
+.included ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.included li { display: flex; align-items: flex-start; gap: var(--cc-space-2); font-size: var(--cc-text-sm); }
+.included svg { flex: none; width: 16px; height: 16px; margin-top: 2px; fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Phones: the side panel spacing above is for desktop only. */
+@media (max-width: 960px) {
+  .side { padding: var(--cc-space-3) var(--cc-space-4); gap: var(--cc-space-3); }
+  .side .consent { padding: 0; }
+  .side .consent p { white-space: nowrap; }
+}
+@media (max-width: 400px) {
+  .side .consent p { white-space: normal; font-size: 11px; }
+  .brand small { display: none; }
+}
+@media (max-width: 960px) { .shell { grid-template-columns: minmax(0, 1fr); } .side { min-width: 0; } }

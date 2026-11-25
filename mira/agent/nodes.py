@@ -97,7 +97,7 @@ def _clean_passage(text: str, limit: int = 280) -> str:
     return cut[:end + 1] if end > 60 else cut.rsplit(" ", 1)[0] + "..."
 
 
-def tour_card(ctx: AgentContext, tour_id: str, accent: str = "teal") -> UIComponent | None:
+def tour_card(ctx: AgentContext, tour_id: str, accent: str = "teal", with_inclusions: bool = False) -> UIComponent | None:
     doc = ctx.catalog.content.get(tour_id)
     if doc is None or not doc.is_published:
         return None
@@ -108,7 +108,21 @@ def tour_card(ctx: AgentContext, tour_id: str, accent: str = "teal") -> UICompon
     return UIComponent(component="TourCard", props={
         "tour_id": doc.id, "title": doc.title, "category": doc.category or "", "duration": duration,
         "places": [d.replace("-", " ").title() for d in doc.destinations], "summary": summary,
-        "priceable": ctx.resolver.priceable(doc.id), "source_ref": f"{doc.id}#overview", "accent": accent})
+        "priceable": ctx.resolver.priceable(doc.id), "source_ref": f"{doc.id}#overview", "accent": accent,
+        "included": inclusions(ctx, doc.id) if with_inclusions else []})
+
+
+ASKS_ABOUT_INCLUSIONS = re.compile(r"includ|inclusion|what do (we|i) get|what'?s in it|covered", re.I)
+
+
+def inclusions(ctx: AgentContext, tour_id: str) -> list[str]:
+    """The bullet lines of the tour page's Inclusions section, from the CLEANED published passage
+    (instruction-like, discount and superseded lines are already removed at index time)."""
+    for p in ctx.retriever.passages:
+        if p.doc_id == tour_id and p.section.lower().startswith("inclusion"):
+            items = [line.strip()[2:].strip() for line in p.text.splitlines() if line.strip().startswith("- ")]
+            return [i for i in items if i][:12]
+    return []
 
 
 def itinerary_days(ctx: AgentContext, tour_id: str, limit: int = 3) -> list[UIComponent]:
@@ -506,7 +520,7 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
             "sources": turn.citations[:8], "accent": "leaf"}))
     tour_id = turn.extraction.tour_id if turn.extraction else None
     if tour_id and not any(c.component == "TourCard" for c in turn.components):
-        card = tour_card(ctx, tour_id)
+        card = tour_card(ctx, tour_id, with_inclusions=bool(ASKS_ABOUT_INCLUSIONS.search(turn.user_text)))
         if card:
             turn.components.insert(0, card)
             # Multi-day tour: show the first days of its itinerary (ItineraryDay cards, from content only).

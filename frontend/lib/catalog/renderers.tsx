@@ -219,6 +219,12 @@ function TourCardView({ p }: { p: z.infer<(typeof resolved)["TourCard"]> }) {
       <h3 className="cc-title">{p.title}</h3>
       <p className="tour-summary">{p.summary}</p>
       <div className="chips">{p.places.map((x) => <span key={x} className="chip">{x}</span>)}</div>
+      {p.included && p.included.length > 0 && (
+        <div className="included">
+          <p className="included-head">What&apos;s included</p>
+          <ul>{p.included.map((x) => <li key={x}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>{x}</li>)}</ul>
+        </div>
+      )}
       <div className="cc-actions">
         {p.priceable ? (
           <button className="btn btn-primary" onClick={() => say(`I'd like a price for ${p.title}.`)}>Get a price</button>
@@ -313,15 +319,26 @@ function SourceCitation({ props }: { props: unknown }) {
   const v = useValid("SourceCitation", props);
   if (!v.success) return <Fallback name="sources" />;
   const p = v.data;
+  // One entry per page, with its sections listed (the same page cited three times reads as noise).
+  const pages: { doc_id: string; title: string; sections: string[]; note: string }[] = [];
+  for (const s of p.sources) {
+    const page = pages.find((x) => x.doc_id === s.doc_id);
+    if (page) { if (!page.sections.includes(s.section)) page.sections.push(s.section); }
+    else pages.push({ doc_id: s.doc_id, title: s.title, sections: [s.section], note: s.note || "" });
+  }
+  const current = pages.filter((x) => !x.note);
+  const named = (current.length ? current : pages).map((x) => x.title).join(", ");
+  // Requirement 4: the source is always named; the detail opens only if the traveller wants it.
   return (
-    <Card accent={p.accent} testid="source-citation">
-      <div className="cc-kicker">Where this comes from</div>
+    <details className="sources-pill" data-testid="source-citation">
+      <summary><span className="sources-dot" />Source{pages.length > 1 ? "s" : ""}: <span className="sources-names">{named}</span></summary>
       <ul className="sources">
-        {p.sources.map((s) => (
-          <li key={s.passage_id} className={s.note ? "older" : undefined}><span className="ref">{s.doc_id}</span><span>{s.title} <span className="cc-muted">· {s.section}</span>{s.note && <span className="src-note">{s.note}</span>}</span></li>
+        {pages.map((x) => (
+          <li key={x.doc_id} className={x.note ? "older" : undefined}><span className="ref">{x.doc_id}</span>
+            <span>{x.title} <span className="cc-muted">· {x.sections.join(", ")}</span>{x.note && <span className="src-note">{x.note}</span>}</span></li>
         ))}
       </ul>
-    </Card>
+    </details>
   );
 }
 

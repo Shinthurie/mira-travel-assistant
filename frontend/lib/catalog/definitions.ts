@@ -15,7 +15,7 @@ const DOptStr = DynamicStringSchema.nullable().optional();
 const TourCardSchema = z.object({
   accent: Accent, tour_id: z.string(), title: z.string(), category: z.string(), duration: z.string(),
   places: z.array(z.string()).max(10), summary: z.string(), priceable: z.boolean(),
-  image: z.literal("placeholder"), source_ref: z.string(),
+  image: z.literal("placeholder"), source_ref: z.string(), included: z.array(z.string()).max(12).optional(),
 }).strict();
 
 export const resolved = {

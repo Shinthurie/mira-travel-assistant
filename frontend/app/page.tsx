@@ -66,7 +66,7 @@ function Consent({ onChange }: { onChange: (visitorId: string | null) => void })
         </>
       ) : (
         <>
-          <p><span className="long">Want me to remember your trip details next time? Nothing is stored unless you say yes.</span><span className="short">Remember my trip next time?</span></p>
+          <p><span className="long">Want me to remember your trip details next time? Nothing is stored unless you say yes.</span><span className="short">Remember my trip?</span></p>
           <button className="btn btn-small" onClick={allow}><span className="long">Yes, remember me</span><span className="short">Yes</span></button>
         </>
       )}

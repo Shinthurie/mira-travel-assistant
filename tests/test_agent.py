@@ -410,3 +410,18 @@ def test_older_page_source_is_listed_last_and_labelled():
     ordered = order_citations(ctx, cites)
     assert ordered[0]["passage_id"] == other.passage_id
     assert ordered[1]["note"].startswith("Older page: terms replaced by")
+
+
+def test_inclusions_question_shows_the_pages_inclusions_on_the_tour_card():
+    """Inclusions come from the cleaned published page, drawn as a checklist (not from the model)."""
+    _, graph = fresh_agent()
+    turn = chat(graph, ["What's included in the Colombo City Tour?"])[0]
+    card = next(c for c in turn["components"] if c["component"] == "TourCard")
+    assert card["props"]["included"] == ["Private vehicle and guide", "Temple entrance", "Lunch"]
+
+
+def test_tour_cards_carry_no_inclusions_unless_asked():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["Tell me about the Colombo City Tour."])[0]
+    card = next(c for c in turn["components"] if c["component"] == "TourCard")
+    assert card["props"]["included"] == []

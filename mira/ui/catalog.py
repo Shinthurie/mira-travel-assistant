@@ -86,6 +86,7 @@ class TourCardProps(_Props):
     priceable: bool
     image: Literal["placeholder"] = "placeholder"   # the dataset has no photos
     source_ref: str
+    included: list[str] = Field(default_factory=list, max_length=12)  # from the page's Inclusions section
 
 
 class ItineraryDayProps(_Props):
