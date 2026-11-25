@@ -326,3 +326,8 @@ h1, h2, h3, p { margin: 0; }
 @media (max-width: 960px) {
   .welcome-staff { display: block; align-self: center; margin-top: var(--cc-space-4); font-size: var(--cc-text-xs); color: var(--cc-muted); text-underline-offset: 3px; }
 }
+/* Welcome fills the screen: centred whenever it fits (any width), top-aligned only when it doesn't.
+   The input lines up with the starter cards (CopilotKit pads its wrapper 16px each side). */
+.welcome { justify-content: safe center !important; }
+@media (max-width: 960px) { .welcome { padding-top: var(--cc-space-4); padding-bottom: var(--cc-space-4); } }
+.welcome-input div:has(> [data-testid="copilot-chat-input"]) { padding-left: 0; padding-right: 0; }
