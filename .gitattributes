@@ -3,7 +3,6 @@
 * text=auto
 # Keep the dataset and brief byte-for-byte identical on every OS (the SHA-256 test depends on it).
 data/** -text
-docs/brief/** -text
 *.xlsx binary
 *.pdf binary
 *.docx binary

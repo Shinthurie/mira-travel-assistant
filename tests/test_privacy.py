@@ -1,4 +1,4 @@
-"""PII never reaches traces (CLAUDE.md rule 10)."""
+"""PII never reaches traces (project rule 10 (README))."""
 
 import json
 

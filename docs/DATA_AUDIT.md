@@ -12,7 +12,7 @@ Status column:
 
 Every issue the loader finds at run time is also returned as a `DataIssue` record (`python -m mira.data` prints them).
 
-## A. Confirmed from CLAUDE.md section 6
+## A. Known data issues confirmed in code
 
 | # | Issue | Verified evidence | Handling | Test |
 |---|---|---|---|---|

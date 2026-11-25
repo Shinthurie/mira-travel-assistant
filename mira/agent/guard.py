@@ -1,4 +1,4 @@
-"""Output price guard (CLAUDE.md rule 2): runs on EVERY reply and UI payload before it leaves.
+"""Output price guard (project rule 2 (README)): runs on EVERY reply and UI payload before it leaves.
 
 Every money amount must equal a USD value from a quote produced by the pricing engine in this
 conversation (``allowed``), or a USD amount stated in a policy passage cited in this turn

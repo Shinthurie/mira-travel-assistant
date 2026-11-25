@@ -1,4 +1,4 @@
-"""PII redaction: names, emails and phone numbers never go to traces or logs (CLAUDE.md rule 10).
+"""PII redaction: names, emails and phone numbers never go to traces or logs (project rule 10 (README)).
 
 Applied by our tracing wrapper to every payload AND passed to Langfuse as its ``mask`` hook,
 so there are two independent layers. Tested in tests/test_privacy.py.

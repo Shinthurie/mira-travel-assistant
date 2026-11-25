@@ -11,7 +11,7 @@ The parts that decide the score are strong and proven: prices only ever come fro
 | # | Requirement | Status | Evidence | Gaps and why |
 |---|---|---|---|---|
 | 1 | Discover trip type and traveller type in at most 3 questions, then show something useful | **Met** | `discovery` node: one question per turn, never repeats a question, shows tours with the first question (`test_discovery_*`, evals S01, S13, M28, M33) | Wording of questions is fixed text, not LLM-written. Chosen on purpose: deterministic, on-brand and testable. |
-| 3 | Agent chooses UI from a fixed catalog (≥5), brand-styled, mobile + desktop | **Met** | 9 components (PriceBreakdown, BookingForm, SpecialistHandoff, EnquiryConfirmation, TourCard, TourShelf, ItineraryDay, TravellerPicker, SourceCitation); A2UI v0.9 over AG-UI with CopilotKit's renderer; screenshots at 375px and desktop in `docs/screenshots/` | Components are chosen by graph logic, not composed freely by the LLM. Deliberate: a model that writes UI JSON can write a price into it. The brief asks the *agent* to choose, and the graph is the agent. |
+| 3 | Agent chooses UI from a fixed catalog (≥5), brand-styled, mobile + desktop | **Met** | 9 components (PriceBreakdown, BookingForm, SpecialistHandoff, EnquiryConfirmation, TourCard, TourShelf, ItineraryDay, TravellerPicker, SourceCitation); A2UI v0.9 over AG-UI with CopilotKit's renderer; checked in Chromium at 320, 375, 760 and 1366px; walkthrough in `demo/mira-demo.mp4` | Components are chosen by graph logic, not composed freely by the LLM. Deliberate: a model that writes UI JSON can write a price into it. The brief asks the *agent* to choose, and the graph is the agent. |
 | 4 | Facts from content only, source shown; if not there, say so and offer an enquiry | **Met** | BM25 over published content only; citations attached by code; `NOT_IN_CONTENT` path; evals S07–S10, S16, S17, M23–M27 | Offline answers are extractive quotes (less conversational). With the key, Gemini writes them in Mira's voice from the same passages. Search has no synonyms (BM25); fine for 95 passages, would need embeddings at scale. |
 | 5 | Correct prices from a pricing function; never LLM arithmetic; staff see cost/price/GP%, travellers only price + deposit | **Met** | `mira/pricing/engine.py` (Decimal); golden tests S02, S03, S13, S15, Q-1041/42/44; `QuoteForTraveller` has no cost fields and forbids extras; price guard; staff page shows cost and GP% | None known. Q-1043 "as sent" is wrong in the dataset and a test documents why. |
 | 6 | Missing or expired rates: never guess, specialist confirms, staff flag | **Met** | 12 `NoQuote` reasons; flag + enquiry saved for each; evals S04–S06, S11, M04, M06, M09–M11, M37 (10/10) | H03's overlapping rows are treated as a conflict until Sales confirms (judgement call, documented). |
@@ -95,6 +95,6 @@ The hard cap ("an invented or wrong price caps the score at 50") is the main ris
 
 ## 10. What is left (Shinthurie)
 
-1. Demo video: `demo/mira-demo.mp4` (captioned walkthrough); optionally a narrated recording (`docs/DEMO_VIDEO_PLAN.md`).
+1. Demo video: `demo/mira-demo.mp4` (captioned walkthrough).
 2. Add Senura as a collaborator on the private repository; submit by 22:00.
 3. H03's overlapping Peak row stays a `conflicting_rate` until Sales confirms (documented).

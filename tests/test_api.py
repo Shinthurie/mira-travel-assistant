@@ -1,4 +1,4 @@
-"""API permissions (CLAUDE.md rule 9), mock booking, and the content approval workflow (requirement 8)."""
+"""API permissions (project rule 9 (README)), mock booking, and the content approval workflow (requirement 8)."""
 
 import pytest
 from fastapi.testclient import TestClient

@@ -1,6 +1,6 @@
 """Pricing input and output models.
 
-Two separate quote schemas (CLAUDE.md rule 6):
+Two separate quote schemas (project rule 6 (README)):
 - ``QuoteInternal``: cost, sell price, gross profit and the full breakdown. Staff only.
 - ``QuoteForTraveller``: price, deposit, balance and inclusions. It has NO cost, margin or GP
   fields, and ``extra="forbid"`` means nobody can add one by accident. UI components accept only this.

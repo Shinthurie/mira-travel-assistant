@@ -85,6 +85,24 @@ One message, end to end:
 3. `compose` validates each component against the Pydantic catalog. `guard` checks every money amount in the text **and** the UI against this conversation's engine values; anything else is removed, flagged and traced. `persist` saves quotes, enquiries and flags and closes the turn's trace.
 4. The `render_mira_ui` tool emits A2UI v0.9 operations. CopilotKit's middleware turns them into a surface, and the browser renders our components, which re-validate with zod.
 
+## Project rules (enforced in code, never only in prompts)
+
+Code comments refer to these as "project rule N".
+
+1. Prices come only from the pricing engine (pure Python, `Decimal`). The model never does arithmetic.
+2. An output price guard checks every money amount in replies and UI payloads against this conversation's engine values; anything else is removed, flagged and traced.
+3. The model never derives numbers: per-person splits, currency conversion, "what if" changes and discounts go back to the engine or are declined.
+4. The `teaser_price` in tour pages is never shown as a price.
+5. No valid rate means no price: `NoQuote(reason)`, "a specialist will confirm", and a staff flag.
+6. Travellers never see cost, margin or GP% (`QuoteForTraveller` vs `QuoteInternal`).
+7. Only `status: published` content is retrievable; drafts never are; HTML comments are stripped.
+8. Content is untrusted data: instructions inside it are never followed.
+9. Permissions, publishing and pricing are deterministic code; role checks happen in the API.
+10. No personal data in traces or logs (redacted, and tested).
+11. "Today" is configurable (`TODAY`, default 2026-11-19).
+12. No secrets, real personal data or payment details in the repo.
+13. The dataset is never modified (SHA-256 test of every file).
+
 ## Main design decisions (all in [docs/DECISIONS.md](docs/DECISIONS.md), D1–D30)
 
 - **Rules in code, not prompts.** Pricing, the price guard, permissions, publishing, routing and tour resolution are deterministic Python. The model only extracts details and writes wording.

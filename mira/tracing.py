@@ -1,4 +1,4 @@
-"""Tracing: one trace per traveller turn (CLAUDE.md section 7).
+"""Tracing: one trace per traveller turn (project architecture, README).
 
 - With Langfuse keys: every span goes to Langfuse under one root observation per turn,
   and the turn gets a real trace URL.
