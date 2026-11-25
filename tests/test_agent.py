@@ -171,7 +171,7 @@ def test_llm_invented_amount_is_blocked_and_flagged():
     llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True),
                    "The Galle Fort walk is lovely and costs USD 99 per person.\nSOURCES: T04#galle-fort-walking-tour"])
     ctx, graph = fresh_agent(llm=llm)
-    turn = chat(graph, ["Tell me about the Galle Fort walking tour"])[0]
+    turn = chat(graph, ["What will we see on the Galle Fort walking tour?"])[0]
     assert "99" not in turn["final_text"]
     assert not turn["guard"]["passed"]
     assert any(f.reason == "unverified_amount_blocked" and f.severity == "blocking" for f in ctx.store.list_flags())
@@ -422,6 +422,35 @@ def test_inclusions_question_shows_the_pages_inclusions_on_the_tour_card():
 
 def test_tour_cards_carry_no_inclusions_unless_asked():
     _, graph = fresh_agent()
+    turn = chat(graph, ["Is the Colombo City Tour good for photography?"])[0]
+    card = next(c for c in turn["components"] if c["component"] == "TourCard")
+    assert card["props"]["included"] == [] and card["props"]["expanded"] is False
+
+
+def test_overview_question_is_answered_by_the_open_card_not_a_paragraph():
+    """'Tell me about X': the open card (from the cleaned page) replaces the model paragraph, which once
+    misquoted the start point ('Negroni' for Negombo). Sources stay attached; no teaser price anywhere."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True, tour_id="T03")])  # no answer queued
+    _, graph = fresh_agent(llm=llm)
     turn = chat(graph, ["Tell me about the Colombo City Tour."])[0]
     card = next(c for c in turn["components"] if c["component"] == "TourCard")
-    assert card["props"]["included"] == []
+    assert card["props"]["expanded"] is True
+    d = card["props"]["details"]
+    assert d["start"] == "Your hotel in Colombo or Negombo" and "Lunch" in d["included"]
+    assert d["about"].startswith("Colombo's landmarks")
+    assert "at a glance" in turn["final_text"] and turn["citations"]
+    assert "40" not in str(card["props"])  # teaser_price "From USD 40 per person" never shown
+
+
+def test_specific_questions_still_get_a_grounded_answer():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["What's the cancellation policy for the Galle Fort walking tour?"])[0]
+    assert "at a glance" not in turn["final_text"] and turn["citations"]
+
+
+def test_every_tour_card_can_open_its_details_without_asking_again():
+    _, graph = fresh_agent()
+    turn = chat(graph, ["We'd like a few days somewhere relaxing"])[0]
+    shelves = [c for c in turn["components"] if c["component"] == "TourShelf"]
+    cards = shelves[0]["props"]["tours"] if shelves else [c["props"] for c in turn["components"] if c["component"] == "TourCard"]
+    assert cards and all(c["details"]["about"] for c in cards)

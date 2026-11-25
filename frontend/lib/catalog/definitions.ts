@@ -16,6 +16,9 @@ const TourCardSchema = z.object({
   accent: Accent, tour_id: z.string(), title: z.string(), category: z.string(), duration: z.string(),
   places: z.array(z.string()).max(10), summary: z.string(), priceable: z.boolean(),
   image: z.literal("placeholder"), source_ref: z.string(), included: z.array(z.string()).max(12).optional(),
+  details: z.object({ about: z.string(), start: z.string(), route: z.array(z.string()).max(10),
+    good_to_know: z.array(z.string()).max(10), included: z.array(z.string()).max(12) }).strict().optional(),
+  expanded: z.boolean().optional(),
 }).strict();
 
 export const resolved = {

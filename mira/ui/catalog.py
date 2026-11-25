@@ -74,6 +74,17 @@ class EnquiryConfirmationProps(_Props):
 # --- Dynamic-schema components (content, never money) -----------------------------
 
 
+class TourDetails(BaseModel):
+    """The card's "Details" box. Every field comes from the cleaned, published tour page. No prices."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    about: str = ""
+    start: str = ""
+    route: list[str] = Field(default_factory=list, max_length=10)
+    good_to_know: list[str] = Field(default_factory=list, max_length=10)
+    included: list[str] = Field(default_factory=list, max_length=12)
+
+
 class TourCardProps(_Props):
     """No price field on purpose: prices only appear in PriceBreakdown."""
 
@@ -87,6 +98,8 @@ class TourCardProps(_Props):
     image: Literal["placeholder"] = "placeholder"   # the dataset has no photos
     source_ref: str
     included: list[str] = Field(default_factory=list, max_length=12)  # from the page's Inclusions section
+    details: TourDetails = Field(default_factory=TourDetails)
+    expanded: bool = False  # open the Details box straight away (overview questions)
 
 
 class ItineraryDayProps(_Props):

@@ -139,11 +139,15 @@ def run_case(case: dict, repeat: int, use_llm: bool) -> RunResult:
                 state = graph.invoke(payload, config={"configurable": {"thread_id": thread}})
                 turn = state["turn"]
                 latency = int((time.perf_counter() - start) * 1000)
-                comps = []
+                comps, card_text = [], []
                 for op in turn.get("ops", []):
                     if "updateComponents" in op:
                         comp = op["updateComponents"]["components"][0]
                         comps.append(comp["component"])
+                        if comp["component"] == "TourCard" and comp.get("expanded"):  # what the traveller reads
+                            d = comp.get("details") or {}
+                            card_text.append(f"{comp.get('title')}: {d.get('about', '')} Starts from: {d.get('start', '')}. "
+                                             f"Included: {'; '.join(d.get('included', []))}.")
                         if comp["component"] == "TourShelf":  # count the cards inside a shelf
                             comps += ["TourCard"] * len(comp["tours"])
                 result.transcript.append({
@@ -151,7 +155,7 @@ def run_case(case: dict, repeat: int, use_llm: bool) -> RunResult:
                     "pricing": turn.get("pricing"), "citations": turn.get("citations", []), "guard": turn.get("guard"),
                     "ui_fallbacks": turn.get("ui_fallbacks", []), "question_slot": turn.get("question_slot"),
                     "trace_id": turn.get("trace_id"), "trace_url": turn.get("trace_url"), "latency_ms": latency,
-                    "mode": turn.get("mode"), "thread": thread,
+                    "mode": turn.get("mode"), "thread": thread, "card_text": card_text,
                 })
                 if result.first_quote_ms is None and (turn.get("pricing") or {}).get("kind") == "quote":
                     result.first_quote_ms = int((time.perf_counter() - t0) * 1000)
@@ -342,7 +346,8 @@ def summarise(cases: list[dict], results: dict[str, list[RunResult]], judge_info
             "latencies_ms": [t["latency_ms"] for r in runs for t in r.transcript],
             "modes": [t["mode"] for r in runs for t in r.transcript],
             "first_quote_ms": [r.first_quote_ms for r in runs if r.first_quote_ms is not None],
-            "transcript": [{k: t[k] for k in ("user", "text", "components", "citations", "pricing")} for t in worst.transcript],
+            "transcript": [{k: t.get(k) for k in ("user", "text", "components", "citations", "pricing", "card_text")}
+                           for t in worst.transcript],
         })
 
     def checks_named(prefix: str) -> list[bool]:

@@ -44,7 +44,7 @@ from mira.agent.tours import mentions_service
 from mira.llm import LLMError
 from mira.pricing.engine import quote as price_quote
 from mira.pricing.schemas import NoQuote, NoQuoteReason, PricingRequest, Quote
-from mira.retrieval.grounding import NO_ANSWER_TEXT, answer_question, citation_for
+from mira.retrieval.grounding import NO_ANSWER_TEXT, Citation, answer_question, citation_for
 from mira.ui.a2ui import build_operations
 from mira.ui.catalog import MONEY_FIELDS, CatalogError, validate_component
 
@@ -97,7 +97,11 @@ def _clean_passage(text: str, limit: int = 280) -> str:
     return cut[:end + 1] if end > 60 else cut.rsplit(" ", 1)[0] + "..."
 
 
-def tour_card(ctx: AgentContext, tour_id: str, accent: str = "teal", with_inclusions: bool = False) -> UIComponent | None:
+def tour_card(ctx: AgentContext, tour_id: str, accent: str = "teal", with_inclusions: bool = False,
+              expanded: bool = False) -> UIComponent | None:
+    """A tour card built from published content only. The "Details" box (about, start, route, good to know,
+    what's included) is always filled, from the CLEANED passages, so the card can open in place without
+    asking Mira again. ``expanded`` opens it straight away (overview questions)."""
     doc = ctx.catalog.content.get(tour_id)
     if doc is None or not doc.is_published:
         return None
@@ -105,24 +109,52 @@ def tour_card(ctx: AgentContext, tour_id: str, accent: str = "teal", with_inclus
     duration = decision.display_duration if decision and decision.display_duration else (doc.duration or "")
     intro = next((s.text for s in doc.sections if s.text.strip()), "")
     summary = " ".join(l for l in intro.split("\n") if l.strip() and not l.startswith("**"))[:260]
+    about = section_text(ctx, doc.id, (doc.title.lower(),)) or summary  # the page's intro, cleaned
     return UIComponent(component="TourCard", props={
         "tour_id": doc.id, "title": doc.title, "category": doc.category or "", "duration": duration,
         "places": [d.replace("-", " ").title() for d in doc.destinations], "summary": summary,
         "priceable": ctx.resolver.priceable(doc.id), "source_ref": f"{doc.id}#overview", "accent": accent,
-        "included": inclusions(ctx, doc.id) if with_inclusions else []})
+        "included": section_bullets(ctx, doc.id, ("inclusion",)) if (with_inclusions or expanded) else [],
+        "details": {"about": about[:600], "start": (doc.start or "")[:120],
+                    "route": section_bullets(ctx, doc.id, ("route",)),
+                    "good_to_know": section_bullets(ctx, doc.id, ("good to know",)),
+                    "included": section_bullets(ctx, doc.id, ("inclusion",))},
+        "expanded": expanded})
 
 
 ASKS_ABOUT_INCLUSIONS = re.compile(r"includ|inclusion|what do (we|i) get|what'?s in it|covered", re.I)
+# "Tell me about the Colombo City Tour": an overview, answered by the open card (no model paragraph).
+ASKS_FOR_OVERVIEW = re.compile(r"^\s*(tell me (more )?about|what is|what'?s|more about|details (of|on|about)|"
+                               r"describe|show me)\b", re.I)
+SPECIFIC_QUESTION = re.compile(r"cancel|child|kid|infant|refund|deposit|pay|price|cost|how much|when|best time|"
+                               r"weather|visa|book|hotel|room|transfer|airport|policy", re.I)
+
+
+def _cleaned_passages(ctx: AgentContext, tour_id: str, prefixes: tuple[str, ...]):
+    for p in ctx.retriever.passages:
+        if p.doc_id == tour_id and p.section.lower().startswith(prefixes):
+            yield p
+
+
+def section_bullets(ctx: AgentContext, tour_id: str, prefixes: tuple[str, ...]) -> list[str]:
+    """Bullet lines of a tour page section, from the CLEANED published passage (instruction-like,
+    discount and superseded lines are already removed at index time)."""
+    for p in _cleaned_passages(ctx, tour_id, prefixes):
+        items = [line.strip()[2:].strip() for line in p.text.splitlines() if line.strip().startswith("- ")]
+        return [i[:160] for i in items if i][:10]
+    return []
+
+
+def section_text(ctx: AgentContext, tour_id: str, prefixes: tuple[str, ...]) -> str:
+    for p in _cleaned_passages(ctx, tour_id, prefixes):
+        lines = [l.strip() for l in p.text.splitlines() if l.strip() and not l.strip().startswith(("- ", "#", "**"))]
+        if lines:
+            return " ".join(lines)
+    return ""
 
 
 def inclusions(ctx: AgentContext, tour_id: str) -> list[str]:
-    """The bullet lines of the tour page's Inclusions section, from the CLEANED published passage
-    (instruction-like, discount and superseded lines are already removed at index time)."""
-    for p in ctx.retriever.passages:
-        if p.doc_id == tour_id and p.section.lower().startswith("inclusion"):
-            items = [line.strip()[2:].strip() for line in p.text.splitlines() if line.strip().startswith("- ")]
-            return [i for i in items if i][:12]
-    return []
+    return section_bullets(ctx, tour_id, ("inclusion",))
 
 
 def itinerary_days(ctx: AgentContext, tour_id: str, limit: int = 3) -> list[UIComponent]:
@@ -488,8 +520,24 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
         hits = ctx.retriever.search(query)
         span.output = [{"id": h.passage.passage_id, "score": h.score, "reason": h.reason} for h in hits]
     turn.retrieved_ids = [h.passage.passage_id for h in hits]
+    tour_id = turn.extraction.tour_id if turn.extraction else None
+    overview = bool(tour_id and ASKS_FOR_OVERVIEW.search(query) and not SPECIFIC_QUESTION.search(query))
 
-    if ctx.llm is not None and hits:
+    if overview:
+        # "Tell me about <tour>": the open tour card IS the answer (every line from the cleaned page), so no
+        # model-written paragraph that could misquote it. Sources: that tour's own passages.
+        card = tour_card(ctx, tour_id, expanded=True)
+        if card:
+            turn.reply_parts.append(f"Here's the {card.props['title']} at a glance. Tap Get a price when "
+                                    "you're ready, or ask me anything about it.")
+            turn.components.append(card)
+            if "pricing" not in turn.route:  # multi-day tour: its first days, from content only
+                turn.components.extend(itinerary_days(ctx, tour_id, limit=3))
+            own = [citation_for(h).model_dump() for h in hits if h.passage.doc_id == tour_id][:4]
+            fallback = Citation(passage_id=f"{tour_id}#overview", doc_id=tour_id, title=card.props["title"],
+                                section="Overview")
+            turn.citations = own or [fallback.model_dump()]
+    elif ctx.llm is not None and hits:
         with _span(ctx, config, "grounded_answer", as_type="chain") as span:
             try:
                 result = answer_question(query, ctx.retriever,

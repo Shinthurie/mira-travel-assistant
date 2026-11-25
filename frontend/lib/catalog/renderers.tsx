@@ -211,27 +211,67 @@ function RouteArt({ seed, stops }: { seed: string; stops: number }) {
   );
 }
 
+/** Outlined line icons (stroke only, brand orange), drawn inline: no emoji, no icon font. */
+const ICONS: Record<string, string> = {
+  clock: "M8 4.5V8l2.5 1.5M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z",
+  pin: "M8 14.5s4.5-4.2 4.5-8a4.5 4.5 0 0 0-9 0c0 3.8 4.5 8 4.5 8Zm0-6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z",
+  route: "M3.5 12.5a1.5 1.5 0 1 0 0 .01M12.5 3.5a1.5 1.5 0 1 0 0 .01M3.5 11V7a2 2 0 0 1 2-2h5M12.5 5v4a2 2 0 0 1-2 2h-5",
+  info: "M8 7.2v4M8 4.8v.01M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z",
+  check: "M3.5 8.5l3 3 6-7",
+  map: "M1.5 3.5l4-1.5 5 2 4-1.5v10l-4 1.5-5-2-4 1.5v-10ZM5.5 2v10.5M10.5 4v10.5",
+};
+function Icon({ name }: { name: keyof typeof ICONS }) {
+  return <svg className="line-icon" viewBox="0 0 16 16" aria-hidden="true"><path d={ICONS[name]} /></svg>;
+}
+
 function TourCardView({ p }: { p: z.infer<(typeof resolved)["TourCard"]> }) {
+  // "Details" opens the box in place: no new message, nothing asked again.
+  const [open, setOpen] = useState(!!p.expanded);
+  const d = p.details;
+  const included = d?.included?.length ? d.included : (p.included || []);
+  const priceButton = p.priceable ? (
+    <button className="btn btn-primary" onClick={() => say(`I'd like a price for ${p.title}.`)}>Get a price</button>
+  ) : (
+    <button className="btn" onClick={() => say(`Please ask a specialist about ${p.title}.`)}>Ask a specialist</button>
+  );
   return (
     <Card accent={p.accent} testid="tour-card">
       <RouteArt seed={p.tour_id} stops={p.places.length} />
       <div className="cc-kicker">{p.category} · {p.duration}</div>
       <h3 className="cc-title">{p.title}</h3>
-      <p className="tour-summary">{p.summary}</p>
-      <div className="chips">{p.places.map((x) => <span key={x} className="chip">{x}</span>)}</div>
-      {p.included && p.included.length > 0 && (
+      {!open && <p className="tour-summary">{p.summary}</p>}
+      {!open && <div className="chips">{p.places.map((x) => <span key={x} className="chip">{x}</span>)}</div>}
+      {!open && included.length > 0 && p.included && p.included.length > 0 && (
         <div className="included">
           <p className="included-head">What&apos;s included</p>
-          <ul>{p.included.map((x) => <li key={x}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>{x}</li>)}</ul>
+          <ul>{included.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul>
+        </div>
+      )}
+      {open && d && (
+        <div className="pkg" data-testid="tour-details">
+          {d.about && <p className="pkg-about">{d.about}</p>}
+          <ul className="pkg-facts">
+            <li><Icon name="clock" /><span><b>Duration</b>{p.duration}</span></li>
+            {d.start && <li><Icon name="pin" /><span><b>Starts from</b>{d.start}</span></li>}
+            {p.places.length > 0 && <li><Icon name="map" /><span><b>Places</b>{p.places.join(" · ")}</span></li>}
+          </ul>
+          {d.route.length > 0 && (
+            <div className="pkg-block"><p className="pkg-head">Route</p>
+              <ul>{d.route.map((x) => <li key={x}><Icon name="route" />{x}</li>)}</ul></div>
+          )}
+          {included.length > 0 && (
+            <div className="pkg-block"><p className="pkg-head">What&apos;s included</p>
+              <ul>{included.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul></div>
+          )}
+          {d.good_to_know.length > 0 && (
+            <div className="pkg-block"><p className="pkg-head">Good to know</p>
+              <ul>{d.good_to_know.map((x) => <li key={x}><Icon name="info" />{x}</li>)}</ul></div>
+          )}
         </div>
       )}
       <div className="cc-actions">
-        {p.priceable ? (
-          <button className="btn btn-primary" onClick={() => say(`I'd like a price for ${p.title}.`)}>Get a price</button>
-        ) : (
-          <button className="btn" onClick={() => say(`Please ask a specialist about ${p.title}.`)}>Ask a specialist</button>
-        )}
-        <button className="btn" onClick={() => say(`Tell me about ${p.title}.`)}>Details</button>
+        {priceButton}
+        {d && <button className="btn" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Less" : "Details"}</button>}
       </div>
     </Card>
   );

@@ -36,6 +36,8 @@ def transcript_text(transcript: list[dict]) -> str:
         lines.append(f"Mira: {t['text']}")
         if t.get("components"):
             lines.append(f"[UI cards shown: {', '.join(t['components'])}]")
+        for text in t.get("card_text") or []:
+            lines.append(f"[Open tour card, shown to the traveller: {text}]")
         if t.get("citations"):
             lines.append(f"[Sources cited: {', '.join(c['doc_id'] + ' ' + c['title'] for c in t['citations'])}]")
     return "\n".join(lines)
