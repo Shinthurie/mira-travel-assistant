@@ -1,6 +1,6 @@
 # Mira evaluation report
 
-- Generated: 2026-11-25T14:58:17+00:00 · git `7cbf9f2` · today = 2026-11-19
+- Generated: 2026-11-25T15:29:37+00:00 · git `38cc302-dirty` · today = 2026-11-19
 - Mode: **llm** · Mira model: deepseek-flash · judge: deepseek-v4-pro · routing: off
 - Margins: day 0.3, multi-day 0.25
 - Cases: 55 (17 seed, 9 multi-turn) · price/flag cases run 3x (worst run counts)
@@ -13,7 +13,7 @@
 | Price consistency (shown price = engine for extracted parameters) | 100.0% (69/69) |
 | Invented prices (runs with an amount not from the engine) | **0** |
 | Missing / expired / no-rate handling (no price + staff flag) | 100.0% (10/10) |
-| Overall cases passed | 98.2% (54/55) |
+| Overall cases passed | 100.0% (55/55) |
 
 ## Pass rate per requirement
 
@@ -22,7 +22,7 @@
 | 1 Discover the trip | 100.0% (9/9) |
 | 2 Returning visitors | 100.0% (2/2) |
 | 3 Generated UI | 100.0% (6/6) |
-| 4 Content only | 92.3% (12/13) |
+| 4 Content only | 100.0% (13/13) |
 | 5 Correct prices | 100.0% (22/22) |
 | 6 Missing/expired rates | 100.0% (11/11) |
 | 7 Private enquiries | 100.0% (3/3) |
@@ -30,8 +30,8 @@
 
 ## Speed
 
-- Per turn: median 2112.0 ms, p95 4189 ms, max 17413 ms (138 turns)
-- Time to first quote: median 2162.5 ms, max 6367 ms; under 60 s: 58/58
+- Per turn: median 2203.0 ms, p95 4161 ms, max 16651 ms (138 turns)
+- Time to first quote: median 2630.5 ms, max 13730 ms; under 60 s: 58/58
 
 ## How each turn was understood
 
@@ -41,20 +41,19 @@
 
 | Model | Purpose | Calls | Median ms | Max ms |
 |---|---|---|---|---|
-| deepseek-flash | content_draft | 2 | 2386.0 | 2458 |
-| deepseek-flash | extract | 138 | 1324.5 | 15365 |
-| deepseek-flash | grounded_answer | 19 | 1141 | 2391 |
-| deepseek-v4-pro | judge | 6 | 5520.0 | 12745 |
+| deepseek-flash | content_draft | 2 | 2873.5 | 3081 |
+| deepseek-flash | extract | 138 | 1311.0 | 15326 |
+| deepseek-flash | grounded_answer | 19 | 1109 | 2202 |
+| deepseek-v4-pro | judge | 4 | 4007.0 | 7435 |
 
 ## LLM judge (behaviour cases)
 
-- Judge model: deepseek-v4-pro · passed 31, failed 1, skipped 0
+- Judge model: deepseek-v4-pro · passed 32, failed 0, skipped 0
 - Behaviour cases without a judge are **skipped, not passed**; their code checks still apply.
 
 ## Failing cases
 
-- **S09** (grounding, req [4]): judge_behaviour: Mira says it doesn't know but does not offer to check as expected.
-  - traces: https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/809331107e2bd474db4c1e944d1e4ff7
+None.
 
 ## All cases
 
@@ -68,7 +67,7 @@
 | S06 | [6, 4] | pass | 8/8 passed |
 | S07 | [4] | pass | 5/5 passed |
 | S08 | [4] | pass | 5/5 passed |
-| S09 | [4] | **FAIL** | 4/5 passed |
+| S09 | [4] | pass | 5/5 passed |
 | S10 | [4] | pass | 5/5 passed |
 | S11 | [6] | pass | 7/7 passed |
 | S12 | [5] | pass | 5/5 passed |
