@@ -139,7 +139,7 @@ The dataset is loaded as-is and never modified (a SHA-256 test checks every file
 
 Also: newer policies override older page terms (P02, P03); there are no photos (a placeholder is used); rates end 31 Oct 2027.
 
-Full requirement-by-requirement review: [docs/SYSTEM_REVIEW.md](docs/SYSTEM_REVIEW.md). Demo script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md). A 6-minute captioned walkthrough of the live app (recorded with Playwright): [demo/mira-demo.mp4](demo/mira-demo.mp4).
+Full requirement-by-requirement review: [docs/SYSTEM_REVIEW.md](docs/SYSTEM_REVIEW.md). Demo script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md). A 4-minute captioned walkthrough of the live app with background music (recorded with Playwright; waits trimmed; the music is generated, so licence-free): [demo/mira-demo.mp4](demo/mira-demo.mp4).
 
 ## Known limitations (honest)
 

@@ -29,7 +29,7 @@
 - Live margin change rehearsed: consistency stays 100%, golden 4/6 (the two day-tour seeds change, as expected).
 
 ## What only Shinthurie can do
-1. Demo video: a 6-minute captioned walkthrough is in `demo/mira-demo.mp4` (Playwright); optionally record a narrated one (`docs/DEMO_VIDEO_PLAN.md`).
+1. Demo video: a 4-minute captioned walkthrough (with generated background music) is in `demo/mira-demo.mp4` (Playwright); optionally record a narrated one (`docs/DEMO_VIDEO_PLAN.md`).
 2. Push, check CI is green, add Senura as a collaborator on submission day.
 
 ### Open questions
