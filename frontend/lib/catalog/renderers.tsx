@@ -75,7 +75,7 @@ function PriceBreakdown({ props }: { props: unknown }) {
       {p.inclusions.length > 0 && (
         <details className="incl">
           <summary>What&apos;s included</summary>
-          <ul>{p.inclusions.map((x) => <li key={x}>{x}</li>)}</ul>
+          <ul>{p.inclusions.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul>
         </details>
       )}
       <button className="btn btn-primary btn-block" onClick={() => say("I'd like to book it.")}>Book this trip</button>

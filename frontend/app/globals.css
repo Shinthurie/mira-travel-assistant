@@ -437,3 +437,6 @@ h1, h2, h3, p { margin: 0; }
 .title-link:focus-visible { outline: 2px solid var(--cc-orange); outline-offset: 2px; border-radius: 4px; }
 .date-field input { font-variant-numeric: tabular-nums; }
 .date-field small { font-weight: var(--cc-weight-regular); }
+/* Price card "What's included": the same orange tick bullets as the tour box. */
+.incl ul { list-style: none; padding-left: 0; gap: 6px; color: var(--cc-ink); }
+.incl li { display: flex; gap: var(--cc-space-2); align-items: flex-start; }
