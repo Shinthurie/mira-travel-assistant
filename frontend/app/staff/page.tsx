@@ -14,6 +14,9 @@ type Enquiry = {
   flags: { ref: string; reason: string; detail: string; severity: string }[];
   notes: { author: string; text: string; created_at: string }[];
 };
+/** Display names for follow-up status (stored values stay new/contacted/won/lost). */
+const STATUS_LABEL: Record<string, string> = { new: "new", contacted: "contacted", won: "confirmed", lost: "rejected" };
+
 type Flag = { ref: string; source: string; reason: string; detail: string; tour_id: string | null; severity: string; trace_url: string | null; created_at: string };
 type Draft = { id: number; doc_id: string; title: string; status: string; command: string; markdown: string; sources: string[]; created_by: string; approved_by: string | null };
 type Auth = { token: string; role: string; user: string };
@@ -115,7 +118,7 @@ function EnquiryRow({ e, auth, reload }: { e: Enquiry; auth: Auth; reload: () =>
       </div>
       <div>
         <select aria-label="Follow-up status" value={e.status} onChange={(ev) => void setStatus(ev.target.value)}>
-          {["new", "contacted", "won", "lost"].map((s) => <option key={s} value={s}>{s}</option>)}
+          {["new", "contacted", "won", "lost"].map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
         </select>
         {e.notes.map((n, i) => <div key={i} className="meta" style={{ marginTop: 6 }}><b>{n.author}</b>: {n.text}</div>)}
         <form className="note-form" onSubmit={(ev) => {

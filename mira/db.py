@@ -72,7 +72,7 @@ class Enquiry(SQLModel, table=True):
     tour_id: Optional[str] = None
     quote_id: Optional[int] = None
     contact_json: str = "{}"               # local DB only, never traced
-    status: str = "new"                    # new | contacted | won | lost
+    status: str = "new"                    # new | contacted | won | lost (shown to staff as confirmed / rejected)
     trace_id: Optional[str] = None
     trace_url: Optional[str] = None
     created_at: datetime = Field(default_factory=now)

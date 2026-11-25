@@ -568,13 +568,29 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
     if browse:
         # "What other tours do you have?": a row of our tours, not a search answer (the search once matched
         # a destination page and replied "I don't have details on other tours").
-        cards = [c for c in (tour_card(ctx, t, accent) for t, accent in
-                             zip(browse_picks(ctx, session, query), ("teal", "leaf", "sky", "teal"))) if c]
-        turn.reply_parts.append("Here are some of our tours. Tap a tour name to see everything about it, "
-                                "or Get a price when one looks right." if cards else
-                                "You've seen all the tours I can price. Tell me what you'd like and I'll narrow it down.")
+        places = ctx.resolver.places_in(query)
+        if places:
+            # "Which tours go to Ella?": every published tour that visits the place, named in the reply
+            # (including tours without rates, which offer a specialist instead). Stale promotions excluded.
+            ids = [t for t in ctx.resolver.rank_by_places(query)
+                   if not ((d := ctx.catalog.decisions.for_tour(t)) and not d.quotable)][:4]
+        else:
+            ids = browse_picks(ctx, session, query)
+        cards = [c for c in (tour_card(ctx, t, accent) for t, accent in zip(ids, ("teal", "leaf", "sky", "teal"))) if c]
+        names = [c.props["title"] for c in cards]
+        if places and names:
+            where = ", ".join(sorted(p.replace("-", " ").title() for p in places))
+            listed = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+            turn.reply_parts.append(f"These tours visit {where}: {listed}. Tap a tour name to see everything "
+                                    "about it.")
+        elif cards:
+            turn.reply_parts.append("Here are some of our tours. Tap a tour name to see everything about it, "
+                                    "or Get a price when one looks right.")
+        else:
+            turn.reply_parts.append("You've seen all the tours I can price. Tell me what you'd like and I'll "
+                                    "narrow it down.")
         turn.components.extend(cards)
-        turn.shelf_title = "Our tours"
+        turn.shelf_title = f"Tours that visit {where}" if places and names else "Our tours"
         turn.citations = [Citation(passage_id=f"{c.props['tour_id']}#overview", doc_id=c.props["tour_id"],
                                    title=c.props["title"], section="Overview").model_dump() for c in cards]
     elif overview:

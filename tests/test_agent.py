@@ -510,3 +510,17 @@ def test_no_picked_for_you_on_top_of_a_specific_request():
                 visitor_id="visitor-picks-3")[0]
     assert not any(c["component"] == "TourShelf" for c in turn["components"])
     assert turn["pricing"]["kind"] == "quote" and turn["pricing"]["tour_id"] == "T01"
+
+
+def test_tours_visiting_a_place_are_named_in_the_reply():
+    """M27 (DeepSeek, final run): 'Which tours go to Ella?' got a generic row instead of naming the tours."""
+    _, graph = fresh_agent()
+    turn = chat(graph, ["Which tours go to Ella?"])[0]
+    assert "Treasures of Sri Lanka" in turn["final_text"] and "Instafamous Sri Lanka" in turn["final_text"]
+    assert "T14" not in str(turn["components"])
+
+
+def test_hi_again_counts_as_a_greeting():
+    from datetime import date
+    from mira.agent.rules import rule_extract
+    assert rule_extract("Hi again", date(2026, 11, 19)).intent == Intent.GREETING

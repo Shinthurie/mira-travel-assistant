@@ -1,6 +1,6 @@
 # Mira evaluation report
 
-- Generated: 2026-11-25T14:28:53+00:00 · git `770f752-dirty` · today = 2026-11-19
+- Generated: 2026-11-25T14:46:33+00:00 · git `7c03eab` · today = 2026-11-19
 - Mode: **llm** · Mira model: deepseek-flash · judge: deepseek-v4-pro · routing: off
 - Margins: day 0.3, multi-day 0.25
 - Cases: 55 (17 seed, 9 multi-turn) · price/flag cases run 3x (worst run counts)
@@ -13,16 +13,16 @@
 | Price consistency (shown price = engine for extracted parameters) | 100.0% (69/69) |
 | Invented prices (runs with an amount not from the engine) | **0** |
 | Missing / expired / no-rate handling (no price + staff flag) | 100.0% (10/10) |
-| Overall cases passed | 98.2% (54/55) |
+| Overall cases passed | 96.4% (53/55) |
 
 ## Pass rate per requirement
 
 | Requirement | Passed |
 |---|---|
-| 1 Discover the trip | 88.9% (8/9) |
-| 2 Returning visitors | 100.0% (2/2) |
+| 1 Discover the trip | 100.0% (9/9) |
+| 2 Returning visitors | 50.0% (1/2) |
 | 3 Generated UI | 83.3% (5/6) |
-| 4 Content only | 100.0% (13/13) |
+| 4 Content only | 92.3% (12/13) |
 | 5 Correct prices | 100.0% (22/22) |
 | 6 Missing/expired rates | 100.0% (11/11) |
 | 7 Private enquiries | 100.0% (3/3) |
@@ -30,8 +30,8 @@
 
 ## Speed
 
-- Per turn: median 2101.0 ms, p95 4136 ms, max 15811 ms (138 turns)
-- Time to first quote: median 2136.5 ms, max 17378 ms; under 60 s: 58/58
+- Per turn: median 2067.0 ms, p95 3993 ms, max 13109 ms (138 turns)
+- Time to first quote: median 2133.5 ms, max 14411 ms; under 60 s: 58/58
 
 ## How each turn was understood
 
@@ -41,20 +41,22 @@
 
 | Model | Purpose | Calls | Median ms | Max ms |
 |---|---|---|---|---|
-| deepseek-flash | content_draft | 2 | 2563.5 | 2720 |
-| deepseek-flash | extract | 138 | 1349.5 | 15180 |
-| deepseek-flash | grounded_answer | 19 | 1270 | 2330 |
-| deepseek-v4-pro | judge | 7 | 3598 | 12568 |
+| deepseek-flash | content_draft | 2 | 3080.0 | 3430 |
+| deepseek-flash | extract | 138 | 1297.5 | 12500 |
+| deepseek-flash | grounded_answer | 19 | 1253 | 1788 |
+| deepseek-v4-pro | judge | 7 | 5621 | 36826 |
 
 ## LLM judge (behaviour cases)
 
-- Judge model: deepseek-v4-pro · passed 31, failed 1, skipped 0
+- Judge model: deepseek-v4-pro · passed 30, failed 2, skipped 0
 - Behaviour cases without a judge are **skipped, not passed**; their code checks still apply.
 
 ## Failing cases
 
-- **M28** (discovery, req [1, 3]): judge_behaviour: Mira asks two questions in one turn: 'Who's travelling, and when would you like to start?' violating the expected behavior of asking at most one question per turn.
-  - traces: https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/85fb2b5ee3b64e8ec49d900aca089607, https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/2a813e960d2ed91a49671af832e7496f, https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/13f3bcaad022c7334634dc6a640eed52
+- **M27** (grounding, req [4]): judge_behaviour: Mira did not explicitly name the tours 'Instafamous Sri Lanka' and 'Treasures of Sri Lanka' as expected. The reply was generic and did not directly answer which tours go to Ella.
+  - traces: https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/69b9d12218e910803200c506a30e53a4
+- **M38** (personalisation, req [2, 3]): components_shown: missing ['TourShelf']; judge_behaviour: Mira greeted as a returning visitor and re-showed the last quote, but did not suggest any related tours as required by the expected behaviour.
+  - traces: https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a1f1e53a1fc7f9619b57539fe64e777e, https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/19a1334dd1929fc307852a128c9398e9
 
 ## All cases
 
@@ -103,8 +105,8 @@
 | M24 | [4] | pass | 6/6 passed |
 | M25 | [4] | pass | 6/6 passed |
 | M26 | [4] | pass | 6/6 passed |
-| M27 | [4] | pass | 5/5 passed |
-| M28 | [1, 3] | **FAIL** | 6/7 passed |
+| M27 | [4] | **FAIL** | 4/5 passed |
+| M28 | [1, 3] | pass | 7/7 passed |
 | M29 | [1, 5] | pass | 6/6 passed |
 | M30 | [1, 6, 7] | pass | 8/8 passed |
 | M31 | [1] | pass | 5/5 passed |
@@ -114,4 +116,4 @@
 | M35 | [2] | pass | 9/9 passed |
 | M36 | [8] | pass | 6/6 passed |
 | M37 | [8] | pass | 10/10 passed |
-| M38 | [2, 3] | pass | 10/10 passed |
+| M38 | [2, 3] | **FAIL** | 8/10 passed |

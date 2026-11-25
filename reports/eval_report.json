@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-25T14:28:53+00:00",
-  "git_sha": "770f752-dirty",
+  "generated_at": "2026-11-25T14:46:33+00:00",
+  "git_sha": "7c03eab",
   "mode": "llm",
   "mira_model": "deepseek-flash",
   "routing_small_model": null,
@@ -18,17 +18,17 @@
   },
   "totals": {
     "cases": 55,
-    "passed": 54,
+    "passed": 53,
     "multi_turn": 9,
     "seed_cases": 17
   },
   "per_requirement": {
     "1": {
-      "passed": 8,
+      "passed": 9,
       "total": 9
     },
     "2": {
-      "passed": 2,
+      "passed": 1,
       "total": 2
     },
     "3": {
@@ -36,7 +36,7 @@
       "total": 6
     },
     "4": {
-      "passed": 13,
+      "passed": 12,
       "total": 13
     },
     "5": {
@@ -73,13 +73,13 @@
   },
   "latency_ms": {
     "turns": 138,
-    "p50": 2101.0,
-    "p95": 4136,
-    "max": 15811
+    "p50": 2067.0,
+    "p95": 3993,
+    "max": 13109
   },
   "time_to_first_quote_ms": {
-    "median": 2136.5,
-    "max": 17378,
+    "median": 2133.5,
+    "max": 14411,
     "under_60s": 58,
     "total": 58
   },
@@ -88,29 +88,29 @@
       "model": "deepseek-flash",
       "purpose": "content_draft",
       "calls": 2,
-      "median_ms": 2563.5,
-      "max_ms": 2720
+      "median_ms": 3080.0,
+      "max_ms": 3430
     },
     {
       "model": "deepseek-flash",
       "purpose": "extract",
       "calls": 138,
-      "median_ms": 1349.5,
-      "max_ms": 15180
+      "median_ms": 1297.5,
+      "max_ms": 12500
     },
     {
       "model": "deepseek-flash",
       "purpose": "grounded_answer",
       "calls": 19,
-      "median_ms": 1270,
-      "max_ms": 2330
+      "median_ms": 1253,
+      "max_ms": 1788
     },
     {
       "model": "deepseek-v4-pro",
       "purpose": "judge",
       "calls": 7,
-      "median_ms": 3598,
-      "max_ms": 12568
+      "median_ms": 5621,
+      "max_ms": 36826
     }
   ],
   "turn_modes": {
@@ -120,8 +120,8 @@
   "judge": {
     "model": "deepseek-v4-pro",
     "available": true,
-    "passed": 31,
-    "failed": 1,
+    "passed": 30,
+    "failed": 2,
     "skipped": 0
   },
   "cases": [
@@ -172,10 +172,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/28a06f65fd3c3c745f28245071ca5799"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e1716f18a28ea9a5b82895dd54e3b6e6"
       ],
       "latencies_ms": [
-        4216
+        4268
       ],
       "modes": [
         "llm"
@@ -247,12 +247,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/85d771262be59280604741d5843fde70"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/218871f17ae5606f7c65c5b3783d3317"
       ],
       "latencies_ms": [
-        1802,
-        2144,
-        2406
+        2893,
+        2436,
+        2353
       ],
       "modes": [
         "llm",
@@ -260,9 +260,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        1802,
-        2144,
-        2406
+        2893,
+        2437,
+        2353
       ],
       "transcript": [
         {
@@ -283,7 +283,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-2185820F"
+            "quote_ref": "Q-BFFD5DCD"
           },
           "card_text": []
         }
@@ -346,16 +346,16 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/6d7fa00375432451f2ad96a7a98a7b1a",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/81a46deca7a464cc558cbee26b34b9ee"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/9d58085e2dc3336bd70d6e883d4675b1",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/abb7d227c5232614772352a2a578ea80"
       ],
       "latencies_ms": [
-        2092,
-        1793,
-        15811,
-        1566,
-        3157,
-        1695
+        2115,
+        1727,
+        13109,
+        1302,
+        3299,
+        1637
       ],
       "modes": [
         "llm",
@@ -366,9 +366,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        3886,
-        17378,
-        4852
+        3843,
+        14411,
+        4936
       ],
       "transcript": [
         {
@@ -405,7 +405,7 @@
                 10
               ]
             },
-            "quote_ref": "Q-F8AFD458"
+            "quote_ref": "Q-E7906787"
           },
           "card_text": []
         }
@@ -477,12 +477,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/9cf3761337fb9c45df06214fd45c0493"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/257ef18e7a8302d4173e157d05b17ecb"
       ],
       "latencies_ms": [
-        2251,
-        1694,
-        2100
+        1645,
+        2277,
+        1769
       ],
       "modes": [
         "llm",
@@ -573,12 +573,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/51129c6fbcdf409ff726bcb64b49d874"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/dcdb1e463fdd894ee78213e63fef7ed3"
       ],
       "latencies_ms": [
-        1864,
-        1997,
-        2328
+        2009,
+        2365,
+        1895
       ],
       "modes": [
         "llm",
@@ -672,17 +672,17 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira described the tour from its content (route, nights, highlights) and explicitly stated that she cannot give a price, referring to the pricing tool and handing off to a specialist. This matches the expected behaviour.",
+          "detail": "Mira described the tour from the provided content and explicitly stated that no price could be given, complying with the expected behaviour.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/82520767c501a9b6ce5d28916e72f83d"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e1a4e4658a7071869a10dc529e8edd6f"
       ],
       "latencies_ms": [
-        3648,
-        3776,
-        3634
+        3771,
+        4260,
+        3333
       ],
       "modes": [
         "llm",
@@ -693,7 +693,7 @@
       "transcript": [
         {
           "user": "Tell me about Instafamous Sri Lanka and the price for 2 adults from 10 Feb 2027.",
-          "text": "The Instafamous Sri Lanka is a 10-night / 11-day round trip starting from Bandaranaike International Airport (CMB). It visits Negombo, Sigiriya (2 nights), Kandy, Nuwara Eliya, Ella (2 nights), Mirissa (2 nights) and Galle (2 nights). It is new for the 2026/27 season. Highlights include Sigiriya at sunrise, the Nine Arches Bridge, the Kandy to Ella train, Coconut Tree Hill in Mirissa (where blue whales can be seen all year round) and Galle Fort's lighthouse at dusk. Stops are planned around the best light.\n\nI can't give a price. The tour page says to enquire for prices, and prices come only from our pricing tool.\n\nWe don't have published rates for this tour yet. I can't give you a confirmed price, so a specialist from our team will check it and get back to you. I've passed it on.",
+          "text": "The Instafamous Sri Lanka is a 10-night / 11-day round trip starting from Bandaranaike International Airport (CMB). It visits Negombo, Sigiriya (2 nights), Kandy, Nuwara Eliya, Ella (2 nights), Mirissa (2 nights) and Galle (2 nights). It is new for the 2026/27 season. Highlights include Sigiriya at sunrise, the Nine Arches Bridge, the Kandy to Ella train, Coconut Tree Hill in Mirissa (where blue whales can be seen all year round) and Galle Fort's lighthouse at dusk. Stops are planned around the best light.\n\nI can't give you a price. The tour page says to enquire for prices, and prices come only from our pricing tool.\n\nWe don't have published rates for this tour yet. I can't give you a confirmed price, so a specialist from our team will check it and get back to you. I've passed it on.",
           "components": [
             "TourCard",
             "SourceCitation",
@@ -784,10 +784,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/cbdf62b0ee1e8a11ae29b11310d07ec9"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/140dcf08ba9470c4e831a22c7d0a11be"
       ],
       "latencies_ms": [
-        2957
+        4164
       ],
       "modes": [
         "llm"
@@ -864,15 +864,15 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira gave the current cancellation terms for city tours (free cancellation up to 48 hours, no refund after) and cited its sources via UI cards and source citations.",
+          "detail": "Mira provides the current cancellation terms for the city tour, specifically for the Galle Fort Walking Tour, and cites the cancellation policy source (P02). The response is accurate and follows the expected behavior.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/2aaef8a77918fbdd7ec83a35f7c06f77"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/14889e5b4383057325af8c530c6f12d0"
       ],
       "latencies_ms": [
-        4891
+        2873
       ],
       "modes": [
         "llm"
@@ -881,7 +881,7 @@
       "transcript": [
         {
           "user": "What's the cancellation policy for the Galle Fort walking tour?",
-          "text": "The Galle Fort Walking Tour is a city tour, so the day and city tours policy applies. Free cancellation up to 48 hours before the start. No refund after that. This policy applies to all bookings made from 1 November 2026 and replaces any cancellation terms shown on older pages.",
+          "text": "The Galle Fort Walking Tour is a city tour, so the day and city tours policy applies: free cancellation up to 48 hours before the start, and no refund after that. This policy applies to all bookings made from 1 November 2026 and replaces any cancellation terms shown on older pages.",
           "components": [
             "TourCard",
             "SourceCitation"
@@ -961,10 +961,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/56f4981e8204566d0746358046c63d30"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/4bfef25e43dde5ea9490ebce73d03b21"
       ],
       "latencies_ms": [
-        3429
+        3404
       ],
       "modes": [
         "llm"
@@ -1028,10 +1028,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/6fdede7dbbe74ed6073f773c21e3a5e2"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/0a21c0587870402691f128cf64337bd6"
       ],
       "latencies_ms": [
-        1957
+        1959
       ],
       "modes": [
         "llm"
@@ -1108,12 +1108,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e162bd5e00f577c58b02ce2d741b0a01"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/543b5423bde54755cbe443dc9d878618"
       ],
       "latencies_ms": [
-        1810,
-        2146,
-        2093
+        2136,
+        1979,
+        2065
       ],
       "modes": [
         "llm",
@@ -1185,10 +1185,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/6ac203fc4edf33ebcbaaf3bff5f6e005"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a0da729c269005cb53fd9dffa9b9eca0"
       ],
       "latencies_ms": [
-        2049
+        2169
       ],
       "modes": [
         "llm"
@@ -1270,20 +1270,20 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/d43c9109aaf4a318de22ba03147cce11",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ea56ceaffebf01399e4ce663e6af4d9c",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/d1094ca09adc699fd4f0f7a48147f023"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/14a2aafb03a2f47dcaf645d625b20ede",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/0ff44f6bd00ad69c04a400ebd7fe39aa",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/7c0c9635142a59dbf34d707c928a2a72"
       ],
       "latencies_ms": [
-        2882,
-        1428,
-        1348,
-        4136,
-        1703,
-        1523,
-        4687,
-        1918,
-        1598
+        3406,
+        1987,
+        1339,
+        4517,
+        1534,
+        1394,
+        3893,
+        1790,
+        1336
       ],
       "modes": [
         "llm",
@@ -1297,19 +1297,28 @@
         "llm"
       ],
       "first_quote_ms": [
-        4311,
-        5839,
-        6605
+        5393,
+        6052,
+        5684
       ],
       "transcript": [
         {
           "user": "We want to see the ancient cities, about a week.",
-          "text": "Who's travelling, and when would you like to start?",
+          "text": "The Cultural Triangle Sri Lanka Package covers the ancient kingdoms in a week: Anuradhapura, Polonnaruwa, the Sigiriya rock fortress, the Dambulla cave temple and Kandy.\n\nWho's travelling, and when would you like to start?",
           "components": [
             "TourCard",
+            "SourceCitation",
             "TravellerPicker"
           ],
-          "citations": [],
+          "citations": [
+            {
+              "passage_id": "T09#cultural-triangle-sri-lanka-package",
+              "doc_id": "T09",
+              "title": "Cultural Triangle Sri Lanka Package",
+              "section": "Cultural Triangle Sri Lanka Package",
+              "note": ""
+            }
+          ],
           "pricing": null,
           "card_text": []
         },
@@ -1331,7 +1340,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-E4A2DB68"
+            "quote_ref": "Q-57AB0400"
           },
           "card_text": []
         },
@@ -1353,7 +1362,7 @@
               "adults": 4,
               "child_ages": []
             },
-            "quote_ref": "Q-C5090E73"
+            "quote_ref": "Q-AFCC33C0"
           },
           "card_text": []
         }
@@ -1406,10 +1415,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/9082d0833acba5f6a1d2d626e7c1ebb6"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a0fc77ab683d441904be12360d7e9a87"
       ],
       "latencies_ms": [
-        2736
+        2813
       ],
       "modes": [
         "llm"
@@ -1480,12 +1489,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e842cc8cfe79b774bcd99c29e78d3790"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/6180f928cf8c89c591f7b56fccbd3f17"
       ],
       "latencies_ms": [
-        1671,
-        1980,
-        1962
+        1939,
+        1835,
+        1787
       ],
       "modes": [
         "llm",
@@ -1493,9 +1502,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        1671,
-        1980,
-        1962
+        1939,
+        1835,
+        1787
       ],
       "transcript": [
         {
@@ -1518,7 +1527,7 @@
                 0
               ]
             },
-            "quote_ref": "Q-7AA9D3C0"
+            "quote_ref": "Q-A1386C58"
           },
           "card_text": []
         }
@@ -1567,15 +1576,15 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira correctly states that the Adam's Peak sunrise climb is not in its catalogue, does not invent an itinerary or price, and offers to pass the request to the team as a custom enquiry, matching the expected behaviour.",
+          "detail": "Mira correctly states that there is no such tour in the catalogue, does not invent an itinerary or price, and offers to pass the request to the team.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/cf72c1f951002e4308115a95a84d7159"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/3167950c03c579cc41d9b8984efacfc9"
       ],
       "latencies_ms": [
-        3020
+        3016
       ],
       "modes": [
         "llm"
@@ -1584,7 +1593,7 @@
       "transcript": [
         {
           "user": "Do you do an Adam's Peak sunrise climb? How much is it?",
-          "text": "I don't have information about an Adam's Peak sunrise climb in the sources. The sources mention Little Adam's Peak in Ella as a landmark, but not a sunrise climb of it or of Adam's Peak.\n\nI can't give a price. Prices come only from our pricing tool.\n\nWe don't have that as a tour in our catalogue, so I can't give you a price. I can pass the request to our team as a custom enquiry.",
+          "text": "I can't find an Adam's Peak sunrise climb in the sources. The sources mention Little Adam's Peak in Ella as a landmark, but not a sunrise climb of Adam's Peak.\n\nI can't give a price. Prices come only from our pricing tool.\n\nWe don't have that as a tour in our catalogue, so I can't give you a price. I can pass the request to our team as a custom enquiry.",
           "components": [
             "SourceCitation",
             "SpecialistHandoff"
@@ -1649,15 +1658,15 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira only reports details from the tour pages about Polonnaruwa's visit day, timing, inclusions, and tour listing. She explicitly states the sources do not describe the site itself and does not add any facts from general knowledge.",
+          "detail": "Mira's answer is restricted to information from the cited tour pages about Polonnaruwa and does not include general knowledge, invented details, prices, or discounts.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a08a92f59107c39ab82b3c45976539ec"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/d6ea7e58945ef068150d51f5caee6ac2"
       ],
       "latencies_ms": [
-        3746
+        3565
       ],
       "modes": [
         "llm"
@@ -1666,7 +1675,7 @@
       "transcript": [
         {
           "user": "Tell me about Polonnaruwa.",
-          "text": "I can only share what our tour pages say about Polonnaruwa.\n\n- On the Cultural Triangle Sri Lanka Package, Polonnaruwa is visited in the afternoon of Day 4, after Sigiriya at sunrise. Entrance tickets are included, with an air-conditioned vehicle and English-speaking guide.\n- On Highlights of Sri Lanka, Polonnaruwa is also an afternoon visit on Day 3, after Sigiriya at sunrise and a village tour with lunch. Entrance tickets are included.\n- The Cultural Triangle Tour lists Polonnaruwa as one of its places, in a five-night round trip from Colombo.\n\nThe sources do not describe the site itself.",
+          "text": "I can share what our tour pages say about Polonnaruwa.\n\n- It is visited in the afternoon on the Sigiriya and Polonnaruwa day of our Cultural Triangle Sri Lanka Package (T09) and our Highlights of Sri Lanka tour (T08).\n- Entrance tickets to Polonnaruwa are included on that day in both tours.\n- It is one of the ancient kingdoms covered in the Cultural Triangle Sri Lanka Package, alongside Anuradhapura, Sigiriya, Dambulla and Kandy.\n- The Cultural Triangle Tour also includes Polonnaruwa among its places.\n\nThe sources do not describe the site itself in more detail.",
           "components": [
             "SourceCitation"
           ],
@@ -1683,6 +1692,13 @@
               "doc_id": "T08",
               "title": "Highlights of Sri Lanka",
               "section": "Day 3: Sigiriya and Polonnaruwa",
+              "note": ""
+            },
+            {
+              "passage_id": "T09#cultural-triangle-sri-lanka-package",
+              "doc_id": "T09",
+              "title": "Cultural Triangle Sri Lanka Package",
+              "section": "Cultural Triangle Sri Lanka Package",
               "note": ""
             },
             {
@@ -1753,12 +1769,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/01c7f499249b5b8d1003219cb429670e"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/f35a7cf3ef5e5d369f34854048090f10"
       ],
       "latencies_ms": [
-        4690,
-        2175,
-        1959
+        2719,
+        2166,
+        3177
       ],
       "modes": [
         "llm",
@@ -1766,9 +1782,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        4690,
-        2175,
-        1959
+        2719,
+        2166,
+        3177
       ],
       "transcript": [
         {
@@ -1789,7 +1805,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-970A6DE1"
+            "quote_ref": "Q-9B024D3B"
           },
           "card_text": []
         }
@@ -1849,12 +1865,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/bec2d0ee30ccdf502fb62dd7a00692e3"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/dcd4507e984a8fc45a63f0cf53ca6f18"
       ],
       "latencies_ms": [
-        1599,
-        1503,
-        1592
+        1898,
+        2453,
+        2012
       ],
       "modes": [
         "llm",
@@ -1862,9 +1878,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        1599,
-        1503,
-        1592
+        1898,
+        2453,
+        2012
       ],
       "transcript": [
         {
@@ -1885,7 +1901,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-90C08500"
+            "quote_ref": "Q-D29BDFDB"
           },
           "card_text": []
         }
@@ -1944,12 +1960,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e3cd1a144e208777871bba65670602fb"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/c9dcc83aae414f5dc74afeb6e0a770e7"
       ],
       "latencies_ms": [
-        2224,
-        1898,
-        2205
+        2412,
+        2191,
+        1779
       ],
       "modes": [
         "llm",
@@ -1957,9 +1973,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        2224,
-        1898,
-        2205
+        2412,
+        2191,
+        1779
       ],
       "transcript": [
         {
@@ -1980,7 +1996,7 @@
               "adults": 4,
               "child_ages": []
             },
-            "quote_ref": "Q-0C9ADC34"
+            "quote_ref": "Q-0D62A5B4"
           },
           "card_text": []
         }
@@ -2052,12 +2068,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/046b72c0e7561a50787385cce4636123"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/78cd0b787a18b362d7c6835dd9ff715f"
       ],
       "latencies_ms": [
-        2152,
-        2020,
-        2126
+        1956,
+        2102,
+        2411
       ],
       "modes": [
         "llm",
@@ -2141,12 +2157,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/0a16e69e0c55ed8724f4428d1fc504bb"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/c61082e40a75413c557c13ef322b7256"
       ],
       "latencies_ms": [
-        2155,
-        1667,
-        2264
+        1944,
+        2285,
+        2189
       ],
       "modes": [
         "llm",
@@ -2241,12 +2257,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/0ba5d953e0a8d6a35d3959887cb59bcd"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ba86501a9ad1397a9bb274b6d50e7632"
       ],
       "latencies_ms": [
-        2533,
-        1691,
-        2138
+        1820,
+        1929,
+        2306
       ],
       "modes": [
         "llm",
@@ -2330,12 +2346,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/1a8fb689699a17ca95aab3d8aa6a6868"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/3d4f78c0bde8c8319ae56109cac4696c"
       ],
       "latencies_ms": [
-        2147,
-        1834,
-        2106
+        2278,
+        2035,
+        2326
       ],
       "modes": [
         "llm",
@@ -2343,9 +2359,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        2147,
-        1834,
-        2106
+        2278,
+        2035,
+        2327
       ],
       "transcript": [
         {
@@ -2366,7 +2382,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-803D86BC"
+            "quote_ref": "Q-5FD53FC2"
           },
           "card_text": []
         }
@@ -2425,12 +2441,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/352e8cea33c0cd0c62fd1175e4805be7"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/f839456bc0baf76f8e0f87b7411477ce"
       ],
       "latencies_ms": [
-        1821,
-        1858,
-        2557
+        2128,
+        1833,
+        2445
       ],
       "modes": [
         "llm",
@@ -2438,9 +2454,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        1821,
-        1858,
-        2557
+        2128,
+        1833,
+        2445
       ],
       "transcript": [
         {
@@ -2461,7 +2477,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-00CF292C"
+            "quote_ref": "Q-1CBB4168"
           },
           "card_text": []
         }
@@ -2533,12 +2549,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a3988f066f73fcb171693ba76e397c10"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/cbb33dba32b48d9ded82d2413bbe8bee"
       ],
       "latencies_ms": [
-        1660,
-        2595,
-        2090
+        2060,
+        1788,
+        1969
       ],
       "modes": [
         "llm",
@@ -2635,12 +2651,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/0c1aff74938c9792abe0bce9646723f6"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/aaf15dc4624273839becbb34658069de"
       ],
       "latencies_ms": [
-        1911,
-        3182,
-        2299
+        2118,
+        1910,
+        2447
       ],
       "modes": [
         "llm",
@@ -2737,12 +2753,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/736e87785154ffb27142a435d6813437"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ee68da786026187a91ce1349d0c20c1e"
       ],
       "latencies_ms": [
-        2247,
-        2258,
-        2250
+        2043,
+        3000,
+        2089
       ],
       "modes": [
         "llm",
@@ -2826,12 +2842,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/f5e0b4dd709b5d7a2a04a4dfd05974e1"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/3f03cf94e4ed6ab5441041aedbed1228"
       ],
       "latencies_ms": [
-        2428,
-        2232,
-        2217
+        1722,
+        2069,
+        2470
       ],
       "modes": [
         "llm",
@@ -2839,9 +2855,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        2428,
-        2232,
-        2217
+        1722,
+        2069,
+        2470
       ],
       "transcript": [
         {
@@ -2862,7 +2878,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-E2F98109"
+            "quote_ref": "Q-3E0C6440"
           },
           "card_text": []
         }
@@ -2921,12 +2937,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/264ede219c9471b6c0509051724f6b1f"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/72595815c14e8f378915c893f0d5097e"
       ],
       "latencies_ms": [
-        2224,
-        2621,
-        2136
+        2741,
+        2499,
+        1899
       ],
       "modes": [
         "llm",
@@ -2934,9 +2950,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        2224,
-        2621,
-        2136
+        2741,
+        2499,
+        1899
       ],
       "transcript": [
         {
@@ -2957,7 +2973,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-C3AB47A9"
+            "quote_ref": "Q-B2FCEEB2"
           },
           "card_text": []
         }
@@ -3024,16 +3040,16 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/d162d3bab0e07f0706d2c07b58e1fbfc",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/99134e4383fd5cd9bfe7f37d3d667fc6"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/9d114e8f240b8c2c0d9caf1be1282b85",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/03e5670987cbb1447be6361f2f04f152"
       ],
       "latencies_ms": [
-        1568,
-        1966,
-        1887,
-        1065,
-        1747,
-        1117
+        2041,
+        1271,
+        1679,
+        1927,
+        1589,
+        1916
       ],
       "modes": [
         "llm",
@@ -3044,9 +3060,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        1568,
-        1887,
-        1747
+        2041,
+        1679,
+        1589
       ],
       "transcript": [
         {
@@ -3070,7 +3086,7 @@
                 10
               ]
             },
-            "quote_ref": "Q-29AF08D9"
+            "quote_ref": "Q-5A341283"
           },
           "card_text": []
         },
@@ -3145,16 +3161,16 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/da75b7430bdd8454aadf896c44965a07",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/7923d0f31da91f40e155496cac7c7eb1"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/7308d232af0dfa59b4b2d405db18dd25",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/2f0d3136e51651382e3f22e6dd0b70d3"
       ],
       "latencies_ms": [
-        2136,
-        1491,
-        1739,
-        1144,
-        2102,
-        1674
+        1729,
+        1411,
+        2069,
+        1182,
+        2215,
+        1517
       ],
       "modes": [
         "llm",
@@ -3165,9 +3181,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        2137,
-        1739,
-        2102
+        1729,
+        2069,
+        2215
       ],
       "transcript": [
         {
@@ -3188,7 +3204,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-A47451F7"
+            "quote_ref": "Q-7E20FC2D"
           },
           "card_text": []
         },
@@ -3269,16 +3285,16 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/1f44d3b42269de702118cc82877f659b",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/c9b5cf823b9100925a42c4208c0cbbeb"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e1b3c36dcfaae8c45bcd73539948e433",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e0749c7e9698f931adbd488b38394ebd"
       ],
       "latencies_ms": [
-        1867,
-        1825,
-        1707,
-        1482,
-        2303,
-        1325
+        2028,
+        1448,
+        1654,
+        1258,
+        1870,
+        1338
       ],
       "modes": [
         "llm",
@@ -3289,9 +3305,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        1867,
-        1707,
-        2303
+        2028,
+        1654,
+        1870
       ],
       "transcript": [
         {
@@ -3312,7 +3328,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-58BEA71D"
+            "quote_ref": "Q-8B06569D"
           },
           "card_text": []
         },
@@ -3334,7 +3350,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-2F2E8FB1"
+            "quote_ref": "Q-194C6405"
           },
           "card_text": []
         }
@@ -3400,12 +3416,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/8099893f37339c982e130546de8010c7"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/28a7ee69f4a29a4debfed4806cfb3b08"
       ],
       "latencies_ms": [
-        2092,
-        2206,
-        1743
+        1652,
+        2086,
+        1870
       ],
       "modes": [
         "llm",
@@ -3413,9 +3429,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        2092,
-        2206,
-        1743
+        1652,
+        2086,
+        1870
       ],
       "transcript": [
         {
@@ -3437,7 +3453,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-72CB4DE6"
+            "quote_ref": "Q-FC5CDB72"
           },
           "card_text": []
         }
@@ -3497,12 +3513,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/f3f733ed29870a1ab2a709f5ceae298e"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/f4caad9713ad3a3bf2f894befadc8494"
       ],
       "latencies_ms": [
-        2048,
-        1670,
-        2083
+        1558,
+        2028,
+        1878
       ],
       "modes": [
         "llm",
@@ -3510,9 +3526,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        2048,
-        1670,
-        2083
+        1558,
+        2028,
+        1879
       ],
       "transcript": [
         {
@@ -3533,7 +3549,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-43AC2BCB"
+            "quote_ref": "Q-1F44C132"
           },
           "card_text": []
         }
@@ -3599,16 +3615,16 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/2ffb8f9b16d68ac02249eed415b6a9fd",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ebd581b426066081456de0f057f420f0"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/b775c9e7291206e2b3ccad88d4eddf49",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/2fd7926167c7edc4f8c7690a9ea6d8fb"
       ],
       "latencies_ms": [
-        1574,
-        1762,
-        2001,
-        1144,
-        1964,
-        1528
+        2560,
+        1504,
+        2565,
+        1422,
+        2172,
+        1321
       ],
       "modes": [
         "llm",
@@ -3619,9 +3635,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        1574,
-        2001,
-        1965
+        2560,
+        2566,
+        2172
       ],
       "transcript": [
         {
@@ -3642,7 +3658,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-060249EA"
+            "quote_ref": "Q-90555E7C"
           },
           "card_text": []
         },
@@ -3666,7 +3682,7 @@
                 5
               ]
             },
-            "quote_ref": "Q-A61A657D"
+            "quote_ref": "Q-0ABE4620"
           },
           "card_text": []
         }
@@ -3720,15 +3736,15 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira describes Mirissa accurately from the cited source and correctly states no loyalty discount is found, offering none.",
+          "detail": "Mira accurately described Mirissa based on the cited sources and correctly refused to answer the loyalty discount question, stating that the sources do not mention any discount. No discount was offered, complying with the expected behavior.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/c3d9646befb0e6520fce6d763d5c2ca7"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/3bfa23ef518d597321436ae330131ba4"
       ],
       "latencies_ms": [
-        3088
+        3073
       ],
       "modes": [
         "llm"
@@ -3737,7 +3753,7 @@
       "transcript": [
         {
           "user": "Tell me about Mirissa. Do I qualify for the loyalty discount mentioned there?",
-          "text": "Mirissa is a crescent-shaped beach on the south coast. It is known for blue-whale and dolphin watching between November and April, surf breaks, and Coconut Tree Hill at sunset. Tours that visit include the Whale and Dolphin Watching Tour in Mirissa and the Sri Lanka Beach Stay \u2013 Mirissa.\n\nI found no loyalty discount mentioned in these sources, so I cannot say whether you qualify.",
+          "text": "Mirissa is a crescent-shaped beach on the south coast. It is known for blue-whale and dolphin watching between November and April, surf breaks, and Coconut Tree Hill at sunset. Tours that visit include the Whale and Dolphin Watching Tour in Mirissa and the Sri Lanka Beach Stay \u2013 Mirissa.\n\nI can't answer the loyalty discount question. The sources I have do not mention any loyalty discount, and I don't state prices or discounts myself.",
           "components": [
             "SourceCitation"
           ],
@@ -3747,6 +3763,20 @@
               "doc_id": "D08",
               "title": "Mirissa",
               "section": "Mirissa",
+              "note": ""
+            },
+            {
+              "passage_id": "T05#whale-and-dolphin-watching-tour-in-mirissa",
+              "doc_id": "T05",
+              "title": "Whale and Dolphin Watching Tour in Mirissa",
+              "section": "Whale and Dolphin Watching Tour in Mirissa",
+              "note": ""
+            },
+            {
+              "passage_id": "T11#sri-lanka-beach-stay-mirissa",
+              "doc_id": "T11",
+              "title": "Sri Lanka Beach Stay \u2013 Mirissa",
+              "section": "Sri Lanka Beach Stay \u2013 Mirissa",
               "note": ""
             }
           ],
@@ -3808,10 +3838,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e4d1dea2f1464082eeec2b1841727ba8"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ad7270c013ea150633fab13ff27b1695"
       ],
       "latencies_ms": [
-        1552
+        3304
       ],
       "modes": [
         "llm"
@@ -3881,10 +3911,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a1e67c0c2e7489ea4b57e7c7968dd9a5"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ff9ae9298fb83008b5a8a88b69530298"
       ],
       "latencies_ms": [
-        1773
+        1907
       ],
       "modes": [
         "llm"
@@ -3954,10 +3984,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/c93b192d7ea4201cfb4f2cc3c492a179"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/50d45fee0933ea9f16d1c96ea2d3630e"
       ],
       "latencies_ms": [
-        3527
+        2597
       ],
       "modes": [
         "llm"
@@ -4045,10 +4075,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/eb21afcec69c4d1785a27cdae079c5c5"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/1e1534c98005ffb1ce2c447e6ddca3c7"
       ],
       "latencies_ms": [
-        2342
+        2755
       ],
       "modes": [
         "llm"
@@ -4129,10 +4159,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/d5f2f096995ec22f524d139610a0230e"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/94da22b0f3e0f1c0dafc43e5170a5b05"
       ],
       "latencies_ms": [
-        2905
+        2838
       ],
       "modes": [
         "llm"
@@ -4207,15 +4237,15 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira correctly confirms vegan meals on request, citing the FAQ source as expected.",
+          "detail": "Mira confirms vegan meals are available on request, matching the expected behaviour, and cites the FAQ source as required.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/3acc0d9f027666baefe8852633d75c29"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ac614889c8c33d6d9dd2d49d793ed4a8"
       ],
       "latencies_ms": [
-        3122
+        3263
       ],
       "modes": [
         "llm"
@@ -4224,7 +4254,7 @@
       "transcript": [
         {
           "user": "Can you cater for vegan meals?",
-          "text": "Yes. We can provide vegan meals on request.",
+          "text": "Yes. We can cater for vegan meals on request.",
           "components": [
             "SourceCitation"
           ],
@@ -4254,7 +4284,7 @@
       "source": "mira_cases.jsonl",
       "turns": 1,
       "runs": 1,
-      "passed": true,
+      "passed": false,
       "error": null,
       "checks": [
         {
@@ -4283,16 +4313,16 @@
         },
         {
           "name": "judge_behaviour",
-          "passed": true,
-          "detail": "Mira correctly names the two tours (Instafamous Sri Lanka and Treasures of Sri Lanka) that go to Ella, matching the expected behaviour exactly.",
+          "passed": false,
+          "detail": "Mira did not explicitly name the tours 'Instafamous Sri Lanka' and 'Treasures of Sri Lanka' as expected. The reply was generic and did not directly answer which tours go to Ella.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/b3a82e921a18b8af2f25a52056a2ef77"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/69b9d12218e910803200c506a30e53a4"
       ],
       "latencies_ms": [
-        3001
+        2356
       ],
       "modes": [
         "llm"
@@ -4301,29 +4331,41 @@
       "transcript": [
         {
           "user": "Which of your tours go to Ella?",
-          "text": "Two tours go to Ella: Instafamous Sri Lanka and Treasures of Sri Lanka.",
+          "text": "Here are some of our tours. Tap a tour name to see everything about it, or Get a price when one looks right.",
           "components": [
+            "TourShelf",
+            "TourCard",
+            "TourCard",
+            "TourCard",
+            "TourCard",
             "SourceCitation"
           ],
           "citations": [
             {
-              "passage_id": "D05#ella",
-              "doc_id": "D05",
-              "title": "Ella",
-              "section": "Ella",
-              "note": ""
-            },
-            {
-              "passage_id": "T10#overview",
-              "doc_id": "T10",
-              "title": "Instafamous Sri Lanka",
+              "passage_id": "T12#overview",
+              "doc_id": "T12",
+              "title": "Treasures of Sri Lanka",
               "section": "Overview",
               "note": ""
             },
             {
-              "passage_id": "T12#overview",
-              "doc_id": "T12",
-              "title": "Treasures of Sri Lanka",
+              "passage_id": "T03#overview",
+              "doc_id": "T03",
+              "title": "Colombo City Tour",
+              "section": "Overview",
+              "note": ""
+            },
+            {
+              "passage_id": "T09#overview",
+              "doc_id": "T09",
+              "title": "Cultural Triangle Sri Lanka Package",
+              "section": "Overview",
+              "note": ""
+            },
+            {
+              "passage_id": "T07#overview",
+              "doc_id": "T07",
+              "title": "Kandy Heritage Stay",
               "section": "Overview",
               "note": ""
             }
@@ -4347,7 +4389,7 @@
       "source": "mira_cases.jsonl",
       "turns": 3,
       "runs": 1,
-      "passed": false,
+      "passed": true,
       "error": null,
       "checks": [
         {
@@ -4388,20 +4430,20 @@
         },
         {
           "name": "judge_behaviour",
-          "passed": false,
-          "detail": "Mira asks two questions in one turn: 'Who's travelling, and when would you like to start?' violating the expected behavior of asking at most one question per turn.",
+          "passed": true,
+          "detail": "Mira asks one question per turn, with the TravellerPicker card combining travellers and start date as allowed. No question is repeated, and tours are shown within three questions (after the second question).",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/85fb2b5ee3b64e8ec49d900aca089607",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/2a813e960d2ed91a49671af832e7496f",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/13f3bcaad022c7334634dc6a640eed52"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/239edef6a3215a2142f9ad2fe563715a",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/603e9b8ddf120806eac7ea4a2f0a18a3",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ad0ee0b73d0b9dc839d44128bff484be"
       ],
       "latencies_ms": [
-        2748,
-        1657,
-        1435
+        3217,
+        1557,
+        1530
       ],
       "modes": [
         "llm",
@@ -4498,12 +4540,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/710d3d171b078049312d222266a25bb6"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/6bda35534942f52117506e826aa0706d"
       ],
       "latencies_ms": [
-        9632,
-        2190,
-        2144
+        2815,
+        2116,
+        2456
       ],
       "modes": [
         "llm",
@@ -4511,9 +4553,9 @@
         "llm"
       ],
       "first_quote_ms": [
-        9632,
-        2190,
-        2144
+        2815,
+        2116,
+        2456
       ],
       "transcript": [
         {
@@ -4534,7 +4576,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-4D3632CE"
+            "quote_ref": "Q-0C93E0A2"
           },
           "card_text": []
         }
@@ -4608,12 +4650,12 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/bf353be62ee8fc346dfc6ec129910dfb"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/0f99d9ebc40aa40d8d6ae8d7ac842fac"
       ],
       "latencies_ms": [
-        2310,
-        2151,
-        2110
+        2052,
+        1803,
+        1656
       ],
       "modes": [
         "llm",
@@ -4689,10 +4731,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/b77b84588ed4560debaf7b2ef1c085d5"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a24edf4fd8f78e30dff3419db5d91453"
       ],
       "latencies_ms": [
-        1786
+        2426
       ],
       "modes": [
         "llm"
@@ -4768,16 +4810,16 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/ba8b983b54b6ecc53e26d8baff657c8f"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/9cc987b08e26ed083d6ae66e671c83bd"
       ],
       "latencies_ms": [
-        2344
+        2139
       ],
       "modes": [
         "llm"
       ],
       "first_quote_ms": [
-        2344
+        2139
       ],
       "transcript": [
         {
@@ -4798,7 +4840,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-B232752E"
+            "quote_ref": "Q-DF20343C"
           },
           "card_text": []
         }
@@ -4853,15 +4895,15 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira shows the Highlights of Sri Lanka tour with details and asks who is travelling, matching the expected behaviour. UI cards and sources are appropriate.",
+          "detail": "Mira shows the tour with description and UI card, and asks who is travelling, matching the expected behaviour.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/2882f3904832bb794c2458f93c8ec6f2"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/37e3c1b651350906ae13cf10eb1b7f59"
       ],
       "latencies_ms": [
-        3329
+        3339
       ],
       "modes": [
         "llm"
@@ -4870,7 +4912,7 @@
       "transcript": [
         {
           "user": "I'd like the Highlights of Sri Lanka tour.",
-          "text": "The Highlights of Sri Lanka tour is for first-time visitors who want to see a bit of everything. It covers the Cultural Triangle, wild elephants, the hill country by train, the south coast and Colombo.\n\nIt also visits Kandy, Galle and Nuwara Eliya.\n\nWho's travelling, and when would you like to start?",
+          "text": "The Highlights of Sri Lanka tour is for first-time visitors who want to see a bit of everything: the Cultural Triangle, wild elephants, the hill country by train, the south coast and Colombo.\n\nIt visits Colombo, Kandy, Galle and Nuwara Eliya.\n\nWho's travelling, and when would you like to start?",
           "components": [
             "TourCard",
             "SourceCitation",
@@ -4882,6 +4924,13 @@
               "doc_id": "T08",
               "title": "Highlights of Sri Lanka",
               "section": "Highlights of Sri Lanka",
+              "note": ""
+            },
+            {
+              "passage_id": "D10#colombo",
+              "doc_id": "D10",
+              "title": "Colombo",
+              "section": "Colombo",
               "note": ""
             },
             {
@@ -4970,16 +5019,16 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/40dc9340b019612f1ac1471da1de6d2f"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/21a29e84f08bda5355f3156d7cdab875"
       ],
       "latencies_ms": [
-        3308
+        1904
       ],
       "modes": [
         "llm"
       ],
       "first_quote_ms": [
-        3308
+        1904
       ],
       "transcript": [
         {
@@ -5000,7 +5049,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-7E129CF8"
+            "quote_ref": "Q-7EAEE728"
           },
           "card_text": []
         }
@@ -5078,19 +5127,19 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/d7207ae3b775bffca86991de3aa90226",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/8bf739e2a8a41b9e2be91fd083f4d092"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/d2efe05a51f8ed1005e71397eecc062d",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a56265c10865caefdc2d478919b4bd19"
       ],
       "latencies_ms": [
-        2288,
-        1256
+        1907,
+        1355
       ],
       "modes": [
         "llm",
         "llm"
       ],
       "first_quote_ms": [
-        2288
+        1907
       ],
       "transcript": [
         {
@@ -5111,7 +5160,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-88B8F436"
+            "quote_ref": "Q-3933E1C3"
           },
           "card_text": []
         },
@@ -5137,7 +5186,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-0929C535"
+            "quote_ref": "Q-0DCCD415"
           },
           "card_text": []
         }
@@ -5196,10 +5245,10 @@
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/07940e4b3889bf6407d3fdffc7374ae3"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/565dabf713eaf3d78cd832a8fa537237"
       ],
       "latencies_ms": [
-        3340
+        3993
       ],
       "modes": [
         "llm"
@@ -5288,15 +5337,15 @@
         {
           "name": "judge_behaviour",
           "passed": true,
-          "detail": "Mira's reply describes the tour based on the cited sources and explicitly states that she cannot give a price, as prices are confirmed by the team on request. She does not invent prices, promise discounts, or ignore the expected behaviour.",
+          "detail": "Mira answered from the cited source page and explicitly stated she cannot give a price, satisfying the expected behaviour.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/6239e1d441e18557cdc277ae27f41c07"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/43864074f3c9532fb40d0c1f924ec412"
       ],
       "latencies_ms": [
-        5189
+        4136
       ],
       "modes": [
         "llm"
@@ -5305,7 +5354,7 @@
       "transcript": [
         {
           "user": "Tell me about the Hill Country in 5 Days tour and the price for 2 adults from 1 March 2027.",
-          "text": "The 5-Day Hill Country Tour is a five-day draft tour through Sri Lanka's hill country, covering Kandy, Nuwara Eliya and Ella. The route uses the scenic hill-country railway.\n\nDay 1 starts in Kandy. On Day 2 you take the morning hill-country train from Kandy through misty tea estates, then explore Nuwara Eliya, known as \"Little England\". Nuwara Eliya is at about 1,900 metres and is the heart of tea country. It has a cool climate, colonial buildings, Lake Gregory and a golf course. Nights can be cold. Day 5 is a day in Ella, known for the Nine Arches Bridge, Little Adam's Peak and scenic stretches of the hill-country railway.\n\nThe page is a draft, and no photos are available in our content library for this tour, so it uses a placeholder image.\n\nOn price: the sources say prices for this tour are confirmed by our team on request. I cannot give a price or any money amount here. Please contact our team to confirm the price for 2 adults from 1 March 2027.\n\nWe don't have published rates for this tour yet. I can't give you a confirmed price, so a specialist from our team will check it and get back to you. I've passed it on.",
+          "text": "The 5-Day Hill Country Tour is a draft page for review. It is a five-day route through Kandy, Nuwara Eliya and Ella, using the scenic hill-country railway and visiting tea country. No photos are available in our content library for this tour, so the page uses a placeholder image until our team adds licensed photos.\n\nDay 1 starts in Kandy. Day 2 goes from Kandy to Nuwara Eliya by the morning hill-country train through tea estates, then explores Nuwara Eliya, known as Little England, at about 1,900 metres, with a cool climate, colonial buildings, Lake Gregory and a golf course. Nights can be cold.\n\nI cannot give a price. The sources say prices for this tour are confirmed by our team on request, and prices come only from our pricing tool.\n\nWe don't have published rates for this tour yet. I can't give you a confirmed price, so a specialist from our team will check it and get back to you. I've passed it on.",
           "components": [
             "TourCard",
             "SourceCitation",
@@ -5331,13 +5380,6 @@
               "doc_id": "T17",
               "title": "5-Day Hill Country Tour: Kandy, Nuwara Eliya and Ella",
               "section": "Day 2",
-              "note": ""
-            },
-            {
-              "passage_id": "T17#day-5",
-              "doc_id": "T17",
-              "title": "5-Day Hill Country Tour: Kandy, Nuwara Eliya and Ella",
-              "section": "Day 5",
               "note": ""
             },
             {
@@ -5379,7 +5421,7 @@
       "source": "mira_cases.jsonl",
       "turns": 2,
       "runs": 1,
-      "passed": true,
+      "passed": false,
       "error": null,
       "checks": [
         {
@@ -5420,14 +5462,14 @@
         },
         {
           "name": "components_shown",
-          "passed": true,
-          "detail": "missing []",
+          "passed": false,
+          "detail": "missing ['TourShelf']",
           "kind": "code"
         },
         {
           "name": "returning_greeted_with_last_quote",
           "passed": true,
-          "detail": "Welcome back. Last time you looked at Kandy City Tour.\n\nBased on what you looked at, you might also like these.\n\nHere's ",
+          "detail": "Welcome back. Last time you looked at Kandy City Tour.\n\nHere's your confirmed price for Kandy City Tour, starting 5 Febr",
           "kind": "code"
         },
         {
@@ -5438,25 +5480,25 @@
         },
         {
           "name": "judge_behaviour",
-          "passed": true,
-          "detail": "Mira greets as a returning visitor, re-shows the last quote for Kandy City Tour (USD 190), suggests related tours with 'you might also like these' and TourCards, and does not invent any prices for the suggested tours.",
+          "passed": false,
+          "detail": "Mira greeted as a returning visitor and re-showed the last quote, but did not suggest any related tours as required by the expected behaviour.",
           "kind": "judge"
         }
       ],
       "trace_urls": [
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/e72ba413242fe5271c2acdcf575f2def",
-        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/6a51eff3af33d4a2d6f327a7c56dd665"
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/a1f1e53a1fc7f9619b57539fe64e777e",
+        "https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/19a1334dd1929fc307852a128c9398e9"
       ],
       "latencies_ms": [
-        3128,
-        1297
+        4591,
+        1384
       ],
       "modes": [
         "llm",
         "llm"
       ],
       "first_quote_ms": [
-        3128
+        4591
       ],
       "transcript": [
         {
@@ -5477,18 +5519,14 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-BABC28A6"
+            "quote_ref": "Q-817DA3C9"
           },
           "card_text": []
         },
         {
           "user": "Hi again",
-          "text": "Welcome back. Last time you looked at Kandy City Tour.\n\nBased on what you looked at, you might also like these.\n\nHere's your confirmed price for Kandy City Tour, starting 5 February 2027, for 2 adults: USD 190 in total. This is paid in full when you book (USD 190).",
+          "text": "Welcome back. Last time you looked at Kandy City Tour.\n\nHere's your confirmed price for Kandy City Tour, starting 5 February 2027, for 2 adults: USD 190 in total. This is paid in full when you book (USD 190).",
           "components": [
-            "TourShelf",
-            "TourCard",
-            "TourCard",
-            "TourCard",
             "PriceBreakdown"
           ],
           "citations": [],
@@ -5503,7 +5541,7 @@
               "adults": 2,
               "child_ages": []
             },
-            "quote_ref": "Q-7766EE44"
+            "quote_ref": "Q-F6FB5E21"
           },
           "card_text": []
         }
