@@ -294,6 +294,10 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
     # (eval M28, LLM run): keep helping with the trip instead of saying "not in our information".
     if session.asked and not ex.wants_price and not looks_like_question(text) and not _ready_to_price(session):
         return ["discovery"]
+    # "I'd like the Highlights of Sri Lanka tour." names a choice, not a question (eval M33, DeepSeek run):
+    # describe it, then move towards a price.
+    if intent == Intent.INFO and ex.tour_id and not ex.wants_price and not looks_like_question(text):
+        return ["answer", "pricing" if _ready_to_price(session) else "discovery"]
     if intent == Intent.INFO or ex.wants_info:
         route.append("answer")
     if intent == Intent.QUOTE or ex.wants_price:
@@ -600,7 +604,8 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
         missing.append("start_date")
 
     with _span(ctx, config, "discovery", input={"missing": missing, "asked": session.questions_asked}) as span:
-        if tour_id:
+        already_shown = any(c.component == "TourCard" and c.props.get("tour_id") == tour_id for c in turn.components)
+        if tour_id and not already_shown:
             card = tour_card(ctx, tour_id)
             if card:
                 turn.components.append(card)

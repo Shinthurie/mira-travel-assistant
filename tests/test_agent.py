@@ -358,3 +358,12 @@ def test_book_request_without_a_price_does_not_loop():
     _, graph = fresh_agent(llm=llm)
     turn = chat(graph, ["Book Mirissa Beach Stay for 2 adults on 5 February 2027"])[0]
     assert turn["pricing"]["kind"] == "no_quote" and "BookingForm" not in components(turn)
+
+
+def test_naming_a_tour_moves_towards_a_price():
+    """M33 (DeepSeek run): 'I'd like the Highlights tour.' was read as a question; nobody asked who's travelling."""
+    llm = FakeLLM([LLMExtraction(intent=Intent.INFO, wants_info=True, tour_id="T09"), "unused"] + ["x"] * 3)
+    _, graph = fresh_agent(llm=llm)
+    turn = chat(graph, ["I'd like the Cultural Triangle Sri Lanka Package."])[0]
+    shown = components(turn)
+    assert "TravellerPicker" in shown and shown.count("TourCard") == 1
