@@ -1,6 +1,6 @@
 # Mira evaluation report
 
-- Generated: 2026-11-25T14:07:58+00:00 · git `c976413-dirty` · today = 2026-11-19
+- Generated: 2026-11-25T14:19:45+00:00 · git `6af94a4-dirty` · today = 2026-11-19
 - Mode: **llm** · Mira model: deepseek-flash · judge: deepseek-v4-pro · routing: off
 - Margins: day 0.3, multi-day 0.25
 - Cases: 55 (17 seed, 9 multi-turn) · price/flag cases run 3x (worst run counts)
@@ -30,8 +30,8 @@
 
 ## Speed
 
-- Per turn: median 2039.0 ms, p95 3897 ms, max 5070 ms (138 turns)
-- Time to first quote: median 2098.5 ms, max 5811 ms; under 60 s: 58/58
+- Per turn: median 2234.5 ms, p95 5752 ms, max 39314 ms (138 turns)
+- Time to first quote: median 2249.0 ms, max 18929 ms; under 60 s: 58/58
 
 ## How each turn was understood
 
@@ -41,10 +41,10 @@
 
 | Model | Purpose | Calls | Median ms | Max ms |
 |---|---|---|---|---|
-| deepseek-flash | content_draft | 2 | 2347.5 | 2453 |
-| deepseek-flash | extract | 138 | 1248.0 | 1965 |
-| deepseek-flash | grounded_answer | 19 | 1228 | 2144 |
-| deepseek-v4-pro | judge | 5 | 4986 | 9731 |
+| deepseek-flash | content_draft | 2 | 2570.0 | 2729 |
+| deepseek-flash | extract | 138 | 1380.5 | 33933 |
+| deepseek-flash | grounded_answer | 20 | 1105.0 | 2030 |
+| deepseek-v4-pro | judge | 7 | 4434 | 8005 |
 
 ## LLM judge (behaviour cases)
 

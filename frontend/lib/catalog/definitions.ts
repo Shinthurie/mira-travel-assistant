@@ -51,6 +51,7 @@ export const resolved = {
   TravellerPicker: z.object({
     accent: Accent, prompt: z.string(), adults_default: z.number().int().min(1).max(20),
     child_ages_default: z.array(z.number().int().min(0).max(17)).max(19), max_group: z.number().int().min(1).max(20),
+    ask_date: z.boolean().optional(), date_min: z.string().optional(), date_max: z.string().optional(),
   }).strict(),
   TourShelf: z.object({
     title: z.string(),

@@ -435,3 +435,5 @@ h1, h2, h3, p { margin: 0; }
 .title-link { all: unset; cursor: pointer; text-decoration: underline; text-decoration-color: var(--cc-line); text-underline-offset: 4px; transition: text-decoration-color var(--cc-fast); }
 .title-link:hover { text-decoration-color: var(--cc-orange); }
 .title-link:focus-visible { outline: 2px solid var(--cc-orange); outline-offset: 2px; border-radius: 4px; }
+.date-field input { font-variant-numeric: tabular-nums; }
+.date-field small { font-weight: var(--cc-weight-regular); }

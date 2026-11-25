@@ -17,7 +17,7 @@ import json
 import re
 import logging
 import uuid
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any, Optional
 
@@ -139,6 +139,18 @@ def _cleaned_passages(ctx: AgentContext, tour_id: str, prefixes: tuple[str, ...]
     for p in ctx.retriever.passages:
         if p.doc_id == tour_id and p.section.lower().startswith(prefixes):
             yield p
+
+
+def bookable_start_range(ctx: AgentContext, tour_id: str | None) -> tuple[str, str]:
+    """First and last start dates the pricing engine accepts for this tour: from today until the tour would
+    end on the last day the rates and FX are fixed (the engine's BEYOND_RATE_VALIDITY rule)."""
+    today = ctx.today
+    rates = ctx.catalog.workbook.tour(tour_id) if tour_id else None
+    until = ctx.catalog.workbook.settings.fx_fixed_until
+    if until is None:
+        return today.isoformat(), ""
+    last = until - timedelta(days=(rates.days if rates else 1) - 1)
+    return today.isoformat(), last.isoformat()
 
 
 def section_bullets(ctx: AgentContext, tour_id: str, prefixes: tuple[str, ...]) -> list[str]:
@@ -704,7 +716,9 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
         missing.append("start_date")
 
     with _span(ctx, config, "discovery", input={"missing": missing, "asked": session.questions_asked}) as span:
-        already_shown = any(c.component == "TourCard" and c.props.get("tour_id") == tour_id for c in turn.components)
+        # The traveller has already seen this tour's card (e.g. they tapped Get a price on it): don't repeat it.
+        already_shown = tour_id in session.shown_tours or any(
+            c.component == "TourCard" and c.props.get("tour_id") == tour_id for c in turn.components)
         if tour_id and not already_shown:
             card = tour_card(ctx, tour_id)
             if card:
@@ -733,14 +747,24 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
             if slot == "tour":
                 for c in _closest_tours(ctx, turn.user_text, s.duration_days):
                     turn.components.append(c)
-            if slot == "travellers":
+            also = []
+            if slot in ("travellers", "start_date"):
+                # One question for both (UI review): who's travelling AND when, on one card, with the date
+                # limited to the starts the engine can price (today .. last day the rates cover).
+                need_people = "travellers" in missing
+                need_date = "start_date" in missing
+                if need_people and need_date:
+                    question = "Who's travelling, and when would you like to start?"
+                    also = ["start_date"] if slot == "travellers" else ["travellers"]
+                date_min, date_max = bookable_start_range(ctx, tour_id)
                 turn.components.append(UIComponent(component="TravellerPicker", props={
-                    "prompt": "Who's travelling?", "adults_default": s.adults or 2,
-                    "child_ages_default": s.child_ages, "max_group": 20, "accent": "sun"}))
+                    "prompt": "Who's travelling, and when?" if need_date else "Who's travelling?",
+                    "adults_default": s.adults or 2, "child_ages_default": s.child_ages, "max_group": 20,
+                    "ask_date": need_date, "date_min": date_min, "date_max": date_max, "accent": "sun"}))
             turn.reply_parts.append(question)
             turn.question_slot = slot
             session.questions_asked += 1
-            session.asked.append(slot)
+            session.asked += [slot] + [a for a in also if a not in session.asked]
             span.output = {"action": "ask", "slot": slot}
     session.stage = "discovery"
     return _out(session, turn)
@@ -876,6 +900,14 @@ def compose(state: dict, config: RunnableConfig | None = None) -> dict:
                 if trace:
                     trace.event("ui_payload_invalid", {"component": c.component, "error": str(exc)}, level="ERROR")
         valid = group_tour_cards(valid, turn.shelf_title)
+        for c in valid:  # remember which tours this conversation has shown
+            if c.component == "TourCard":
+                ids = [c.props.get("tour_id")]
+            elif c.component == "TourShelf":
+                ids = [t.get("tour_id") for t in c.props.get("tours", [])]
+            else:
+                ids = []
+            session.shown_tours += [i for i in ids if i and i not in session.shown_tours]
         span.output = {"valid": [c.component for c in valid], "fallbacks": turn.ui_fallbacks}
     turn.components = valid
     turn.final_text = "\n\n".join(p for p in turn.reply_parts if p.strip()) or replies.QUESTIONS["tour"]

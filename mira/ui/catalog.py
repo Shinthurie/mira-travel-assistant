@@ -131,6 +131,9 @@ class TravellerPickerProps(_Props):
     adults_default: int = Field(ge=1, le=20)
     child_ages_default: list[int] = Field(default_factory=list, max_length=19)
     max_group: int = Field(20, ge=1, le=20)
+    ask_date: bool = False   # also ask the start date on the same card
+    date_min: str = ""       # first bookable start (today), ISO
+    date_max: str = ""       # last start the rates cover, ISO
 
 
 class Source(BaseModel):

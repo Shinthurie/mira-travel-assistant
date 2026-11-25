@@ -454,3 +454,25 @@ def test_every_tour_card_can_open_its_details_without_asking_again():
     shelves = [c for c in turn["components"] if c["component"] == "TourShelf"]
     cards = shelves[0]["props"]["tours"] if shelves else [c["props"] for c in turn["components"] if c["component"] == "TourCard"]
     assert cards and all(c["details"]["about"] for c in cards)
+
+
+def test_get_a_price_after_seeing_a_tour_does_not_show_the_card_again():
+    """UI review: after the tour box, 'I'd like a price for X' asked who's travelling AND repeated the card."""
+    _, graph = fresh_agent()
+    turns = chat(graph, ["Tell me about the Cultural Triangle Sri Lanka Package.",
+                         "I'd like a price for Cultural Triangle Sri Lanka Package."])
+    assert "TourCard" in components(turns[0])
+    assert "TourCard" not in components(turns[1]) and "TravellerPicker" in components(turns[1])
+
+
+def test_travellers_and_date_are_asked_together_with_the_bookable_range():
+    """UI review: one card asks who's travelling AND when; dates limited to what the engine can price."""
+    _, graph = fresh_agent()
+    turns = chat(graph, ["I'd like a price for Cultural Triangle Sri Lanka Package.",
+                         "We are 2 adults and no children, starting 12 April 2027."])
+    assert "Who's travelling, and when" in turns[0]["final_text"]
+    picker = next(c for c in turns[0]["components"] if c["component"] == "TravellerPicker")
+    assert picker["props"]["ask_date"] is True
+    assert picker["props"]["date_min"] == "2026-11-19"
+    assert picker["props"]["date_max"] == "2027-10-25"  # 7-day tour must end by 31 Oct 2027
+    assert turns[1]["pricing"]["kind"] == "quote" and turns[1]["pricing"]["price_usd"] == "2125"

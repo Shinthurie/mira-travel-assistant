@@ -348,16 +348,21 @@ function TravellerPicker({ props }: { props: unknown }) {
   const ok = v.success;
   const [adults, setAdults] = useState(ok ? v.data.adults_default : 2);
   const [kids, setKids] = useState<number[]>(ok ? v.data.child_ages_default : []);
+  const [start, setStart] = useState("");
   if (!ok) return <Fallback name="traveller picker" />;
   const p = v.data;
   const total = adults + kids.filter((a) => a >= 2).length;
+  const needDate = !!p.ask_date;
   function send() {
     const childText = kids.length ? ` and ${kids.length} ${kids.length === 1 ? "child" : "children"} aged ${kids.join(" and ")}` : " and no children";
-    say(`We are ${adults} adults${childText}.`);
+    // "12 April 2027": the wording both the model and the rule-based extractor read reliably.
+    const when = needDate && start
+      ? `, starting ${new Date(`${start}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : "";
+    say(`We are ${adults} adults${childText}${when}.`);
   }
   return (
     <Card accent={p.accent} testid="traveller-picker">
-      <div className="cc-kicker">Travellers</div>
+      <div className="cc-kicker">{p.ask_date ? "Travellers and date" : "Travellers"}</div>
       <h3 className="cc-title">{p.prompt}</h3>
       <div className="counter">
         <div>Adults<small>12 and over</small></div>
@@ -381,7 +386,16 @@ function TravellerPicker({ props }: { props: unknown }) {
         <button className="btn" onClick={() => total < p.max_group && setKids([...kids, 6])}>Add a child</button>
         {kids.length > 0 && <button className="link" onClick={() => setKids(kids.slice(0, -1))}>Remove last child</button>}
       </div>
-      <button className="btn btn-primary btn-block" onClick={send}>Use these travellers</button>
+      {needDate && (
+        <label className="field date-field">
+          <span>Start date</span>
+          <input type="date" value={start} min={p.date_min || undefined} max={p.date_max || undefined}
+            onChange={(e) => setStart(e.target.value)} required />
+          {p.date_max && <small className="cc-muted">Bookable until {new Date(`${p.date_max}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} on our current rates.</small>}
+        </label>
+      )}
+      <button className="btn btn-primary btn-block" onClick={send} disabled={needDate && !start}>
+        {needDate ? "Get my price" : "Use these travellers"}</button>
       <p className="cc-muted">Private tours are for up to {p.max_group} travellers.</p>
     </Card>
   );
