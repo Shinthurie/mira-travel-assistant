@@ -83,4 +83,6 @@ The judge was then checked against Shinthurie's own labels on the final run's tr
 
 **Fix.** Letter currency codes must start a word and must not follow a `X-` reference prefix; currency symbols still match anywhere, so "costs$40" is still caught (`mira/agent/guard.py`). Tests try every hex neighbour of "CAD" in both reference shapes and confirm real amounts are still found. The adversarial set still reports 0 invented amounts.
 
+**Before and after (DeepSeek, full suite):** `20261125-184121` (git c3f99b0): 54/55, consistency 68/69, M32 failing → `20261125-185518` (git 36c7425): **55/55**, consistency 69/69, judge 32/32, invented prices 0.
+
 **Why only the trace could find this:** every code check said the price was right, and it was. Only the guard span showed *why* the card was missing.

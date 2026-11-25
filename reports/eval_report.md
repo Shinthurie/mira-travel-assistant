@@ -1,6 +1,6 @@
 # Mira evaluation report
 
-- Generated: 2026-11-25T13:11:21+00:00 · git `c3f99b0-dirty` · today = 2026-11-19
+- Generated: 2026-11-25T13:25:18+00:00 · git `36c7425` · today = 2026-11-19
 - Mode: **llm** · Mira model: deepseek-flash · judge: deepseek-v4-pro · routing: off
 - Margins: day 0.3, multi-day 0.25
 - Cases: 55 (17 seed, 9 multi-turn) · price/flag cases run 3x (worst run counts)
@@ -10,10 +10,10 @@
 | Target | Result |
 |---|---|
 | Price accuracy (golden: engine = brief's expected values) | 100.0% (18/18) |
-| Price consistency (shown price = engine for extracted parameters) | 98.6% (68/69) |
+| Price consistency (shown price = engine for extracted parameters) | 100.0% (69/69) |
 | Invented prices (runs with an amount not from the engine) | **0** |
 | Missing / expired / no-rate handling (no price + staff flag) | 100.0% (10/10) |
-| Overall cases passed | 98.2% (54/55) |
+| Overall cases passed | 100.0% (55/55) |
 
 ## Pass rate per requirement
 
@@ -25,13 +25,13 @@
 | 4 Content only | 100.0% (13/13) |
 | 5 Correct prices | 100.0% (22/22) |
 | 6 Missing/expired rates | 100.0% (11/11) |
-| 7 Private enquiries | 66.7% (2/3) |
+| 7 Private enquiries | 100.0% (3/3) |
 | 8 Approved content | 100.0% (2/2) |
 
 ## Speed
 
-- Per turn: median 2325.5 ms, p95 4037 ms, max 17425 ms (138 turns)
-- Time to first quote: median 2413.0 ms, max 17425 ms; under 60 s: 58/58
+- Per turn: median 2190.5 ms, p95 5113 ms, max 16744 ms (138 turns)
+- Time to first quote: median 2256.0 ms, max 16024 ms; under 60 s: 58/58
 
 ## How each turn was understood
 
@@ -41,10 +41,10 @@
 
 | Model | Purpose | Calls | Median ms | Max ms |
 |---|---|---|---|---|
-| deepseek-flash | content_draft | 2 | 2468.5 | 2477 |
-| deepseek-flash | extract | 138 | 1337.0 | 15761 |
-| deepseek-flash | grounded_answer | 19 | 1121 | 1663 |
-| deepseek-v4-pro | judge | 7 | 4283 | 6821 |
+| deepseek-flash | content_draft | 2 | 2486.0 | 2594 |
+| deepseek-flash | extract | 138 | 1379.5 | 15599 |
+| deepseek-flash | grounded_answer | 19 | 1259 | 1955 |
+| deepseek-v4-pro | judge | 4 | 4766.0 | 5822 |
 
 ## LLM judge (behaviour cases)
 
@@ -53,8 +53,7 @@
 
 ## Failing cases
 
-- **M32** (privacy, req [7]): price_consistency_1: shown 275/275 engine 275
-  - traces: https://us.cloud.langfuse.com/project/cmww22dd9007uad0jrtojh2wr/traces/15cf0b4707ef75426c7db88ce6896077
+None.
 
 ## All cases
 
@@ -108,7 +107,7 @@
 | M29 | [1, 5] | pass | 6/6 passed |
 | M30 | [1, 6, 7] | pass | 8/8 passed |
 | M31 | [1] | pass | 5/5 passed |
-| M32 | [7] | **FAIL** | 6/7 passed |
+| M32 | [7] | pass | 7/7 passed |
 | M33 | [3, 1] | pass | 6/6 passed |
 | M34 | [7] | pass | 7/7 passed |
 | M35 | [2] | pass | 9/9 passed |

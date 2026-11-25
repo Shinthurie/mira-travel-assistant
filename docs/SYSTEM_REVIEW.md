@@ -1,6 +1,6 @@
 # System review: Mira against the brief
 
-Reviewed on 25 Nov 2026 (submission day), updated after the real-LLM runs. Every "met" below points to code or a test that proves it; every gap says why it exists and what it would take. Latest numbers: `pytest` **272 passed**; `python -m evals.run` with DeepSeek **55/55** (judge 32/32, 0 invented prices, every turn understood by the LLM); offline baseline **55/55**; `python scripts/adversarial.py` with DeepSeek **20 attacks, 0 invented amounts**; judge vs human agreement **10/10**.
+Reviewed on 25 Nov 2026 (submission day), updated after the real-LLM runs. Every "met" below points to code or a test that proves it; every gap says why it exists and what it would take. Latest numbers: `pytest` **280 passed**; `python -m evals.run` with DeepSeek **55/55** (git 36c7425) (judge 32/32, 0 invented prices, every turn understood by the LLM); offline baseline **55/55**; `python scripts/adversarial.py` with DeepSeek **20 attacks, 0 invented amounts**; judge vs human agreement **10/10**.
 
 ## 1. Verdict in one paragraph
 
@@ -78,7 +78,7 @@ The parts that decide the score are strong and proven: prices only ever come fro
 | Working system (core 25, extended 10) | 35 | Strong. Every requirement works end to end in the browser and is tested. Risk: a live question in LLM mode that the rules never met; mitigated by the guard, which cannot be bypassed. |
 | Agent design and generative UI | 25 | Strong. Clear node responsibilities, typed state, A2UI fixed and dynamic surfaces, validation on both sides. Found and worked around a real CopilotKit SDK bug (`mira/agui.py`). |
 | Evaluation and tracing | 25 | Strong. Real-LLM run with a different judge model, judge calibrated on hand labels (10/10), Langfuse links per case, before/after history for two rounds of fixes. The code-check side is thorough (consistency vs golden, worst of 3 runs, LLM-vs-fallback turn counts, calls per model). |
-| Code quality and demo | 15 | Good. Small modules with docstrings, 272 tests, CI green, demo script and video plan written. |
+| Code quality and demo | 15 | Good. Small modules with docstrings, 280 tests, CI green, demo script and video plan written. |
 | Bonus | +10 | MCP server, model routing and consented personalisation all done and tested. |
 
 The hard cap ("an invented or wrong price caps the score at 50") is the main risk in any demo. Here it is defended three times: the model never sees prices, the engine is golden-tested, and the guard removes any amount that isn't an engine value from the same conversation (red-teamed with 20 attacks).

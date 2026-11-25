@@ -21,7 +21,7 @@ Other commands:
 
 | Command | What it does |
 |---|---|
-| `pytest` | 272 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
+| `pytest` | 280 unit tests (no LLM, no network): pricing, loaders, guard, privacy, agent, API permissions, MCP, dataset hashes |
 | `python -m evals.run` | Evaluation suite → `reports/eval_report.md` (+ JSON, + `reports/history/`) |
 | `python -m evals.run --tag pricing` | Just the pricing/flag cases (for the live margin change) |
 | `python -m evals.labels review` | Label the 10 judge-calibration cases by hand, then `python -m evals.labels agreement` |
@@ -90,12 +90,12 @@ One message, end to end:
 
 | Target | Result |
 |---|---|
-| Cases passed | **55/55** (offline baseline also 55/55: `reports/eval_report_offline.md`) |
+| Cases passed | **55/55** on the submitted code (git `36c7425`; offline baseline also 55/55: `reports/eval_report_offline.md`) |
 | Price accuracy (golden) / consistency | 18/18 / 69/69 |
 | Invented prices | **0** (also 0 in 20 adversarial attacks with DeepSeek) |
 | Missing / expired / no-rate handling | 10/10 |
 | LLM judge | 32 pass, 0 fail; agreement with hand labels **10/10** ([reports/judge_agreement.md](reports/judge_agreement.md)) |
-| Time to first quote | median about 2 s, all under 60 s |
+| Time to first quote | median 2.3 s, all 58 under 60 s |
 
 Problems found and fixed through the evals, with before/after numbers: [docs/FIXED_PROBLEM.md](docs/FIXED_PROBLEM.md). First round: a tour mentioned in passing was priced. Second round, found only with a real model and the judge: a repeated discovery question, "book" before a quote, a named tour not moving to a price, and over-use of "custom" and "info".
 

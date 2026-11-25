@@ -21,8 +21,8 @@
 | Bonus: MCP server | done | `mira/mcp_server.py`, `tests/test_mcp.py` |
 
 ## Latest numbers (25 Nov)
-- `pytest`: 272 passed.
-- `python -m evals.run` with DeepSeek (`deepseek-flash`, judge `deepseek-v4-pro`): 55/55; golden 18/18; consistency 69/69; invented prices 0; missing/expired 10/10; judge 32/32; 138/138 turns understood by the model.
+- `pytest`: 280 passed; CI green on PR #2.
+- `python -m evals.run` with DeepSeek (`deepseek-flash`, judge `deepseek-v4-pro`) on git 36c7425: 55/55; golden 18/18; consistency 69/69; invented prices 0; missing/expired 10/10; judge 32/32; 138/138 turns understood by the model.
 - Offline baseline (`--offline`): 55/55 (`reports/eval_report_offline.md`).
 - `python scripts/adversarial.py` with DeepSeek: 20 attacks, 0 invented amounts.
 - Judge vs Shinthurie's labels: 10/10 (`reports/judge_agreement.md`).
