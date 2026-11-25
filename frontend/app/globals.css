@@ -440,3 +440,11 @@ h1, h2, h3, p { margin: 0; }
 /* Price card "What's included": the same orange tick bullets as the tour box. */
 .incl ul { list-style: none; padding-left: 0; gap: 6px; color: var(--cc-ink); }
 .incl li { display: flex; gap: var(--cc-space-2); align-items: flex-start; }
+/* Price card and traveller/date card share the tour box's wide two-column layout (D29). */
+.picker-one, .pkg-col { display: grid; gap: var(--cc-space-3); align-content: start; }
+[data-testid="price-breakdown"] .pkg-cols, [data-testid="traveller-picker"] .pkg-cols { column-gap: var(--cc-space-5); }
+[data-testid="price-breakdown"] .pkg-block ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+[data-testid="price-breakdown"] .pkg-block li { display: flex; gap: var(--cc-space-2); font-size: var(--cc-text-sm); }
+@media (min-width: 640px) {
+  [data-testid="price-breakdown"] .pkg-col + .pkg-col, [data-testid="traveller-picker"] .pkg-col + .pkg-col { border-left: 1px solid var(--cc-line); padding-left: var(--cc-space-5); }
+}

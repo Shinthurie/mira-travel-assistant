@@ -49,8 +49,10 @@ function PriceBreakdown({ props }: { props: unknown }) {
   if (!v.success) return <Fallback name="price" />;
   const p = v.data;
   return (
-    <Card accent={p.accent} testid="price-breakdown">
+    <Card accent={p.accent} testid="price-breakdown" className={`cc-card accent-${p.accent} cc-card-wide`}>
       <div className="cc-kicker">Confirmed price</div>
+      <div className="pkg-cols">
+      <div className="pkg-col">
       <div>
         <h3 className="cc-title">{p.tour_title}</h3>
         <p className="cc-sub">{p.travellers_summary}</p>
@@ -61,7 +63,9 @@ function PriceBreakdown({ props }: { props: unknown }) {
         <dt>Length</dt><dd>{p.duration}</dd>
         <dt>Quote</dt><dd className="num">{p.quote_ref}</dd>
       </dl>
-      <div className="cc-divider" />
+      </div>
+      <div className="pkg-col">
+      <p className="pkg-head">How you pay</p>
       {p.pay_in_full ? (
         <ul className="plan">
           <li><span className="dot" /><span>Pay in full when you book</span><strong className="num">USD {usd(p.deposit_usd)}</strong></li>
@@ -73,12 +77,12 @@ function PriceBreakdown({ props }: { props: unknown }) {
         </ul>
       )}
       {p.inclusions.length > 0 && (
-        <details className="incl">
-          <summary>What&apos;s included</summary>
-          <ul>{p.inclusions.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul>
-        </details>
+        <div className="pkg-block"><p className="pkg-head">What&apos;s included</p>
+          <ul>{p.inclusions.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul></div>
       )}
       <button className="btn btn-primary btn-block" onClick={() => say("I'd like to book it.")}>Book this trip</button>
+      </div>
+      </div>
     </Card>
   );
 }
@@ -361,9 +365,11 @@ function TravellerPicker({ props }: { props: unknown }) {
     say(`We are ${adults} adults${childText}${when}.`);
   }
   return (
-    <Card accent={p.accent} testid="traveller-picker">
+    <Card accent={p.accent} testid="traveller-picker" className={`cc-card accent-${p.accent}${needDate ? " cc-card-wide" : ""}`}>
       <div className="cc-kicker">{p.ask_date ? "Travellers and date" : "Travellers"}</div>
       <h3 className="cc-title">{p.prompt}</h3>
+      <div className={needDate ? "pkg-cols" : "picker-one"}>
+      <div className="pkg-col">
       <div className="counter">
         <div>Adults<small>12 and over</small></div>
         <span className="stepper">
@@ -386,6 +392,8 @@ function TravellerPicker({ props }: { props: unknown }) {
         <button className="btn" onClick={() => total < p.max_group && setKids([...kids, 6])}>Add a child</button>
         {kids.length > 0 && <button className="link" onClick={() => setKids(kids.slice(0, -1))}>Remove last child</button>}
       </div>
+      </div>
+      <div className="pkg-col">
       {needDate && (
         <label className="field date-field">
           <span>Start date</span>
@@ -397,6 +405,8 @@ function TravellerPicker({ props }: { props: unknown }) {
       <button className="btn btn-primary btn-block" onClick={send} disabled={needDate && !start}>
         {needDate ? "Get my price" : "Use these travellers"}</button>
       <p className="cc-muted">Private tours are for up to {p.max_group} travellers.</p>
+      </div>
+      </div>
     </Card>
   );
 }
