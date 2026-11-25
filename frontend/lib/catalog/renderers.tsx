@@ -225,47 +225,78 @@ function Icon({ name }: { name: keyof typeof ICONS }) {
 }
 
 function TourCardView({ p }: { p: z.infer<(typeof resolved)["TourCard"]> }) {
-  // "Details" opens the box in place: no new message, nothing asked again.
+  // One box per tour. Closed: the essentials (brand card width). "Details" opens everything in place,
+  // full chat width, including the day-by-day plan; no new message is sent.
   const [open, setOpen] = useState(!!p.expanded);
   const d = p.details;
   const included = d?.included?.length ? d.included : (p.included || []);
+  const days = d?.days || [];
   const priceButton = p.priceable ? (
     <button className="btn btn-primary" onClick={() => say(`I'd like a price for ${p.title}.`)}>Get a price</button>
   ) : (
     <button className="btn" onClick={() => say(`Please ask a specialist about ${p.title}.`)}>Ask a specialist</button>
   );
   return (
-    <Card accent={p.accent} testid="tour-card">
-      <RouteArt seed={p.tour_id} stops={p.places.length} />
+    <Card accent={p.accent} testid="tour-card" className={`cc-card accent-${p.accent}${open ? " cc-card-wide" : ""}`}>
+      {!open && <RouteArt seed={p.tour_id} stops={p.places.length} />}
       <div className="cc-kicker">{p.category} · {p.duration}</div>
       <h3 className="cc-title">{p.title}</h3>
-      {!open && <p className="tour-summary">{p.summary}</p>}
-      {!open && <div className="chips">{p.places.map((x) => <span key={x} className="chip">{x}</span>)}</div>}
-      {!open && included.length > 0 && p.included && p.included.length > 0 && (
-        <div className="included">
-          <p className="included-head">What&apos;s included</p>
-          <ul>{included.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul>
-        </div>
+      {!open && (
+        <>
+          <p className="tour-summary">{p.summary}</p>
+          {d?.start && <p className="tour-start"><Icon name="pin" />{d.start}</p>}
+          <div className="chips">{p.places.map((x) => <span key={x} className="chip">{x}</span>)}</div>
+          {p.included && p.included.length > 0 && (
+            <div className="included">
+              <p className="included-head">What&apos;s included</p>
+              <ul>{included.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul>
+            </div>
+          )}
+        </>
       )}
       {open && d && (
         <div className="pkg" data-testid="tour-details">
-          {d.about && <p className="pkg-about">{d.about}</p>}
-          <ul className="pkg-facts">
-            <li><Icon name="clock" /><span><b>Duration</b>{p.duration}</span></li>
-            {d.start && <li><Icon name="pin" /><span><b>Starts from</b>{d.start}</span></li>}
-            {p.places.length > 0 && <li><Icon name="map" /><span><b>Places</b>{p.places.join(" · ")}</span></li>}
-          </ul>
-          {d.route.length > 0 && (
-            <div className="pkg-block"><p className="pkg-head">Route</p>
-              <ul>{d.route.map((x) => <li key={x}><Icon name="route" />{x}</li>)}</ul></div>
-          )}
-          {included.length > 0 && (
-            <div className="pkg-block"><p className="pkg-head">What&apos;s included</p>
-              <ul>{included.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul></div>
-          )}
-          {d.good_to_know.length > 0 && (
-            <div className="pkg-block"><p className="pkg-head">Good to know</p>
-              <ul>{d.good_to_know.map((x) => <li key={x}><Icon name="info" />{x}</li>)}</ul></div>
+          <div className="pkg-cols">
+            <div className="pkg-col">
+              {d.about && <p className="pkg-about">{d.about}</p>}
+              <ul className="pkg-facts">
+                <li><Icon name="clock" /><span><b>Duration</b>{p.duration}</span></li>
+                {d.start && <li><Icon name="pin" /><span><b>Starts from</b>{d.start}</span></li>}
+                {p.places.length > 0 && <li><Icon name="map" /><span><b>Places</b>{p.places.join(" · ")}</span></li>}
+              </ul>
+            </div>
+            <div className="pkg-col">
+              {included.length > 0 && (
+                <div className="pkg-block"><p className="pkg-head">What&apos;s included</p>
+                  <ul>{included.map((x) => <li key={x}><Icon name="check" />{x}</li>)}</ul></div>
+              )}
+              {d.good_to_know.length > 0 && (
+                <div className="pkg-block"><p className="pkg-head">Good to know</p>
+                  <ul>{d.good_to_know.map((x) => <li key={x}><Icon name="info" />{x}</li>)}</ul></div>
+              )}
+              {d.route.length > 0 && (
+                <div className="pkg-block"><p className="pkg-head">Route</p>
+                  <ul>{d.route.map((x) => <li key={x}><Icon name="route" />{x}</li>)}</ul></div>
+              )}
+            </div>
+          </div>
+          {days.length > 0 && (
+            <details className="pkg-block pkg-days-wrap"><summary className="pkg-head">Day by day · {days.length} days</summary>
+              <ol className="pkg-days">
+                {days.map((x) => (
+                  <li key={x.day}>
+                    <span className="pkg-day-num">{x.day}</span>
+                    <div>
+                      <strong>{x.title}</strong>
+                      {x.description && <p>{x.description}</p>}
+                      {(x.meals.length > 0 || x.stay) && (
+                        <p className="pkg-day-meta">{[x.meals.length ? `Meals: ${x.meals.join(", ")}` : "", x.stay ? `Stay: ${x.stay}` : ""].filter(Boolean).join(" · ")}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </details>
           )}
         </div>
       )}

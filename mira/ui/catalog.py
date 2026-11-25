@@ -83,6 +83,19 @@ class TourDetails(BaseModel):
     route: list[str] = Field(default_factory=list, max_length=10)
     good_to_know: list[str] = Field(default_factory=list, max_length=10)
     included: list[str] = Field(default_factory=list, max_length=12)
+    days: list["TourDay"] = Field(default_factory=list, max_length=14)
+
+
+class TourDay(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    day: int
+    title: str
+    description: str = ""
+    meals: list[str] = Field(default_factory=list, max_length=4)
+    stay: str = ""
+
+
+TourDetails.model_rebuild()
 
 
 class TourCardProps(_Props):

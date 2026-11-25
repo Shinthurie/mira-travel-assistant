@@ -17,7 +17,8 @@ const TourCardSchema = z.object({
   places: z.array(z.string()).max(10), summary: z.string(), priceable: z.boolean(),
   image: z.literal("placeholder"), source_ref: z.string(), included: z.array(z.string()).max(12).optional(),
   details: z.object({ about: z.string(), start: z.string(), route: z.array(z.string()).max(10),
-    good_to_know: z.array(z.string()).max(10), included: z.array(z.string()).max(12) }).strict().optional(),
+    good_to_know: z.array(z.string()).max(10), included: z.array(z.string()).max(12),
+    days: z.array(z.object({ day: z.number().int(), title: z.string(), description: z.string(), meals: z.array(z.string()).max(4), stay: z.string() }).strict()).max(14).optional() }).strict().optional(),
   expanded: z.boolean().optional(),
 }).strict();
 

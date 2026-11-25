@@ -409,3 +409,25 @@ h1, h2, h3, p { margin: 0; }
 .pkg-block ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .pkg-block li { display: flex; gap: var(--cc-space-2); font-size: var(--cc-text-sm); }
 .pkg-head { font-size: var(--cc-text-xs); text-transform: uppercase; letter-spacing: 0.07em; font-weight: var(--cc-weight-semibold); color: var(--cc-muted); margin-bottom: var(--cc-space-2); }
+
+/* One box per tour: open card uses the chat width (deliberate exception to the 320px brand card, D29). */
+.cc-card-wide { max-width: 680px; }
+.shelf-row .cc-card-wide { grid-column: 1 / -1; }
+.tour-start { display: flex; gap: 6px; font-size: var(--cc-text-sm); color: var(--cc-ink); }
+.tour-summary { -webkit-line-clamp: 2; }
+.pkg-cols { display: grid; grid-template-columns: 1fr; gap: var(--cc-space-4); }
+@media (min-width: 640px) { .pkg-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.pkg-col { display: grid; gap: var(--cc-space-3); align-content: start; }
+.pkg-days { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.pkg-days li { display: grid; grid-template-columns: 28px 1fr; gap: var(--cc-space-3); padding: var(--cc-space-2) 0; border-top: 1px solid var(--cc-line); font-size: var(--cc-text-sm); }
+.pkg-days li:first-child { border-top: 0; }
+.pkg-days strong { font-weight: var(--cc-weight-semibold); }
+.pkg-days p { margin: 2px 0 0; color: var(--cc-muted); }
+.pkg-day-num { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--cc-orange); color: var(--cc-orange); font-weight: var(--cc-weight-semibold); font-size: var(--cc-text-xs); display: flex; align-items: center; justify-content: center; }
+.pkg-day-meta { font-size: var(--cc-text-xs); }
+.pkg-days-wrap summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: var(--cc-space-2) var(--cc-space-3); margin: 0; border: 1px solid var(--cc-line); border-radius: var(--cc-radius-input); }
+.pkg-days-wrap summary::-webkit-details-marker { display: none; }
+.pkg-days-wrap summary::after { content: "▸"; color: var(--cc-orange); }
+.pkg-days-wrap[open] summary::after { content: "▾"; }
+.pkg-days-wrap[open] summary { margin-bottom: var(--cc-space-2); }
+.pkg-days-wrap summary:hover { border-color: var(--cc-ink); }

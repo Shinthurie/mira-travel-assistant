@@ -32,10 +32,14 @@ def test_planner_shelf_is_valid_a2ui():
     assert "TourShelf" in components(turn) and validate_operations(turn["ops"]) == []
 
 
-def test_multi_day_tour_info_shows_itinerary_days():
+def test_multi_day_tour_days_are_inside_the_one_tour_box():
+    """One box per tour: the day-by-day plan is in the card's Details, not separate day cards."""
     _, graph = fresh_agent()
     turn = chat(graph, ["Tell me about the Cultural Triangle Sri Lanka Package"])[0]
-    assert components(turn).count("ItineraryDay") == 3
+    assert components(turn).count("ItineraryDay") == 0
+    card = next(c for c in turn["components"] if c["component"] == "TourCard")
+    days = card["props"]["details"]["days"]
+    assert [d["day"] for d in days][:3] == [1, 2, 3] and days[0]["title"] == "Colombo to Anuradhapura"
     assert validate_operations(turn["ops"]) == []
 
 

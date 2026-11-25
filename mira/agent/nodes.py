@@ -118,7 +118,12 @@ def tour_card(ctx: AgentContext, tour_id: str, accent: str = "teal", with_inclus
         "details": {"about": about[:600], "start": (doc.start or "")[:120],
                     "route": section_bullets(ctx, doc.id, ("route",)),
                     "good_to_know": section_bullets(ctx, doc.id, ("good to know",)),
-                    "included": section_bullets(ctx, doc.id, ("inclusion",))},
+                    "included": section_bullets(ctx, doc.id, ("inclusion",)),
+                    # The day-by-day plan lives inside the card (shown under Details), not as separate cards.
+                    "days": [{"day": d.props["day_number"], "title": d.props["title"][:80],
+                              "description": d.props["description"][:240], "meals": d.props["meals"][:4],
+                              "stay": (d.props["accommodation"] or "")[:100]}
+                             for d in itinerary_days(ctx, doc.id, limit=14)]},
         "expanded": expanded})
 
 
@@ -531,8 +536,6 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
             turn.reply_parts.append(f"Here's the {card.props['title']} at a glance. Tap Get a price when "
                                     "you're ready, or ask me anything about it.")
             turn.components.append(card)
-            if "pricing" not in turn.route:  # multi-day tour: its first days, from content only
-                turn.components.extend(itinerary_days(ctx, tour_id, limit=3))
             own = [citation_for(h).model_dump() for h in hits if h.passage.doc_id == tour_id][:4]
             fallback = Citation(passage_id=f"{tour_id}#overview", doc_id=tour_id, title=card.props["title"],
                                 section="Overview")
@@ -571,9 +574,7 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
         card = tour_card(ctx, tour_id, with_inclusions=bool(ASKS_ABOUT_INCLUSIONS.search(turn.user_text)))
         if card:
             turn.components.insert(0, card)
-            # Multi-day tour: show the first days of its itinerary (ItineraryDay cards, from content only).
-            if "pricing" not in turn.route:
-                turn.components[1:1] = itinerary_days(ctx, tour_id, limit=3)
+            # Multi-day tours: the day-by-day plan is inside the card's Details (no separate day cards).
     session.stage = "informing"
     return _out(session, turn)
 
