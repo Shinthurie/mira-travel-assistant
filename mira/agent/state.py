@@ -104,6 +104,7 @@ class MiraSession(BaseModel):
     questions_asked: int = 0
     asked: list[str] = Field(default_factory=list)       # slot names Mira already asked about
     shown_tours: list[str] = Field(default_factory=list)  # tour cards already shown in this conversation
+    last_tours: list[str] = Field(default_factory=list)   # tours the LAST reply showed or cited ("price for it?")
     quotes: list[QuoteRef] = Field(default_factory=list)
     allowed_amounts: list[str] = Field(default_factory=list)  # every USD amount the guard may let through
     flags: list[str] = Field(default_factory=list)        # flag refs raised in this conversation

@@ -88,6 +88,10 @@ def quote_text(q: QuoteForTraveller) -> str:
 
 def no_quote_text(nq: NoQuote) -> str:
     reason = NO_QUOTE_REASON_TEXT.get(nq.reason, "")
+    if nq.tour_title and nq.request.start_date:
+        # Post-demo fix: say WHAT couldn't be priced ("Our hotel rates for your dates need to be checked" alone
+        # didn't tell the traveller which tour or date Mira had tried).
+        reason = f"For {nq.tour_title} starting {nice_date(nq.request.start_date)}: {reason[:1].lower()}{reason[1:]}"
     if nq.reason in (NoQuoteReason.START_DATE_IN_PAST, NoQuoteReason.INVALID_TRAVELLERS,
                      NoQuoteReason.TOUR_NOT_PUBLISHED, NoQuoteReason.UNKNOWN_TOUR):
         return f"{reason} Could you check the details?" if nq.reason in (

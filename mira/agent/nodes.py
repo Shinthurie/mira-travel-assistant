@@ -145,6 +145,29 @@ ASKS_TO_BROWSE = re.compile(r"\b(more|other|all|some|which|what|any)\b.{0,20}\bt
                             r"|\bshow me (some |your |the )?tours?\b|\bwhat do you offer\b|\blist of tours\b", re.I)
 
 
+# A request for a trip somewhere: "i want a package to Ella and Kandy", "a trip to the south coast".
+TRIP_WORDS = re.compile(r"\b(packages?|pac?k?a?ge|pacakge|tours?|trips?|holidays?|vacation|visit(ing)?|travel(ling)?|"
+                        r"go(ing)? to|see|wants?|wanna|instead|rather|prefer|how about|what about|switch)\b", re.I)
+
+
+def wants_tours_for_places(text: str) -> bool:
+    """Post-demo fix: a trip request that names places (typos allowed) is answered with the tours that visit
+    them, not with a content search ("I don't have a tour that covers Ella" was wrong: two tours do)."""
+    return bool(TRIP_WORDS.search(text)) and bool(get_context().resolver.places_in(text))
+
+
+PLAIN_PLACE_OVERVIEW = re.compile(r"^\s*(tell me (more )?about|what is|what'?s|describe|show me)\s+[\w\s'-]+[.!?]?\s*$", re.I)
+
+
+def destination_pages(ctx: AgentContext, text: str) -> list:
+    """Published destination pages for a plain "Tell me about Kandy" message (one sentence, nothing else asked).
+    Places without a page (Polonnaruwa, seed S17) keep the normal grounded answer from the tour pages."""
+    if not PLAIN_PLACE_OVERVIEW.match(text):
+        return []
+    places = {p.replace("-", " ") for p in ctx.resolver.places_in(text)}
+    return [d for d in ctx.catalog.content.published("destination") if d.title.lower() in places][:2]
+
+
 def browse_picks(ctx: AgentContext, session: MiraSession, text: str = "", limit: int = 4) -> list[str]:
     """Up to four priceable tours not yet shown in this conversation: tours visiting the places mentioned
     first ("What tours go to Ella?"), then one per category (variety)."""
@@ -161,6 +184,23 @@ def browse_picks(ctx: AgentContext, session: MiraSession, text: str = "", limit:
 NOT_COVERED = re.compile(r"(don'?t|do not|doesn'?t|does not) (say|mention|cover|include|have|list)|not (mentioned|covered|"
                          r"listed|in our)|no information|can'?t find|cannot find|isn'?t (mentioned|covered)", re.I)
 ENQUIRY_OFFER = "I can pass your question to our team as an enquiry, and a specialist will get back to you."
+
+
+MORE_DETAILS = re.compile(r"\b(more )?(details?|info|information)\b|\btell me more\b", re.I)
+PRICE_ONLY_WORDS = re.compile(r"\b(prices?|pricing|costs?|how much|quotes?)\b", re.I)
+
+
+def resolve_from_context(ex: "Extraction", session: MiraSession, text: str) -> "Extraction":
+    """Post-demo fix: "can you give more details and price" after Mira talked about ONE tour means that tour.
+    It got "I can't give a price, please ask for a quote" plus a different tour. With several tours just shown,
+    nothing is guessed (discovery asks which one)."""
+    if ex.tour_id or session.slots.tour_id or len(session.last_tours) != 1:
+        return ex
+    if not (asks_about_price(text) or MORE_DETAILS.search(text) or ex.intent in (Intent.QUOTE, Intent.BOOK)):
+        return ex
+    if get_context().resolver.places_in(text):  # a new place was named: that's a new search, not "it"
+        return ex
+    return ex.model_copy(update={"tour_id": session.last_tours[0]})
 
 
 def bookable_start_range(ctx: AgentContext, tour_id: str | None) -> tuple[str, str]:
@@ -297,6 +337,8 @@ def validate_extraction(ctx: AgentContext, ex: Extraction, text: str) -> Extract
             data[key] = [a for a in data[key] if isinstance(a, int) and 0 <= a <= 17]
     if data.get("start_date") and (data["start_date"].year < 2000 or data["start_date"].year > 2100):
         data["start_date"] = None
+    if data.get("start_date") and not DAY_GIVEN.search(text):
+        data["start_date"] = None  # "June" alone: the model would invent a day (post-demo fix); ask instead
     if not ctx.resolver.is_published_tour(data.get("tour_id")):
         data["tour_id"] = None  # an id the model invented, a draft (T15) or a destination
     if data.get("tour_id") is None and not mentions_service(text):
@@ -381,10 +423,17 @@ def plan_route(session: MiraSession, ex: Extraction, text: str) -> list[str]:
     if intent == Intent.PLAN_CUSTOM:
         return ["planner"]
     route: list[str] = []
+    # Post-demo fix: "more details and price" right after SEVERAL tours were shown names no tour: ask which one
+    # (it got "I can't give a price" and a specialist handoff with the real model).
+    if (not ex.tour_id and not s.tour_id and len(session.last_tours) >= 2
+            and (asks_about_price(text) or MORE_DETAILS.search(text))
+            and not get_context().resolver.places_in(text)):
+        return ["discovery"]
     # "Not sure yet" in the middle of discovery is an answer, not a question for the content search
     # (eval M28, LLM run): keep helping with the trip instead of saying "not in our information".
-    if not ex.tour_id and ASKS_TO_BROWSE.search(text) and not SPECIFIC_QUESTION.search(text):
-        return ["answer"]  # "What other tours do you have?": a row of our tours
+    if (not ex.tour_id and (ASKS_TO_BROWSE.search(text) or wants_tours_for_places(text))
+            and not SPECIFIC_QUESTION.search(text)):
+        return ["answer"]  # "What tours do you have?" / "a package to Ella and Kandy": tours, not a search answer
     if session.asked and not asks_about_price(text) and not looks_like_question(text) and not _ready_to_price(session):
         return ["discovery"]
     # "I'd like the Highlights of Sri Lanka tour." names a choice, not a question (eval M33, DeepSeek run):
@@ -487,7 +536,22 @@ def intake(state: dict, config: RunnableConfig | None = None) -> dict:
     with trace.span("intake", as_type="chain", input={"message": text, "known": session.slots}) as span:
         ex, mode = extract(ctx, text, session)
         ex = validate_extraction(ctx, ex, text)
+        ex = resolve_from_context(ex, session, text)
+        recent = [t for t in [session.slots.suggested_tour_id, session.slots.tour_id, *session.last_tours] if t]
+        if ex.tour_id and ex.tour_id not in recent:
+            # Post-demo fix: "Yes the Cultural Triangle one" matched two tours with that name and picked the old
+            # 2023 page (no rates) instead of the one just discussed. Among the matches, the tour in play wins.
+            matches = {m.tour_id for m in ctx.resolver.candidates(text, ex.duration_days)}
+            preferred = next((t for t in recent if t in matches), None)
+            if preferred:
+                ex = ex.model_copy(update={"tour_id": preferred})
         merge_slots(session, ex, ctx)
+        if not ex.tour_id and wants_tours_for_places(text):
+            # Post-demo fix: "okay i want to galle instead" re-priced the PREVIOUS tour (Treasures) because it
+            # was still selected. A new place without a named tour clears the old choice; travellers and the
+            # date are kept, so the tour picked next is priced for the same party.
+            session.slots.tour_id = None
+            session.slots.suggested_tour_id = None
         if not session.slots.tour_id and ex.intent in (Intent.QUOTE,) and ex.duration_days:
             found = ctx.resolver.candidates(text, ex.duration_days)
             if found:
@@ -561,14 +625,16 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
     ctx = get_context()
     session, turn = load_session(state), load_turn(state)
     _pop(turn, "answer")
-    query = turn.user_text
+    query = ctx.resolver.correct_places(turn.user_text)  # "elle" -> "ella", so search finds the right pages
     with _span(ctx, config, "retrieval", as_type="retriever", input={"query": query}) as span:
         hits = ctx.retriever.search(query)
         span.output = [{"id": h.passage.passage_id, "score": h.score, "reason": h.reason} for h in hits]
     turn.retrieved_ids = [h.passage.passage_id for h in hits]
     tour_id = turn.extraction.tour_id if turn.extraction else None
-    overview = bool(tour_id and ASKS_FOR_OVERVIEW.search(query) and not SPECIFIC_QUESTION.search(query))
-    browse = not tour_id and bool(ASKS_TO_BROWSE.search(query)) and not SPECIFIC_QUESTION.search(query)
+    not_price = PRICE_ONLY_WORDS.sub(" ", query)  # "more details and price": details now, price next
+    overview = bool(tour_id and (ASKS_FOR_OVERVIEW.search(query) or MORE_DETAILS.search(query))
+                    and not SPECIFIC_QUESTION.search(not_price))
+    browse = not tour_id and bool(ASKS_TO_BROWSE.search(query) or wants_tours_for_places(query))         and not SPECIFIC_QUESTION.search(query)
 
     if browse:
         # "What other tours do you have?": a row of our tours, not a search answer (the search once matched
@@ -584,7 +650,8 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
         cards = [c for c in (tour_card(ctx, t, accent) for t, accent in zip(ids, ("teal", "leaf", "sky", "teal"))) if c]
         names = [c.props["title"] for c in cards]
         if places and names:
-            where = ", ".join(sorted(p.replace("-", " ").title() for p in places))
+            spots = sorted(p.replace("-", " ").title() for p in places)
+            where = spots[0] if len(spots) == 1 else ", ".join(spots[:-1]) + " and " + spots[-1]
             listed = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
             turn.reply_parts.append(f"These tours visit {where}: {listed}. Tap a tour name to see everything "
                                     "about it.")
@@ -598,6 +665,25 @@ def answer(state: dict, config: RunnableConfig | None = None) -> dict:
         turn.shelf_title = f"Tours that visit {where}" if places and names else "Our tours"
         turn.citations = [Citation(passage_id=f"{c.props['tour_id']}#overview", doc_id=c.props["tour_id"],
                                    title=c.props["title"], section="Overview").model_dump() for c in cards]
+    elif not tour_id and (pages := destination_pages(ctx, query)):
+        # Post-demo fix: "Tell me about Kandy" quoted the children policy. Now: the place's own page, then the
+        # tours that visit it. Every line comes from published content.
+        for d in pages:
+            intro = section_text(ctx, d.id, (d.title.lower(),))
+            if intro:
+                turn.reply_parts.append(intro)
+        ids = [t for t in ctx.resolver.rank_by_places(query)
+               if not ((dec := ctx.catalog.decisions.for_tour(t)) and not dec.quotable)][:4]
+        cards = [c for c in (tour_card(ctx, t, a) for t, a in zip(ids, ("teal", "leaf", "sky", "teal"))) if c]
+        if cards:
+            names = [c.props["title"] for c in cards]
+            listed = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+            turn.reply_parts.append(f"Tours that go there: {listed}. Tap a tour name to see everything about it.")
+            turn.components.extend(cards)
+            turn.shelf_title = "Tours that go there"
+        own = [citation_for(h).model_dump() for h in hits if h.passage.doc_id in {d.id for d in pages}][:3]
+        turn.citations = own or [Citation(passage_id=f"{d.id}#overview", doc_id=d.id, title=d.title,
+                                          section="Overview").model_dump() for d in pages]
     elif overview:
         # "Tell me about <tour>": the open tour card IS the answer (every line from the cleaned page), so no
         # model-written paragraph that could misquote it. Sources: that tour's own passages.
@@ -687,6 +773,9 @@ def pricing(state: dict, config: RunnableConfig | None = None) -> dict:
             if str(amount) not in session.allowed_amounts:
                 session.allowed_amounts.append(str(amount))
         turn.reply_parts.append(replies.quote_text(t))
+        if any(age >= 12 for age in request.child_ages):
+            # Post-demo fix: "kids aged 7 and 12" was summarised as "3 adults, 1 child" with no reason given.
+            turn.reply_parts.append("Children aged 12 and over are priced as adults, under our children policy.")
         decision = ctx.catalog.decisions.for_tour(t.tour_id)
         if decision and decision.traveller_note:
             turn.reply_parts.append(decision.traveller_note)
@@ -788,6 +877,27 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
                 if s.suggested_tour_id and not s.tour_id:
                     turn.reply_parts.append(f"The closest match in our catalogue is {card.props['title']} "
                                             f"({card.props['duration']}).")
+        # Post-demo fix: say what was understood ("Got it: 2 adults, starting 15 June 2027.") so details given
+        # in pieces are visibly kept, instead of a question that seems to ignore them.
+        ack = acknowledgement(turn.extraction, s)
+        if ack:
+            turn.reply_parts.append(ack)
+        # Tours were just shown but none is chosen: ask which one (never a generic question or more cards).
+        if "tour" in missing and session.last_tours:
+            names = [d.title for d in ctx.resolver.tours if d.id in session.last_tours][:4]
+            listed = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " or " + names[-1]
+            if "which_tour" not in session.asked:
+                turn.reply_parts.append(f"Which tour would you like a price for: {listed}? "
+                                        "Tap Get a price on its card, or tell me the name.")
+                turn.question_slot = "which_tour"
+                session.asked.append("which_tour")
+                session.questions_asked += 1
+            else:  # never ask the same question twice: point to the choice instead
+                turn.reply_parts.append(f"When you've chosen ({listed}), tap Get a price on its card and I'll "
+                                        "use these details.")
+            span.output = {"action": "ask_which_tour", "tours": session.last_tours}
+            session.stage = "discovery"
+            return _out(session, turn)
         # Never ask the same question twice: if every missing detail was already asked, show tours instead.
         unasked = [m for m in missing if m not in session.asked]
         if session.questions_asked >= 3 or not unasked:
@@ -801,12 +911,17 @@ def discovery(state: dict, config: RunnableConfig | None = None) -> dict:
             slot = unasked[0]
             if slot == "travellers" and s.adults and not s.children_known:
                 question = "Will any children be travelling? If so, how old are they?"
+            elif slot == "tour" and len(session.last_tours) >= 2 and (asks_about_price(turn.user_text)
+                                                                       or MORE_DETAILS.search(turn.user_text)):
+                names = [d.title for d in ctx.resolver.tours if d.id in session.last_tours][:4]
+                listed = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " or " + names[-1]
+                question = (f"Which tour would you like: {listed}? Tap Get a price on its card, or tell me the name.")
             elif slot == "tour" and ("trip_type" in session.asked or s.trip_type or s.duration_days):
                 # The greeting already asked what kind of trip (eval M28, found by the judge): ask about places instead.
                 question = replies.PLACES_QUESTION
             else:
                 question = replies.QUESTIONS[slot]
-            if slot == "tour":
+            if slot == "tour" and not question.startswith("Which tour would you like"):  # cards are just above
                 for c in _closest_tours(ctx, turn.user_text, s.duration_days):
                     turn.components.append(c)
             also = []
@@ -886,14 +1001,58 @@ def planner(state: dict, config: RunnableConfig | None = None) -> dict:
     return _out(session, turn)
 
 
+_MONTH = r"(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*"
+# A real day was given: "15 June", "June 15th", "2027-06-15", "15/6", or a relative day. A month alone is not one.
+DAY_GIVEN = re.compile(rf"\b\d{{1,2}}(st|nd|rd|th)?\s+(of\s+)?{_MONTH}\b|\b{_MONTH}\s+\d{{1,2}}(st|nd|rd|th)?\b|"
+                       r"\b\d{4}-\d{1,2}-\d{1,2}\b|\b\d{1,2}[/.]\d{1,2}\b|\bthe\s+\d{1,2}(st|nd|rd|th)\b|"
+                       r"\b(today|tomorrow|tonight|next week|this weekend|next (mon|tues|wednes|thurs|fri|satur|sun)day|"
+                       r"this (mon|tues|wednes|thurs|fri|satur|sun)day)\b", re.I)
+
+
+def acknowledgement(ex: "Extraction | None", s) -> str:
+    """'Got it: 2 adults, 1 child (6), starting 15 June 2027.' when this message gave traveller or date details."""
+    if ex is None or not (ex.adults or ex.child_ages or ex.add_child_ages or ex.start_date):
+        return ""
+    bits = []
+    if s.adults:
+        bits.append(f"{s.adults} adult{'s' if s.adults != 1 else ''}")
+    if s.child_ages:
+        n = len(s.child_ages)
+        bits.append(f"{n} child{'ren' if n != 1 else ''} ({', '.join(str(a) for a in s.child_ages)})")
+    text = " and ".join(bits)
+    if s.start_date:
+        text = f"{text}, starting {replies.nice_date(s.start_date)}" if text else f"starting {replies.nice_date(s.start_date)}"
+    return f"Got it: {text}." if text else ""
+
+
+def matching_quote(session: MiraSession) -> QuoteRef | None:
+    """The latest quote for the tour, travellers and date being discussed now (None if they changed since)."""
+    s = session.slots
+    tour = s.tour_id or s.suggested_tour_id
+    for q in reversed(session.quotes):
+        if tour and q.tour_id != tour:
+            continue
+        if s.adults and q.adults != s.adults:
+            continue
+        if s.start_date and q.start_date != s.start_date:
+            continue
+        if s.children_known and sorted(q.child_ages) != sorted(s.child_ages):
+            continue
+        return q
+    return None
+
+
 def booking(state: dict, config: RunnableConfig | None = None) -> dict:
     """Show the BookingForm for the latest quote (the booking itself is a mocked API call)."""
     ctx = get_context()
     session, turn = load_session(state), load_turn(state)
     _pop(turn, "booking")
-    if not session.quotes and turn.pricing is not None:
+    q = matching_quote(session)
+    if q is None and turn.pricing is not None:
         return _out(session, turn)  # pricing already ran this turn and gave no price: the handoff explains why
-    if not session.quotes:
+    if q is None:
+        # No quote for THIS tour, party and date yet. Post-demo fix: "Yes the Cultural Triangle one" after a Kandy
+        # City Tour quote opened a booking form for the Kandy City Tour. Now the current choice is priced first.
         # "Can you book 2 adults on 5 Feb at USD 40?" (eval M17, DeepSeek run): price first with the engine,
         # then come back here for the form. Never ask again for details we already have.
         if find_money(turn.user_text):
@@ -904,7 +1063,6 @@ def booking(state: dict, config: RunnableConfig | None = None) -> dict:
             turn.reply_parts.append("Let's get you a confirmed price first.")
             turn.route = ["discovery"] + turn.route
         return _out(session, turn)
-    q = session.quotes[-1]
     turn.reply_parts.append(f"Great choice. Fill in your details to book {q.tour_title}.")
     turn.components.append(UIComponent(component="BookingForm", props={
         "quote_ref": q.ref, "tour_title": q.tour_title, "price_usd": q.price_usd, "deposit_usd": q.deposit_usd,
@@ -970,6 +1128,12 @@ def compose(state: dict, config: RunnableConfig | None = None) -> dict:
             else:
                 ids = []
             session.shown_tours += [i for i in ids if i and i not in session.shown_tours]
+        this_turn = [t for c in valid for t in ([c.props.get("tour_id")] if c.component == "TourCard" else
+                     [x.get("tour_id") for x in c.props.get("tours", [])] if c.component == "TourShelf" else [])]
+        this_turn += [c["doc_id"] for c in turn.citations if ctx.resolver.is_published_tour(c.get("doc_id"))]
+        this_turn = list(dict.fromkeys(t for t in this_turn if t))
+        if this_turn:
+            session.last_tours = this_turn
         span.output = {"valid": [c.component for c in valid], "fallbacks": turn.ui_fallbacks}
     turn.components = valid
     turn.final_text = "\n\n".join(p for p in turn.reply_parts if p.strip()) or replies.QUESTIONS["tour"]

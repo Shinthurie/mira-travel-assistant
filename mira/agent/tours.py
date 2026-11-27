@@ -9,6 +9,7 @@ Only PUBLISHED tours are candidates.
 from __future__ import annotations
 
 import re
+from difflib import SequenceMatcher
 from dataclasses import dataclass
 
 from mira.data import ContentLibrary, DataDecisions, Workbook
@@ -131,10 +132,33 @@ class TourResolver:
         found = self.candidates(text, duration_days)
         return found[0].tour_id if found else None
 
+    def correct_places(self, text: str) -> str:
+        """Fix misspelled place names ("elle" -> "ella", "colmbo" -> "colombo") so matching and search find them.
+
+        Post-demo fix: "i want a package to elle and kandy" was answered "I don't have a tour that covers
+        Ella". A word is only corrected when it is close to a known destination AND starts with the same
+        letter AND has nearly the same length, so ordinary words ("tell", "gallery") are left alone."""
+        names = sorted({s.replace("-", " ") for d in self.tours for s in d.destinations})
+        parts = sorted({w for n in names for w in n.split()})  # "nuwara eliya" -> "nuwara", "eliya"
+
+        def fix(m: re.Match) -> str:
+            word = m.group(0)
+            w = word.lower()
+            if len(w) < 4 or w in parts:
+                return word
+            close = [(SequenceMatcher(None, w, name).ratio(), name) for name in parts
+                     if w[0] == name[0] and abs(len(w) - len(name)) <= 1]
+            best = max(close, default=(0.0, ""))
+            return best[1] if best[0] >= 0.75 else word  # the closest known name, if close enough
+
+        return re.sub(r"[A-Za-z]+", fix, text)
+
     def places_in(self, text: str) -> set[str]:
-        """Destination slugs mentioned in the text, including regions ("south coast" -> galle, mirissa)."""
-        t = text.lower()
-        found = {slug for d in self.tours for slug in d.destinations if slug.replace("-", " ") in t}
+        """Destination slugs mentioned in the text, including regions ("south coast" -> galle, mirissa).
+        Spelling mistakes in place names are tolerated (see ``correct_places``)."""
+        t = self.correct_places(text).lower()
+        found = {slug for d in self.tours for slug in d.destinations  # whole words: "gallery" is not Galle
+                 if re.search(rf"\b{re.escape(slug.replace('-', ' '))}\b", t)}
         for region, slugs in REGIONS.items():
             if re.search(region, t):
                 found |= set(slugs)
